@@ -1,0 +1,291 @@
+/* Design tokens mirror the Spartan AI Framer template (ink #1A1A1A on white / #F0F0F0 panels). */
+:root {
+  --ink: #1a1a1a;
+  --ink-70: rgba(26, 26, 26, 0.7);
+  --ink-60: rgba(26, 26, 26, 0.6);
+  --ink-40: rgba(26, 26, 26, 0.4);
+  --ink-10: rgba(26, 26, 26, 0.1);
+  --ink-06: rgba(26, 26, 26, 0.06);
+  --ink-03: rgba(26, 26, 26, 0.03);
+  --white: #ffffff;
+  --white-80: rgba(255, 255, 255, 0.8);
+  --white-70: rgba(255, 255, 255, 0.7);
+  --white-50: rgba(255, 255, 255, 0.5);
+  --white-40: rgba(255, 255, 255, 0.4);
+  --white-20: rgba(255, 255, 255, 0.2);
+  --white-10: rgba(255, 255, 255, 0.1);
+  --white-06: rgba(255, 255, 255, 0.06);
+  --white-04: rgba(255, 255, 255, 0.04);
+  --panel: #f0f0f0;
+  --panel-2: #d6d6d6;
+  --dark: #1a1a1a;
+  --dark-2: #1f1f1f;
+  --dark-3: #242424;
+  --dark-4: #2e2e2e;
+
+  --font-display: var(--font-inter-display), "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-geist-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-plex-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-pixel: "Jaini", var(--font-display);
+
+  --radius-xl: 30px;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --page-inset: 12px;
+  --gutter: 40px;
+
+  --spring: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 809px) {
+  :root {
+    --gutter: 20px;
+    --page-inset: 8px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+  font-weight: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+img,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--white);
+}
+
+/* Main content slides over the fixed footer; the spacer at the end reveals it.
+   Transparent so the last section's rounded corners show the footer behind. */
+.page-shell {
+  position: relative;
+  z-index: 2;
+}
+
+/* Type presets taken from the template's text styles. */
+.t-h1 {
+  font-size: 70px;
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.t-h2 {
+  font-size: 56px;
+  line-height: 60px;
+  font-weight: 500;
+  letter-spacing: -2px;
+}
+
+.t-h3 {
+  font-size: 54px;
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.t-h4 {
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.t-lead {
+  font-size: 21px;
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.t-body {
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+.t-body-lg {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+.t-small {
+  font-size: 12px;
+  line-height: 16.8px;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+}
+
+.t-mono {
+  font-family: var(--font-plex-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.t-mono-sm {
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 300;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.t-label {
+  font-family: var(--font-geist-mono);
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+@media (max-width: 1199px) {
+  .t-h1 {
+    font-size: 56px;
+  }
+
+  .t-h2 {
+    font-size: 46px;
+    line-height: 1.1;
+  }
+
+  .t-h3 {
+    font-size: 44px;
+  }
+}
+
+@media (max-width: 809px) {
+  .t-h1 {
+    font-size: 44px;
+  }
+
+  .t-h2 {
+    font-size: 36px;
+    letter-spacing: -1.5px;
+  }
+
+  .t-h3 {
+    font-size: 34px;
+  }
+
+  .t-h4 {
+    font-size: 24px;
+  }
+
+  .t-lead {
+    font-size: 18px;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

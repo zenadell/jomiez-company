@@ -1,0 +1,29 @@
+.band {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  height: 560px;
+  padding: 10px;
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.tile {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--dark-3);
+}
+
+.img {
+  object-fit: cover;
+  object-position: 15% top;
+}
+
+@media (max-width: 809px) {
+  .band {
+    grid-template-columns: repeat(2, 1fr);
+    height: 520px;
+  }
+}

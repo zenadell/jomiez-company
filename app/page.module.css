@@ -1,0 +1,75 @@
+.dark {
+  position: relative;
+  background: var(--dark);
+  color: var(--white);
+  overflow: clip;
+}
+
+.darkFirst {
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  /* Fills the rounded corners with the light Impact section below. */
+  box-shadow: 0 20px 0 var(--white);
+}
+
+.darkRounded {
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: var(--dark);
+}
+
+/* The light Impact section's rounded bottom sits over the dark image band. */
+.onDark {
+  position: relative;
+  z-index: 1;
+  background: var(--dark);
+}
+
+.darkBottom {
+  margin-top: -20px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  /* Fills the rounded corners with the light section that follows. */
+  box-shadow: 0 20px 0 var(--white);
+}
+
+.darkInner {
+  display: flex;
+  flex-direction: column;
+  gap: 250px;
+  padding: 250px var(--gutter) 200px;
+}
+
+.panelSection {
+  padding: 0 var(--page-inset) var(--page-inset);
+  background: var(--white);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 180px;
+  padding: 12px var(--gutter) 60px;
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+}
+
+@media (max-width: 1199px) {
+  .darkInner {
+    gap: 160px;
+    padding: 160px var(--gutter) 140px;
+  }
+
+  .panel {
+    gap: 120px;
+  }
+}
+
+@media (max-width: 809px) {
+  .darkInner {
+    gap: 110px;
+    padding: 110px var(--gutter) 100px;
+  }
+
+  .panel {
+    gap: 90px;
+  }
+}

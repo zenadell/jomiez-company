@@ -1,0 +1,254 @@
+.spacer {
+  position: relative;
+  height: min(774px, 86vh);
+  pointer-events: none;
+}
+
+.footer {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 170px var(--gutter) 40px;
+  background: var(--dark);
+  color: var(--white);
+  overflow: hidden;
+}
+
+.bg {
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  padding-bottom: clamp(160px, 22vw, 250px);
+}
+
+.brand {
+  width: 50%;
+  padding-right: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.logo {
+  display: inline-flex;
+  color: var(--white);
+}
+
+.logoMark {
+  font-size: 40px;
+}
+
+.blurb {
+  max-width: 400px;
+  font-size: 15px;
+  line-height: 22.5px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+.contactPill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+  padding: 6px 6px 6px 18px;
+  border-radius: 17px;
+  background: var(--white-20);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.contactEmail {
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: var(--white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.follow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.socials {
+  display: flex;
+  gap: 10px;
+}
+
+.social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: var(--white-10);
+  color: var(--white);
+  transition: background 0.25s ease;
+}
+
+.social:hover {
+  background: var(--white-20);
+}
+
+.columns {
+  width: 50%;
+  display: flex;
+  padding-right: 80px;
+}
+
+.col {
+  width: 200px;
+  padding-left: 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.colTitle {
+  font-family: var(--font-geist-mono);
+  font-size: 16px;
+  line-height: 22.4px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.colLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  transition: transform 0.35s var(--spring);
+}
+
+.dash {
+  position: absolute;
+  left: -35px;
+  top: 50%;
+  width: 15px;
+  height: 1px;
+  background: var(--white-50);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.3s ease, transform 0.35s var(--spring);
+}
+
+.colLink:hover {
+  transform: translateX(8px);
+}
+
+.colLink:hover .dash {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.giant {
+  position: absolute;
+  left: -1%;
+  right: -1%;
+  bottom: -2.5vw;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.giant svg {
+  width: 100%;
+  height: auto;
+}
+
+.giantText {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 330px;
+  letter-spacing: -14px;
+  fill: var(--white);
+}
+
+.copy {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 14px;
+  z-index: 2;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--white-70);
+}
+
+@media (max-width: 1199px) {
+  .brand {
+    padding-right: 30px;
+  }
+
+  .columns {
+    padding-right: 0;
+  }
+
+  .col {
+    width: auto;
+    flex: 1;
+  }
+}
+
+@media (max-width: 809px) {
+  /* On phones the footer is taller than the screen, so it flows normally instead of being revealed. */
+  .spacer {
+    display: none;
+  }
+
+  .footer {
+    position: relative;
+    inset: auto;
+    z-index: 0;
+    min-height: 100svh;
+    padding-top: 110px;
+  }
+
+  .inner {
+    flex-direction: column;
+    gap: 40px;
+    padding-bottom: 32vw;
+  }
+
+  .brand,
+  .columns {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .columns {
+    flex-wrap: wrap;
+    gap: 24px 0;
+  }
+
+  .col {
+    width: 50%;
+    flex: none;
+    padding-left: 0;
+  }
+
+  .colTitle {
+    font-size: 14px;
+  }
+
+  .copy {
+    left: var(--gutter);
+    right: auto;
+  }
+}

@@ -1,0 +1,137 @@
+.card {
+  display: block;
+  padding: 16px;
+}
+
+.frame {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 1px;
+  border-radius: 20px;
+  background: var(--ink-03);
+  overflow: hidden;
+  transition: background 0.4s ease;
+}
+
+.card:hover .frame {
+  background: var(--ink-06);
+}
+
+.media {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  height: 302px;
+  padding: 10px;
+  border-radius: 19px 19px 10px 10px;
+  background: var(--white);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.pill {
+  position: relative;
+  z-index: 2;
+  padding: 8px 16px 7px;
+  border-radius: 100px;
+  background: var(--white);
+  font-family: var(--font-geist-mono);
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.mark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: rgba(26, 26, 26, 0.3);
+  white-space: nowrap;
+  transition: opacity 0.4s ease;
+}
+
+.shot {
+  z-index: 1;
+  object-fit: cover;
+  object-position: top center;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 0.5s ease, transform 0.9s var(--spring);
+}
+
+.card:hover .shot,
+.card:focus-visible .shot {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(120% 90% at 80% 10%, rgba(26, 26, 26, 0.9), rgba(26, 26, 26, 0.75) 45%, #2e2e2e 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.card:hover .placeholder {
+  opacity: 1;
+}
+
+.card:hover .mark:has(+ .placeholder) {
+  color: var(--white);
+  z-index: 2;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin: 0;
+  border-radius: 10px 10px 19px 19px;
+  overflow: hidden;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 11px 15px 15px;
+  border-radius: 10px;
+  background: var(--white);
+}
+
+.value {
+  font-family: var(--font-geist-mono);
+  font-size: 16px;
+  line-height: 22.4px;
+  font-weight: 500;
+  color: var(--ink-70);
+}
+
+.label {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16.8px;
+  font-weight: 300;
+  letter-spacing: 0.12px;
+  color: var(--ink-70);
+}
+
+@media (max-width: 809px) {
+  .card {
+    padding: 8px 0;
+  }
+
+  .media {
+    height: 240px;
+  }
+}

@@ -1,0 +1,40 @@
+.panel {
+  position: relative;
+  z-index: 1;
+  padding: 180px 0 180px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: var(--white);
+  overflow: hidden;
+}
+
+.marquee {
+  padding-bottom: 30px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 20px;
+  padding: 0 var(--gutter);
+}
+
+@media (max-width: 1199px) {
+  .panel {
+    padding: 120px 0;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 0;
+  }
+}
+
+@media (max-width: 809px) {
+  .panel {
+    padding: 90px 0;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

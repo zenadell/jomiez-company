@@ -1,0 +1,251 @@
+.row {
+  display: flex;
+  padding: 250px var(--gutter) 0;
+  color: var(--white);
+}
+
+.left {
+  width: 50%;
+  min-height: 630px;
+  padding-right: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  max-width: 500px;
+}
+
+.introText {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 300;
+  letter-spacing: 0.32px;
+}
+
+.bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+.title {
+  max-width: 600px;
+  font-size: 54px;
+  line-height: 59.4px;
+  font-weight: 500;
+  letter-spacing: -2.16px;
+}
+
+.cards {
+  width: 50%;
+  height: 630px;
+  display: flex;
+  gap: 10px;
+}
+
+.card {
+  position: relative;
+  flex: 0 0 90px;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  background: var(--white-04);
+  overflow: hidden;
+  cursor: pointer;
+  outline-offset: -2px;
+}
+
+.card.open {
+  flex: 1 1 480px;
+  background: rgba(255, 255, 255, 0);
+  border: 1px solid var(--white-10);
+  cursor: default;
+}
+
+.num {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  padding: 10px 20px;
+  border-radius: 100px;
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  line-height: 20.4px;
+  font-weight: 200;
+  text-transform: uppercase;
+  color: var(--white-80);
+}
+
+.card:not(.open) .num {
+  right: 50%;
+  transform: translateX(50%);
+}
+
+.openBody {
+  position: absolute;
+  inset: 0;
+  width: 478px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.open .openBody {
+  opacity: 1;
+  transition-delay: 0.2s;
+  pointer-events: auto;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 30px 70px 0 30px;
+}
+
+.cardTitle {
+  max-width: 350px;
+  font-size: 28px;
+  line-height: 39.2px;
+  font-weight: 500;
+  letter-spacing: -0.28px;
+}
+
+.cardText {
+  max-width: 380px;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 300;
+  letter-spacing: 0.28px;
+}
+
+.art {
+  position: relative;
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+.texture {
+  object-fit: cover;
+  opacity: 0.18;
+}
+
+.iso {
+  position: relative;
+  width: 270px;
+  height: 270px;
+  object-fit: contain;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(-2deg);
+  }
+}
+
+.vertical {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  padding: 10px;
+  writing-mode: vertical-rl;
+  transform: translateX(-50%) rotate(180deg);
+  font-family: var(--font-geist-mono);
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--white-70);
+  transition: opacity 0.25s ease;
+}
+
+.open .vertical {
+  opacity: 0;
+}
+
+@media (max-width: 1199px) {
+  .row {
+    flex-direction: column;
+    gap: 60px;
+    padding-top: 160px;
+  }
+
+  .left,
+  .cards {
+    width: 100%;
+  }
+
+  .left {
+    min-height: 0;
+    padding-right: 0;
+    gap: 50px;
+  }
+}
+
+@media (max-width: 809px) {
+  .row {
+    padding-top: 110px;
+  }
+
+  .title {
+    font-size: 38px;
+    line-height: 42px;
+    letter-spacing: -1.5px;
+  }
+
+  .cards {
+    height: auto;
+    flex-direction: column;
+  }
+
+  .card {
+    flex: none;
+    height: 90px;
+  }
+
+  .card.open {
+    flex: none;
+    height: 520px;
+  }
+
+  .card:not(.open) .num {
+    right: 14px;
+    transform: none;
+  }
+
+  .openBody {
+    width: 100%;
+  }
+
+  .copy {
+    padding-right: 90px;
+  }
+
+  .cardTitle {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .vertical {
+    left: 24px;
+    bottom: auto;
+    top: 50%;
+    writing-mode: horizontal-tb;
+    transform: translateY(-50%);
+    padding: 0;
+  }
+}

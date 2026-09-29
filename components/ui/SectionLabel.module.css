@@ -1,0 +1,42 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  color: var(--ink);
+}
+
+.dark {
+  color: var(--white);
+}
+
+.reverse {
+  flex-direction: row-reverse;
+}
+
+.pill {
+  flex: none;
+  width: 36px;
+  height: 20px;
+  border-radius: 100px;
+  border: 3.5px solid currentColor;
+}
+
+.line {
+  flex: 1;
+  height: 1px;
+  background: var(--ink-10);
+}
+
+.dark .line {
+  background: var(--white-10);
+}
+
+.label {
+  flex: none;
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  line-height: 19.2px;
+  font-weight: 300;
+  text-transform: uppercase;
+}

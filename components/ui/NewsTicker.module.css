@@ -1,0 +1,32 @@
+.wrap {
+  font-size: 14px;
+  line-height: 19.6px;
+  font-weight: 400;
+  letter-spacing: 0.28px;
+  color: var(--ink);
+}
+
+.dark {
+  color: var(--white);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 100px;
+  white-space: nowrap;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pill {
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  border-radius: 100px;
+  border: 3.5px solid currentColor;
+}

@@ -1,0 +1,53 @@
+.wrap {
+  color: var(--ink);
+}
+
+.dark {
+  color: var(--white);
+}
+
+.word {
+  flex: none;
+  font-size: 200px;
+  line-height: 220px;
+  font-weight: 700;
+  letter-spacing: -8px;
+  white-space: nowrap;
+}
+
+.star {
+  flex: none;
+  width: 151px;
+  height: 151px;
+  color: rgba(26, 26, 26, 0.1);
+}
+
+.dark .star {
+  color: var(--white-10);
+}
+
+@media (max-width: 1199px) {
+  .word {
+    font-size: 140px;
+    line-height: 160px;
+    letter-spacing: -5px;
+  }
+
+  .star {
+    width: 106px;
+    height: 106px;
+  }
+}
+
+@media (max-width: 809px) {
+  .word {
+    font-size: 90px;
+    line-height: 104px;
+    letter-spacing: -3.5px;
+  }
+
+  .star {
+    width: 68px;
+    height: 68px;
+  }
+}
