@@ -18,10 +18,11 @@ Requires Node 20.9 or newer.
 
 | Path | What it is |
 | --- | --- |
-| `app/` | Pages: home, `about`, `services`, `work` + `work/[slug]`, `insights` + `insights/[slug]`, `contact`, legal pages, 404, sitemap, robots |
+| `app/` | Pages: home, `about`, `services`, `work` + `work/[slug]` (our products get the product page; client builds get a case study), `insights` + `insights/[slug]`, `contact`, legal pages, 404, sitemap, robots |
 | `components/sections/home/` | Homepage sections (Hero, Intro, Work, Services, Mission, Impact, Showcase, Process, Studio, Pricing, FAQ, Insights) |
 | `components/ui/` | Shared pieces: `JomiezMark` (the logo mark, redrawn from jomiez.com), `Icon` (the template's Phosphor icons), `PixelButton` (the pixel-arrow CTA), `PixelArrow`, `Marquee`, `BigMarquee`, `ScrollText`, `ProgressiveBlur`, `TechMark`, `Appear` motion helpers |
-| `components/layout/` | Nav (with phone menu), reveal footer, Lenis smooth scrolling |
+| `components/product/` | The product page (template's "Digital Brain" layout): hero, stats, browser-framed showcase, mockup cards, statement, FAQ |
+| `components/layout/` | Nav (with phone menu), reveal footer, Lenis smooth scrolling, page transitions |
 | `content/` | **All copy and data.** Edit these files to change the site |
 | `public/media/` | Optimised images used by the site |
 | `scripts/optimize-assets.mjs` | Rebuilds `public/media` from source images |
@@ -30,6 +31,7 @@ Requires Node 20.9 or newer.
 ### Editing content
 
 - `content/site.ts` — company name, email, phone, socials, stats, nav and footer links
+- `content/products.ts` — product pages for Chaka AI and Chaka WAP (every fact is from their case studies)
 - `content/projects.ts` — products and case studies (add one here and it gets a card and a `/work/<slug>` page; `product: true` marks Jomiez's own products)
 - `content/articles.ts` — Insights articles
 - `content/services.ts`, `content/standards.ts` (the seven tenets), `content/faq.ts` (also holds pricing tiers), `content/legal.ts`
@@ -38,6 +40,8 @@ Requires Node 20.9 or newer.
 
 - **Pixel arrow button** — reproduces the template's Framer component exactly: a 14-frame double-chevron marquee (one 3px column every 205ms), and on hover the tile grows to fill the pill with a spring (0.4s, bounce 0.2) while the arrow holds the full `>>`. Five variants: `primary`, `secondary`, `light`, `primarySmall`, `secondarySmall`.
 - Page-load entrances use the template's own spring settings (from its appear-animation config).
+- Page transitions match the template's page effect: the old page slides up and out while the new one rises from below (400ms, `cubic-bezier(0.27, 0, 0.51, 1)`), using the View Transitions API.
+- The tenets slideshow loops infinitely across the full width, advancing every 5s (0.9s ease-out), with arrows and drag/swipe.
 - The four animated feature glyphs (swinging magnifier, two-moon orbit, stepping sliders, region ticker) are rebuilt from the live template component: same artwork, positions, timings and easing.
 - Scroll-driven character reveals, parallax image bands, infinite marquees, accordion layouts, a rising footer wordmark and Lenis smooth scrolling.
 - Everything respects `prefers-reduced-motion`.

@@ -39,7 +39,7 @@ export const footerColumns = [
     title: "Quick Links",
     links: [
       { label: "Home", href: "/" },
-      { label: "Services", href: "/services" },
+      { label: "Chaka AI", href: "/work/chaka-ai" },
       { label: "Products & Work", href: "/work" },
       { label: "Journal", href: "/insights" },
     ],

@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { animate, motion, useInView, useMotionValue, useReducedMotion, type PanInfo } from "motion/react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BigMarquee } from "@/components/ui/BigMarquee";
 import { JomiezMark } from "@/components/ui/JomiezMark";
 import { Appear, springFirm } from "@/components/ui/Motion";
@@ -10,15 +11,70 @@ import styles from "./Impact.module.css";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
-export function Impact() {
-  const track = useRef<HTMLDivElement>(null);
+/*
+ * Infinite slideshow, as in the template: the current card sits on the centre
+ * line under the arrows and looped copies fill the width to both edges. It
+ * advances every 5s; each move eases out over 0.9s (the template's curve).
+ */
+const N = standards.length;
+const COPIES = 3;
+const SLIDE = { duration: 0.9, ease: [0.25, 1, 0.5, 1] as const };
+const AUTOPLAY_MS = 5000;
 
-  const scroll = (dir: 1 | -1) => {
-    const el = track.current;
+export function Impact() {
+  const viewport = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const index = useRef<number>(N);
+  const pitch = useRef(301);
+  const [paused, setPaused] = useState(false);
+  const reduce = useReducedMotion();
+  const inView = useInView(viewport, { amount: 0.3 });
+
+  // Card width + gap, re-measured on resize so the loop stays aligned.
+  useLayoutEffect(() => {
+    const el = viewport.current;
     if (!el) return;
-    const card = el.querySelector("article");
-    const step = card ? card.getBoundingClientRect().width + 16 : 300;
-    el.scrollBy({ left: dir * step, behavior: "smooth" });
+    const measure = () => {
+      const cards = el.querySelectorAll("article");
+      if (cards.length > 1) pitch.current = cards[1].getBoundingClientRect().left - cards[0].getBoundingClientRect().left;
+      x.set(-index.current * pitch.current);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [x]);
+
+  const go = useCallback(
+    (to: number) => {
+      index.current = to;
+      animate(x, -to * pitch.current, {
+        ...SLIDE,
+        onComplete: () => {
+          // Jump back into the middle copy without animating, so the loop never runs out.
+          let n = index.current;
+          if (n < N) n += N;
+          else if (n >= 2 * N) n -= N;
+          if (n !== index.current) {
+            index.current = n;
+            x.set(-n * pitch.current);
+          }
+        },
+      });
+    },
+    [x],
+  );
+
+  useEffect(() => {
+    if (reduce || paused || !inView) return;
+    const id = window.setInterval(() => go(index.current + 1), AUTOPLAY_MS);
+    return () => window.clearInterval(id);
+  }, [go, reduce, paused, inView]);
+
+  const onDragEnd = (_: unknown, info: PanInfo) => {
+    const projected = -x.get() - info.velocity.x * 0.2;
+    go(Math.round(projected / pitch.current));
+    setPaused(false);
   };
 
   return (
@@ -37,40 +93,56 @@ export function Impact() {
 
       <div className={styles.carousel}>
         <div className={styles.controls}>
-          <button type="button" className={styles.arrow} onClick={() => scroll(-1)} aria-label="Previous">
+          <button type="button" className={styles.arrow} onClick={() => go(index.current - 1)} aria-label="Previous">
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
               <path d="M22.5 12.5 15 20l7.5 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <button type="button" className={styles.arrow} onClick={() => scroll(1)} aria-label="Next">
+          <button type="button" className={styles.arrow} onClick={() => go(index.current + 1)} aria-label="Next">
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
               <path d="M17.5 12.5 25 20l-7.5 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         </div>
-        <div ref={track} className={styles.track} data-lenis-prevent-wheel="">
-          {standards.map((s, i) => (
-            <article key={s.title} className={styles.card}>
-              <div className={styles.cardTop}>
-                <span className={styles.chip}>
-                  <span className={styles.avatar}>
-                    <JomiezMark size={13} />
-                  </span>
-                  <span className={styles.tag}>{s.tag}</span>
-                </span>
-                <span className={styles.index}>{ROMAN[i]}</span>
-              </div>
-              <QuoteMark />
-              <p className={styles.cardText}>{s.body}</p>
-              <div className={styles.cardFoot}>
-                <span className={styles.footRule} />
-                <div>
-                  <p className={styles.footTitle}>{s.title}</p>
-                  <p className={styles.footSub}>A Jomiez tenet</p>
-                </div>
-              </div>
-            </article>
-          ))}
+        <div
+          ref={viewport}
+          className={styles.viewport}
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
+          <motion.div
+            className={styles.track}
+            style={{ x }}
+            drag="x"
+            dragMomentum={false}
+            onDragStart={() => setPaused(true)}
+            onDragEnd={onDragEnd}
+          >
+            {Array.from({ length: COPIES }, (_, copy) =>
+              standards.map((s, i) => (
+                <article key={`${copy}-${s.title}`} className={styles.card} aria-hidden={copy !== 1 || undefined}>
+                  <div className={styles.cardTop}>
+                    <span className={styles.chip}>
+                      <span className={styles.avatar}>
+                        <JomiezMark size={13} />
+                      </span>
+                      <span className={styles.tag}>{s.tag}</span>
+                    </span>
+                    <span className={styles.index}>{ROMAN[i]}</span>
+                  </div>
+                  <QuoteMark />
+                  <p className={styles.cardText}>{s.body}</p>
+                  <div className={styles.cardFoot}>
+                    <span className={styles.footRule} />
+                    <div>
+                      <p className={styles.footTitle}>{s.title}</p>
+                      <p className={styles.footSub}>A Jomiez tenet</p>
+                    </div>
+                  </div>
+                </article>
+              )),
+            )}
+          </motion.div>
         </div>
       </div>
 

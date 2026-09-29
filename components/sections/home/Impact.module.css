@@ -58,32 +58,33 @@
   transform: scale(1.08);
 }
 
+/* The current card starts on the centre line; the rest spill out to both edges (the section clips them). */
+.viewport {
+  position: relative;
+}
+
 .track {
   display: flex;
   gap: 16px;
-  margin-left: calc(-50vw + 30px);
-  padding: 0 30px 0 calc(50vw - 30px);
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-padding-left: calc(50vw - 30px);
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
+  width: max-content;
+  cursor: grab;
+  touch-action: pan-y;
 }
 
-.track::-webkit-scrollbar {
-  display: none;
+.track:active {
+  cursor: grabbing;
 }
 
 .card {
   flex: none;
   width: 285px;
   height: 394px;
+  user-select: none;
   display: flex;
   flex-direction: column;
   padding: 20px;
   border-radius: 16px;
   background: var(--panel);
-  scroll-snap-align: start;
   transition: background 0.3s ease, transform 0.4s var(--spring);
 }
 
@@ -185,12 +186,6 @@
 
   .controls {
     left: var(--gutter);
-  }
-
-  .track {
-    margin-left: calc(-1 * var(--gutter));
-    padding: 0 var(--gutter);
-    scroll-padding-left: var(--gutter);
   }
 
   .descLine {

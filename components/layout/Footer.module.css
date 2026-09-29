@@ -5,6 +5,8 @@
 }
 
 .footer {
+  /* Width of the giant wordmark; the bottom quarter of its letters runs off the edge. */
+  --giant-w: min(90vw, 150vh);
   position: fixed;
   inset: 0;
   z-index: 1;
@@ -27,7 +29,8 @@
   z-index: 1;
   display: flex;
   align-items: flex-start;
-  padding-bottom: clamp(160px, 22vw, 250px);
+  /* Clear the visible part of the giant wordmark (75% of its 0.238 x width height), plus breathing room. */
+  padding-bottom: calc(var(--giant-w) * 0.1785 + 40px);
 }
 
 .brand {
@@ -164,17 +167,19 @@
 
 .giant {
   position: absolute;
-  left: -1%;
-  right: -1%;
-  /* Letters rise to about the same line as the template's wordmark and run off the bottom edge. */
-  bottom: -8.5vw;
+  left: 50%;
+  bottom: calc(var(--giant-w) * -0.0595);
   z-index: 1;
+  width: var(--giant-w);
+  margin-left: calc(var(--giant-w) / -2);
   pointer-events: none;
 }
 
 .giant svg {
+  display: block;
   width: 100%;
   height: auto;
+  overflow: visible;
 }
 
 .giantText {
@@ -237,7 +242,6 @@
   .inner {
     flex-direction: column;
     gap: 40px;
-    padding-bottom: 32vw;
   }
 
   .brand,

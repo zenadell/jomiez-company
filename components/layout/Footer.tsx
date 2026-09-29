@@ -77,8 +77,9 @@ export function Footer() {
         </motion.div>
 
         <motion.div className={styles.giant} style={{ y: wordY }} aria-hidden="true">
-          <svg viewBox="0 0 1000 250" preserveAspectRatio="xMidYMax meet">
-            <text x="500" y="228" textAnchor="middle" className={styles.giantText}>
+          {/* viewBox hugs the ink of "Jomiez" (Inter Display 800, 330px, -14px tracking), baseline at y=0. */}
+          <svg viewBox="5 -248 1067 254">
+            <text x="0" y="0" className={styles.giantText}>
               Jomiez
             </text>
           </svg>

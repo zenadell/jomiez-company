@@ -289,3 +289,24 @@ select {
     scroll-behavior: auto !important;
   }
 }
+
+/* Page effect (see PageTransitions): old page slides up and out, new page rises from below. */
+::view-transition-old(root) {
+  animation: 0.4s cubic-bezier(0.27, 0, 0.51, 1) both page-exit;
+}
+
+::view-transition-new(root) {
+  animation: 0.4s cubic-bezier(0.27, 0, 0.51, 1) both page-enter;
+}
+
+@keyframes page-exit {
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes page-enter {
+  from {
+    transform: translateY(100%);
+  }
+}

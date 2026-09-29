@@ -33,6 +33,13 @@ const images = [
   ["mirror:3d7d3dc6d092.jpeg", "articles/high-performance.jpg", 1600, 78],
   ["mirror:c945627bae54.png", "services-iso.webp", 700, 82],
   ["mirror:a178557ac749.png", "services-texture.webp", 1400, 70],
+  // Product page artwork (the template's "Digital Brain" page)
+  ["mirror:d489f73f590f.jpeg", "product/hero.jpg", 2400, 76],
+  ["mirror:56f6dc3aa7e5.jpg", "product/panel.jpg", 2400, 72],
+  ["mirror:c774c0e1b057.jpg", "product/card-1.jpg", 1200, 72],
+  ["mirror:8729cbdca4c3.jpg", "product/card-2.jpg", 1200, 72],
+  // Chaka AI logo (jomiez.com), used as a mask in the product mockups
+  ["cache:logo-chaka.png", "ai/chaka.png", 160, 90],
   // Client avatars (jomiez.com)
   ["cache:client-01.avif", "clients/client-1.jpg", 160, 82],
   ["cache:client-02.avif", "clients/client-2.jpg", 160, 82],

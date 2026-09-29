@@ -11,6 +11,7 @@ import "./globals.css";
 import { site } from "@/content/site";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
+import { PageTransitions } from "@/components/layout/PageTransitions";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 
 const interDisplay = localFont({
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={interDisplay.variable}>
       <body>
         <SmoothScroll />
+        <PageTransitions />
         <Nav />
         <main className="page-shell">{children}</main>
         <Footer />

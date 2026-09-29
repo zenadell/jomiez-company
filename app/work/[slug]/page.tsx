@@ -4,6 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Appear, springFirm, springSlow, springSoft } from "@/components/ui/Motion";
 import { PixelButton } from "@/components/ui/PixelButton";
+import { ProductPage } from "@/components/product/ProductPage";
+import { getProductPage } from "@/content/products";
 import { getProject, projects } from "@/content/projects";
 import styles from "./case.module.css";
 
@@ -26,6 +28,10 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) notFound();
+
+  // Our own products get the product page (the template's "Digital Brain" layout).
+  const product = getProductPage(slug);
+  if (product) return <ProductPage product={product} />;
 
   const index = projects.findIndex((p) => p.slug === slug);
   const next = projects[(index + 1) % projects.length];

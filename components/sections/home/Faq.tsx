@@ -9,24 +9,39 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 import { faqs } from "@/content/faq";
 import styles from "./Faq.module.css";
 
-export function Faq() {
+type FaqProps = {
+  label?: string;
+  sub?: string;
+  title?: string;
+  items?: readonly { q: string; a: string }[];
+  cta?: { label: string; href: string };
+};
+
+/* FAQ block: label and title on the left, accordion on the right. Product pages pass their own questions. */
+export function Faq({
+  label = "The inquiry",
+  sub = "Answers on how we scope, build and care for your product, and on the products we make ourselves.",
+  title = "Everything you should know before we begin.",
+  items = faqs,
+  cta = { label: "Contact Us", href: "/contact" },
+}: FaqProps) {
   const [open, setOpen] = useState(0);
 
   return (
     <div className={styles.row}>
       <div className={styles.left}>
         <div className={styles.head}>
-          <SectionLabel>The inquiry</SectionLabel>
-          <p className={styles.sub}>Answers on how we scope, build and care for your product, and on the products we make ourselves.</p>
+          <SectionLabel>{label}</SectionLabel>
+          <p className={styles.sub}>{sub}</p>
         </div>
         <Appear inView transition={springFirm} className={styles.bottom}>
-          <h2 className={styles.title}>Everything you should know before we begin.</h2>
-          <PixelButton href="/contact">Contact Us</PixelButton>
+          <h2 className={styles.title}>{title}</h2>
+          <PixelButton href={cta.href}>{cta.label}</PixelButton>
         </Appear>
       </div>
 
       <div className={styles.list}>
-        {faqs.map((f, i) => {
+        {items.map((f, i) => {
           const isOpen = open === i;
           return (
             <motion.div
