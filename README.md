@@ -20,12 +20,13 @@ Requires Node 20.9 or newer.
 | --- | --- |
 | `app/` | Pages: home, `about`, `services`, `work` + `work/[slug]` (our products get the product page; client builds get a case study), `insights` + `insights/[slug]`, `contact`, legal pages, 404, sitemap, robots |
 | `components/sections/home/` | Homepage sections (Hero, Intro, Work, Services, Mission, Impact, Showcase, Process, Studio, Pricing, FAQ, Insights) |
-| `components/ui/` | Shared pieces: `JomiezMark` (the logo mark, redrawn from jomiez.com), `Icon` (the template's Phosphor icons), `PixelButton` (the pixel-arrow CTA), `PixelArrow`, `Marquee`, `BigMarquee`, `ScrollText`, `ProgressiveBlur`, `TechMark`, `Appear` motion helpers |
+| `components/ui/` | Shared pieces: `JomiezMark` / `JomiezIcon` (the Jomiez "Z" as a vector, and the full-colour app icon), `Icon` (the template's Phosphor icons), `PixelButton` (the pixel-arrow CTA), `PixelArrow`, `Marquee`, `BigMarquee`, `ScrollText`, `ProgressiveBlur`, `TechMark`, `Appear` motion helpers |
 | `components/product/` | The product page (template's "Digital Brain" layout): hero, stats, browser-framed showcase, mockup cards, statement, FAQ |
 | `components/layout/` | Nav (with phone menu), reveal footer, Lenis smooth scrolling, page transitions |
 | `content/` | **All copy and data.** Edit these files to change the site |
 | `public/media/` | Optimised images used by the site |
 | `scripts/optimize-assets.mjs` | Rebuilds `public/media` from source images |
+| `scripts/brand-assets.mjs` | Builds the logo icon, favicon, app icon and Apple touch icon from the master logo in `scripts/brand/` |
 | `aethron/` | Aethron's mirror of the Framer template and its copy map. Reference only; excluded from deploys and safe to delete |
 
 ### Editing content
@@ -53,7 +54,7 @@ Requires Node 20.9 or newer.
 - **Contact form** — there's no email backend yet, so submitting opens the visitor's email app with the message addressed to hello@jomiez.com. Add an API route (e.g. Resend) to send directly.
 - **Pricing** — shows "Custom / quoted per milestone" because the template's dollar figures were Spartan's, not Jomiez's.
 - **Insights articles** — adapted from the Aethron copy map with unverifiable claims removed; give them a read.
-- **Imagery** — project screenshots, client avatars and the logo mark come from jomiez.com. Decorative images (hero landscape, footer scene, showcase band, textures, article covers) and the Gemini/OpenAI glyphs are from the purchased template; Claude, Hugging Face and the tech-stack logos are from Simple Icons (CC0).
+- **Imagery** — project screenshots and client avatars come from jomiez.com; the logo comes from the master file in `scripts/brand/`. Decorative images (hero landscape, footer scene, showcase band, textures, article covers) and the Gemini/OpenAI glyphs are from the purchased template; Claude, Hugging Face and the tech-stack logos are from Simple Icons (CC0).
 - **Location** — the contact page says "Enugu, Nigeria & working worldwide" (from the previous site); update in `components/sections/contact/ContactStandard.tsx` if needed.
 
 ## Deploy

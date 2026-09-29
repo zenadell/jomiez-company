@@ -6,7 +6,7 @@ import { ScrollText } from "@/components/ui/ScrollText";
 import { NewsTicker } from "@/components/ui/NewsTicker";
 import { Dial } from "@/components/ui/Dial";
 import { Icon } from "@/components/ui/Icon";
-import { JomiezMark } from "@/components/ui/JomiezMark";
+import { JomiezIcon } from "@/components/ui/JomiezMark";
 import { site } from "@/content/site";
 import styles from "./Intro.module.css";
 
@@ -74,7 +74,7 @@ export function Intro() {
               <div className={styles.quoteTop}>
                 <Icon name="quotesFill" size={40} style={{ color: "#1f1f1f" }} />
                 <span className={styles.quoteBrand}>
-                  <JomiezMark size={16} />
+                  <JomiezIcon size={22} />
                   Jomiez
                 </span>
               </div>

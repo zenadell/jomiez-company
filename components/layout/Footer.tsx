@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { footerColumns, site } from "@/content/site";
-import { JomiezMark } from "@/components/ui/JomiezMark";
+import { JomiezIcon } from "@/components/ui/JomiezMark";
 import { Wordmark } from "@/components/ui/Logo";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { SocialIcon } from "@/components/ui/SocialIcon";
@@ -29,7 +29,7 @@ export function Footer() {
         <motion.div className={styles.inner} style={{ y: contentY }}>
           <div className={styles.brand}>
             <Link href="/" className={styles.logo} aria-label="Jomiez home">
-              <JomiezMark size={30} />
+              <JomiezIcon size={44} />
               <Wordmark className={styles.logoWord} />
             </Link>
             <p className={styles.blurb}>
