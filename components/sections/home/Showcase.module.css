@@ -63,7 +63,6 @@
   border: 1px solid var(--white-20);
   background: var(--white-06);
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   font-size: 14px;
   line-height: 19.6px;
   font-weight: 400;

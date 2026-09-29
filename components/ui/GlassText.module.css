@@ -1,0 +1,31 @@
+.box {
+  position: relative;
+  display: inline-block;
+}
+
+/* Once the cut-out letters are in place, the real text only holds the layout. */
+.box[data-ready] {
+  color: transparent;
+}
+
+.probe {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: baseline;
+}
+
+/*
+ * The letters: the backdrop, softened so photo grain doesn't speckle them, taken
+ * to grey, pushed to black or white (slightly favouring ink on mid-tones) and
+ * flipped. The nav's burger bars and current-page dot use the same filter.
+ * No hand-written -webkit- copy: the CSS build adds the prefix itself, and with
+ * both present it kept only the prefixed one, which Chrome ignores.
+ */
+.ink {
+  position: absolute;
+  pointer-events: none;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  backdrop-filter: blur(1.5px) grayscale(1) brightness(1.12) contrast(10) invert(1);
+}

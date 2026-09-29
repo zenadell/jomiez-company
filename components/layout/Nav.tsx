@@ -4,14 +4,14 @@ import { Glass, type GlassOptics } from "@samasante/liquid-glass";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { navLinks } from "@/content/site";
 import { LogoLink } from "@/components/ui/Logo";
 import { PixelButton } from "@/components/ui/PixelButton";
+import { GlassText } from "@/components/ui/GlassText";
 import { ProgressiveBlur } from "@/components/ui/ProgressiveBlur";
 import { useLiveGlass } from "@/components/ui/useGlassSupport";
 import styles from "./Nav.module.css";
-import { useNavTone } from "./useNavTone";
 
 // Framer appear effect for the nav: drops 100px, spring 0.8s, no bounce, 0.5s delay.
 const DROP = {
@@ -23,8 +23,9 @@ const DROP = {
 /*
  * Deep, clear liquid glass for the nav pills (github.com/samasante/liquid-glass):
  * the page scrolling underneath swells through a strongly magnifying body and
- * pours around a rainbow-edged rim, under only a whisper of tint. The link text
- * flips between white and ink with whatever is behind it (useNavTone). It bends
+ * pours around a rainbow-edged rim, under only a whisper of tint. The labels and
+ * the burger are cut from the backdrop itself, white over dark and ink over
+ * light pixel by pixel (GlassText), so they read over anything. It bends
  * the live page, so it runs where useLiveGlass allows (Chromium with a GPU);
  * elsewhere the pills stay solid white.
  */
@@ -48,6 +49,10 @@ const NAV_GLASS: Partial<GlassOptics> = {
   glowFalloff: 0.6,
 };
 
+/* The open phone menu: the same clear glass, frosted just enough that the page
+   behind doesn't tangle with the big links. */
+const MENU_GLASS: Partial<GlassOptics> = { ...NAV_GLASS, frost: 7 };
+
 export function Nav() {
   const pathname = usePathname();
   // The menu remembers the path it was opened on, so navigating anywhere closes it.
@@ -59,25 +64,29 @@ export function Nav() {
   const live = useLiveGlass();
   const [dropped, setDropped] = useState(false);
   const glass = live && dropped;
-  const pill = useRef<HTMLElement>(null);
-  const hire = useRef<HTMLDivElement>(null);
-  useNavTone(glass, [pill, hire], pathname);
+  const label = (text: string) => (glass ? <GlassText>{text}</GlassText> : text);
+
+  // The phone menu has no place on a wide screen: close it if the window widens.
+  useEffect(() => {
+    const wide = window.matchMedia("(min-width: 810px)");
+    const close = () => wide.matches && setOpenOn(null);
+    wide.addEventListener("change", close);
+    return () => wide.removeEventListener("change", close);
+  }, []);
 
   return (
     <>
       <ProgressiveBlur className={styles.topBlur} direction="down" />
 
       <motion.nav
-        ref={pill}
         className={styles.pill}
         aria-label="Main"
         data-glass={glass ? "" : undefined}
-        data-open={open ? "" : undefined}
         onAnimationComplete={() => setDropped(true)}
         {...DROP}
       >
         {glass && (
-          <Glass optics={NAV_GLASS} className={styles.glass}>
+          <Glass optics={open ? MENU_GLASS : NAV_GLASS} className={styles.glass}>
             <span />
           </Glass>
         )}
@@ -86,8 +95,8 @@ export function Nav() {
           <ul className={styles.links}>
             {navLinks.map((l) => (
               <li key={l.href}>
-                <Link href={l.href} className={styles.link} data-active={pathname === l.href} data-tone-target="">
-                  {l.label}
+                <Link href={l.href} className={styles.link} data-active={pathname === l.href}>
+                  {label(l.label)}
                 </Link>
               </li>
             ))}
@@ -95,7 +104,6 @@ export function Nav() {
           <button
             type="button"
             className={styles.burger}
-            data-tone-target=""
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -111,21 +119,22 @@ export function Nav() {
             <motion.div
               id="mobile-menu"
               className={styles.mobileMenu}
-              initial={{ height: 0, opacity: 0 }}
+              // On glass the menu only unrolls: fading it would blank the cut-out labels.
+              initial={{ height: 0, opacity: glass ? 1 : 0 }}
               animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              exit={{ height: 0, opacity: glass ? 1 : 0 }}
               transition={{ type: "spring", duration: 0.5, bounce: 0.1 }}
             >
               <ul>
                 {navLinks.map((l, i) => (
                   <motion.li
                     key={l.href}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: glass ? 1 : 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.05 * i + 0.1 }}
                   >
                     <Link href={l.href} className={styles.mobileLink} onClick={() => setOpen(false)}>
-                      {l.label}
+                      {label(l.label)}
                     </Link>
                   </motion.li>
                 ))}
@@ -140,14 +149,14 @@ export function Nav() {
         </AnimatePresence>
       </motion.nav>
 
-      <motion.div ref={hire} className={styles.hire} data-glass={glass ? "" : undefined} data-tone-target="" {...DROP}>
+      <motion.div className={styles.hire} data-glass={glass ? "" : undefined} {...DROP}>
         {glass && (
           <Glass optics={NAV_GLASS} className={styles.glass}>
             <span />
           </Glass>
         )}
         <PixelButton href="/contact" variant="primarySmall" className={styles.hireBtn}>
-          Hire Us
+          {label("Hire Us")}
         </PixelButton>
       </motion.div>
     </>

@@ -27,10 +27,6 @@
   animation: glass-in 0.6s ease both;
 }
 
-/* The open phone menu sits on a milkier sheet so its big links stay readable. */
-.pill[data-open] .glass {
-  background: rgba(255, 255, 255, 0.82);
-}
 
 @keyframes glass-in {
   from {
@@ -76,23 +72,33 @@
   opacity: 1;
 }
 
-/* On clear glass the text takes the opposite shade of what's behind it. */
+/*
+ * On clear glass the labels are cut from the backdrop (GlassText), so they are
+ * drawn at full strength: any opacity below 1 would cut them off from the page.
+ * A small dot, cut the same way, marks the current page and the hovered link.
+ */
 .pill[data-glass] .link {
-  opacity: 0.88;
-}
-
-.pill[data-glass] .link:hover,
-.pill[data-glass] .link[data-active="true"] {
+  position: relative;
   opacity: 1;
 }
 
-.pill[data-glass] .link[data-tone="dark"] {
-  color: var(--white);
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+.pill[data-glass] .link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  backdrop-filter: blur(1.5px) grayscale(1) brightness(1.12) contrast(10) invert(1);
+  transform: scale(0);
+  transition: transform 0.25s ease;
 }
 
-.pill[data-glass] .link[data-tone="light"] {
-  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.5);
+.pill[data-glass] .link:hover::after,
+.pill[data-glass] .link[data-active="true"]::after {
+  transform: scale(1);
 }
 
 .burger {
@@ -112,12 +118,9 @@
   background: var(--ink);
 }
 
-.pill[data-glass]:not([data-open]) .burger[data-tone="dark"] .bar {
-  background: var(--white);
-}
-
-.bar {
-  transition: background 0.3s ease;
+.pill[data-glass] .bar {
+  background: transparent;
+  backdrop-filter: blur(1.5px) grayscale(1) brightness(1.12) contrast(10) invert(1);
 }
 
 .bar:first-child {
@@ -150,13 +153,16 @@
   border-color: transparent;
 }
 
-.hire[data-glass][data-tone="dark"] {
-  --pb-label: var(--white);
-}
 
 .mobileMenu {
   position: relative;
   overflow: hidden;
+}
+
+@media (min-width: 810px) {
+  .mobileMenu {
+    display: none;
+  }
 }
 
 .mobileMenu ul {

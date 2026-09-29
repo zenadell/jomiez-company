@@ -77,7 +77,6 @@
   border-radius: 17px;
   background: var(--white-20);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 
 .contactEmail {

@@ -150,10 +150,8 @@
   color: var(--white);
 }
 
-/* --pb-label lets a glass container flip the label to white over dark backdrops. */
 .primarySmall .label {
-  color: var(--pb-label, var(--ink));
-  transition: color 0.3s ease;
+  color: var(--ink);
 }
 
 .primarySmall .labelInTile {
