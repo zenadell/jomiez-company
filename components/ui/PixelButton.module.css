@@ -16,6 +16,13 @@
   isolation: isolate;
 }
 
+/* The label and arrow move between the tile and the pill on hover. Keeping them
+   out of hit-testing means a press always lands on the button itself, so a quick
+   click still counts even when the label is swapped out mid-press. */
+.btn * {
+  pointer-events: none;
+}
+
 .btn[data-hovered="true"] {
   gap: 0;
   padding: 3px;

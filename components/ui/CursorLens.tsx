@@ -13,8 +13,6 @@ import styles from "./CursorLens.module.css";
  * (see useCursorLens); it never takes clicks, and steps aside over form fields.
  */
 
-const D = 132;
-
 const LENS: Partial<GlassOptics> = {
   mapSize: 256,
   clipToShape: true,
@@ -42,11 +40,12 @@ const LENS: Partial<GlassOptics> = {
 /* Where the drop steps aside so typing and embeds stay clear. */
 const AVOID = "input, textarea, select, iframe, [contenteditable='true']";
 
-export function CursorLens() {
-  return useCursorLens() ? <Lens /> : null;
+/** `size` is the drop's diameter in px (set in the admin's Effects). */
+export function CursorLens({ size = 132 }: { size?: number }) {
+  return useCursorLens() ? <Lens key={size} D={size} /> : null;
 }
 
-function Lens() {
+function Lens({ D }: { D: number }) {
   const wrap = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,7 +111,7 @@ function Lens() {
       document.removeEventListener("pointerout", onLeave);
       window.removeEventListener("blur", onBlur);
     };
-  }, []);
+  }, [D]);
 
   return (
     <div ref={wrap} className={styles.lens} aria-hidden="true">

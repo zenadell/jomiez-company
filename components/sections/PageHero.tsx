@@ -12,9 +12,9 @@ export function PageHero({
   children,
 }: {
   title: string;
-  lead?: string;
-  cta?: { label: string; href: string };
-  eyebrow?: string;
+  lead?: string | null;
+  cta?: { label: string; href: string } | null;
+  eyebrow?: string | null;
   children?: ReactNode;
 }) {
   return (
@@ -33,7 +33,7 @@ export function PageHero({
             <p className={styles.lead}>{lead}</p>
           </Appear>
         )}
-        {cta && (
+        {cta?.label && (
           <Appear delay={0.7} transition={springFirm}>
             <PixelButton href={cta.href}>{cta.label}</PixelButton>
           </Appear>

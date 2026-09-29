@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
-import { site } from "@/content/site";
+import { getGlobal } from "@/lib/cms";
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const site = await getGlobal("site");
   return {
-    rules: { userAgent: "*", allow: "/" },
-    sitemap: `${site.url}/sitemap.xml`,
+    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/api", "/next"] },
+    sitemap: `${site.url.replace(/\/$/, "")}/sitemap.xml`,
   };
 }

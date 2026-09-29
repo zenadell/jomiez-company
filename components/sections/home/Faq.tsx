@@ -6,46 +6,39 @@ import { Icon } from "@/components/ui/Icon";
 import { Appear, springFirm } from "@/components/ui/Motion";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { faqs } from "@/content/faq";
 import styles from "./Faq.module.css";
 
 type FaqProps = {
-  label?: string;
-  sub?: string;
-  title?: string;
-  items?: readonly { q: string; a: string }[];
-  cta?: { label: string; href: string };
+  label?: string | null;
+  sub?: string | null;
+  title?: string | null;
+  items?: readonly { q: string; a: string; id?: string | null }[] | null;
+  cta?: { label: string; href: string } | null;
 };
 
 /* FAQ block: label and title on the left, accordion on the right. Product pages pass their own questions. */
-export function Faq({
-  label = "The inquiry",
-  sub = "Answers on how we scope, build and care for your product, and on the products we make ourselves.",
-  title = "Everything you should know before we begin.",
-  items = faqs,
-  cta = { label: "Contact Us", href: "/contact" },
-}: FaqProps) {
+export function Faq({ label, sub, title, items, cta }: FaqProps) {
   const [open, setOpen] = useState(0);
 
   return (
     <div className={styles.row}>
       <div className={styles.left}>
         <div className={styles.head}>
-          <SectionLabel>{label}</SectionLabel>
-          <p className={styles.sub}>{sub}</p>
+          {label && <SectionLabel>{label}</SectionLabel>}
+          {sub && <p className={styles.sub}>{sub}</p>}
         </div>
         <Appear inView transition={springFirm} className={styles.bottom}>
           <h2 className={styles.title}>{title}</h2>
-          <PixelButton href={cta.href}>{cta.label}</PixelButton>
+          {cta?.label && <PixelButton href={cta.href}>{cta.label}</PixelButton>}
         </Appear>
       </div>
 
       <div className={styles.list}>
-        {items.map((f, i) => {
+        {(items ?? []).map((f, i) => {
           const isOpen = open === i;
           return (
             <motion.div
-              key={f.q}
+              key={f.id ?? f.q}
               layout
               transition={{ type: "spring", duration: 0.5, bounce: 0.1 }}
               className={`${styles.item} ${isOpen ? styles.itemOpen : ""}`}

@@ -6,7 +6,7 @@ import { BigMarquee } from "@/components/ui/BigMarquee";
 import { JomiezMark } from "@/components/ui/JomiezMark";
 import { Appear, springFirm } from "@/components/ui/Motion";
 import { NewsTicker } from "@/components/ui/NewsTicker";
-import { standards } from "@/content/standards";
+import type { Home } from "@/payload-types";
 import styles from "./Impact.module.css";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
@@ -16,12 +16,13 @@ const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
  * line under the arrows and looped copies fill the width to both edges. It
  * advances every 5s; each move eases out over 0.9s (the template's curve).
  */
-const N = standards.length;
 const COPIES = 3;
 const SLIDE = { duration: 0.9, ease: [0.25, 1, 0.5, 1] as const };
 const AUTOPLAY_MS = 5000;
 
-export function Impact() {
+export function Impact({ data }: { data: Home["tenets"] }) {
+  const standards = data.items ?? [];
+  const N = standards.length;
   const viewport = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const index = useRef<number>(N);
@@ -47,6 +48,7 @@ export function Impact() {
 
   const go = useCallback(
     (to: number) => {
+      if (!N) return;
       index.current = to;
       animate(x, -to * pitch.current, {
         ...SLIDE,
@@ -62,7 +64,7 @@ export function Impact() {
         },
       });
     },
-    [x],
+    [x, N],
   );
 
   useEffect(() => {
@@ -80,13 +82,11 @@ export function Impact() {
   return (
     <section className={styles.section}>
       <div className={styles.head}>
-        <BigMarquee text="Our Tenets" />
+        <BigMarquee text={data.marquee} />
         <div className={styles.descRow}>
           <span className={styles.descLine} />
           <Appear inView transition={springFirm}>
-            <p className={styles.desc}>
-              Seven principles carved into everything we make, from our own products to yours.
-            </p>
+            <p className={styles.desc}>{data.description}</p>
           </Appear>
         </div>
       </div>
@@ -120,7 +120,7 @@ export function Impact() {
           >
             {Array.from({ length: COPIES }, (_, copy) =>
               standards.map((s, i) => (
-                <article key={`${copy}-${s.title}`} className={styles.card} aria-hidden={copy !== 1 || undefined}>
+                <article key={`${copy}-${s.id ?? s.title}`} className={styles.card} aria-hidden={copy !== 1 || undefined}>
                   <div className={styles.cardTop}>
                     <span className={styles.chip}>
                       <span className={styles.avatar}>
@@ -128,7 +128,7 @@ export function Impact() {
                       </span>
                       <span className={styles.tag}>{s.tag}</span>
                     </span>
-                    <span className={styles.index}>{ROMAN[i]}</span>
+                    <span className={styles.index}>{ROMAN[i] ?? i + 1}</span>
                   </div>
                   <QuoteMark />
                   <p className={styles.cardText}>{s.body}</p>
@@ -136,7 +136,7 @@ export function Impact() {
                     <span className={styles.footRule} />
                     <div>
                       <p className={styles.footTitle}>{s.title}</p>
-                      <p className={styles.footSub}>A Jomiez tenet</p>
+                      <p className={styles.footSub}>{data.cardFooter}</p>
                     </div>
                   </div>
                 </article>
@@ -146,7 +146,7 @@ export function Impact() {
         </div>
       </div>
 
-      <NewsTicker className={styles.ticker} />
+      {data.showTicker !== false && <NewsTicker className={styles.ticker} />}
     </section>
   );
 }

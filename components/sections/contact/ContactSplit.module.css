@@ -186,3 +186,26 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Server-side validation messages and the spam trap. */
+.field[data-invalid="true"] input,
+.field[data-invalid="true"] textarea {
+  border-color: #c2410c;
+}
+
+.error {
+  font-size: 12px;
+  color: #c2410c;
+}
+
+.trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.failed {
+  color: #c2410c;
+}

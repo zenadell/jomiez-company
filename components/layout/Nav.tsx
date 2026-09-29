@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { navLinks } from "@/content/site";
+import { useSiteData } from "@/components/cms/SiteData";
 import { LogoLink } from "@/components/ui/Logo";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { GlassText } from "@/components/ui/GlassText";
@@ -55,13 +55,16 @@ const MENU_GLASS: Partial<GlassOptics> = { ...NAV_GLASS, frost: 7 };
 
 export function Nav() {
   const pathname = usePathname();
+  const { nav, effects } = useSiteData();
+  const navLinks = nav.header?.links ?? [];
+  const hire = nav.header?.showHire !== false && nav.header?.hire?.label ? nav.header.hire : null;
   // The menu remembers the path it was opened on, so navigating anywhere closes it.
   const [openOn, setOpenOn] = useState<string | null>(null);
   const open = openOn === pathname;
   const setOpen = (next: boolean) => setOpenOn(next ? pathname : null);
   // The pills turn to glass once they've dropped in: while the drop fades them in,
   // their opacity would cut the glass off from the page it bends.
-  const live = useLiveGlass();
+  const live = useLiveGlass() && effects.navGlass !== false;
   const [dropped, setDropped] = useState(false);
   const glass = live && dropped;
   const label = (text: string) => (glass ? <GlassText>{text}</GlassText> : text);
@@ -94,7 +97,7 @@ export function Nav() {
           <LogoLink />
           <ul className={styles.links}>
             {navLinks.map((l) => (
-              <li key={l.href}>
+              <li key={l.id ?? l.href}>
                 <Link href={l.href} className={styles.link} data-active={pathname === l.href}>
                   {label(l.label)}
                 </Link>
@@ -128,7 +131,7 @@ export function Nav() {
               <ul>
                 {navLinks.map((l, i) => (
                   <motion.li
-                    key={l.href}
+                    key={l.id ?? l.href}
                     initial={{ opacity: glass ? 1 : 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.05 * i + 0.1 }}
@@ -139,26 +142,30 @@ export function Nav() {
                   </motion.li>
                 ))}
               </ul>
-              <div className={styles.mobileCta}>
-                <PixelButton href="/contact" variant="primary">
-                  Hire Us
-                </PixelButton>
-              </div>
+              {hire && (
+                <div className={styles.mobileCta}>
+                  <PixelButton href={hire.href} variant="primary">
+                    {hire.label}
+                  </PixelButton>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
       </motion.nav>
 
-      <motion.div className={styles.hire} data-glass={glass ? "" : undefined} {...DROP}>
-        {glass && (
-          <Glass optics={NAV_GLASS} className={styles.glass}>
-            <span />
-          </Glass>
-        )}
-        <PixelButton href="/contact" variant="primarySmall" className={styles.hireBtn}>
-          {label("Hire Us")}
-        </PixelButton>
-      </motion.div>
+      {hire && (
+        <motion.div className={styles.hire} data-glass={glass ? "" : undefined} {...DROP}>
+          {glass && (
+            <Glass optics={NAV_GLASS} className={styles.glass}>
+              <span />
+            </Glass>
+          )}
+          <PixelButton href={hire.href} variant="primarySmall" className={styles.hireBtn}>
+            {label(hire.label)}
+          </PixelButton>
+        </motion.div>
+      )}
     </>
   );
 }

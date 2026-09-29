@@ -27,14 +27,17 @@ const MASK = `url("data:image/svg+xml,${encodeURIComponent(
 )}")`;
 
 type GlassWordmarkProps = {
+  /** The word to show. The glass letters are cut for "Jomiez"; any other word is drawn solid. */
+  text?: string;
   active: boolean;
   className?: string;
   textClassName?: string;
 };
 
-export function GlassWordmark({ active, className, textClassName }: GlassWordmarkProps) {
+export function GlassWordmark({ text = "Jomiez", active, className, textClassName }: GlassWordmarkProps) {
   const live = useLiveGlass();
-  const on = live && active;
+  const custom = text !== "Jomiez";
+  const on = live && active && !custom;
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
 
@@ -50,6 +53,20 @@ export function GlassWordmark({ active, className, textClassName }: GlassWordmar
 
   const map = useMemo(() => (on && width > 0 ? letterMap(Math.min(MAX_MAP_W, Math.round(width))) : null), [on, width]);
   const glass = on && map !== null;
+
+  if (custom) {
+    // A renamed company: solid letters in the display face, roughly as wide as the original mark.
+    const w = Math.max(300, text.length * 178);
+    return (
+      <div ref={box} className={className} style={{ position: "relative" }}>
+        <svg viewBox={`0 -248 ${w} 254`}>
+          <text x="0" y="0" className={textClassName} style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 330, letterSpacing: -14 }}>
+            {text}
+          </text>
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div ref={box} className={className} style={{ position: "relative" }}>

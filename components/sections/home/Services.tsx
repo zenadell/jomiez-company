@@ -6,37 +6,39 @@ import { useState } from "react";
 import { Appear, springFirm } from "@/components/ui/Motion";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { headlineServices } from "@/content/services";
+import { src } from "@/lib/media";
+import type { Home } from "@/payload-types";
 import styles from "./Services.module.css";
 
-export function Services() {
+export function Services({ data }: { data: Home["services"] }) {
   const [open, setOpen] = useState(0);
+  const texture = src(data.texture, "/media/services-texture.webp");
+  const iso = src(data.iso, "/media/services-iso.webp");
 
   return (
     <div className={styles.row} id="capabilities">
       <div className={styles.left}>
         <Appear inView transition={springFirm} className={styles.intro}>
-          <SectionLabel dark>Services</SectionLabel>
-          <p className={styles.introText}>
-            Beyond our own products, we lend our craft to others, shaping raw ideas into software that feels as
-            natural as it looks.
-          </p>
+          <SectionLabel dark>{data.label}</SectionLabel>
+          {data.intro && <p className={styles.introText}>{data.intro}</p>}
         </Appear>
         <Appear inView delay={0.1} transition={springFirm} className={styles.bottom}>
-          <h2 className={styles.title}>Custom Software, Grown From Deep Roots.</h2>
-          <PixelButton href="/contact" variant="secondary">
-            Start a Project
-          </PixelButton>
+          <h2 className={styles.title}>{data.title}</h2>
+          {data.cta?.label && (
+            <PixelButton href={data.cta.href} variant="secondary">
+              {data.cta.label}
+            </PixelButton>
+          )}
         </Appear>
       </div>
 
       <div className={styles.cards}>
-        {headlineServices.map((s, i) => {
+        {(data.items ?? []).map((s, i) => {
           const isOpen = open === i;
           const num = String(i + 1).padStart(3, "0");
           return (
             <motion.div
-              key={s.title}
+              key={s.id ?? s.title}
               layout
               transition={{ type: "spring", duration: 0.7, bounce: 0.12 }}
               className={`${styles.card} ${isOpen ? styles.open : ""}`}
@@ -52,8 +54,8 @@ export function Services() {
                   <p className={styles.cardText}>{s.body}</p>
                 </div>
                 <div className={styles.art}>
-                  <Image src="/media/services-texture.webp" alt="" fill sizes="480px" className={styles.texture} />
-                  <Image src="/media/services-iso.webp" alt="" width={270} height={270} className={styles.iso} />
+                  <Image src={texture} alt="" fill sizes="480px" className={styles.texture} />
+                  <Image src={iso} alt="" width={270} height={270} className={styles.iso} />
                 </div>
               </div>
               <span className={styles.vertical} aria-hidden={isOpen}>

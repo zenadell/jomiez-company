@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { useRef, useSyncExternalStore } from "react";
-import { footerColumns, site } from "@/content/site";
+import { useSiteData } from "@/components/cms/SiteData";
+import { fill, src } from "@/lib/media";
 import { JomiezIcon } from "@/components/ui/JomiezMark";
 import { Wordmark } from "@/components/ui/Logo";
 import { PixelButton } from "@/components/ui/PixelButton";
@@ -18,6 +19,7 @@ import styles from "./Footer.module.css";
  * On phones it flows after the content instead (the spacer is hidden).
  */
 const FLOWING = "(max-width: 809px)";
+
 const watchFlowing = (cb: () => void) => {
   const mq = window.matchMedia(FLOWING);
   mq.addEventListener("change", cb);
@@ -25,8 +27,11 @@ const watchFlowing = (cb: () => void) => {
 };
 
 export function Footer() {
+  const { site, nav, effects } = useSiteData();
+  const footer = nav.footer ?? {};
+  const bg = src(footer.background, "/media/footer-cube.webp");
   const spacer = useRef<HTMLDivElement>(null);
-  const footer = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: spacer, offset: ["start end", "end end"] });
   const wordY = useTransform(scrollYProgress, [0, 1], ["45%", "0%"]);
   const contentY = useTransform(scrollYProgress, [0, 1], [80, 0]);
@@ -35,52 +40,56 @@ export function Footer() {
   // always "intersects" the viewport, so on desktop the reveal spacer decides.
   const flowing = useSyncExternalStore(watchFlowing, () => window.matchMedia(FLOWING).matches, () => false);
   const revealed = useInView(spacer);
-  const onScreen = useInView(footer);
-  const glassActive = flowing ? onScreen : revealed;
+  const onScreen = useInView(footerRef);
+  const glassActive = effects.footerGlass !== false && (flowing ? onScreen : revealed);
+  const fillTokens = (t: string | null | undefined) =>
+    fill(t, { legalName: site.legalName, year: new Date().getFullYear(), name: site.name });
 
   return (
     <>
       <div ref={spacer} className={styles.spacer} aria-hidden="true" />
-      <footer ref={footer} className={styles.footer}>
-        <Image src="/media/footer-cube.webp" alt="" fill sizes="100vw" className={styles.bg} />
+      <footer ref={footerRef} className={styles.footer}>
+        <Image src={bg} alt="" fill sizes="100vw" className={styles.bg} />
         <motion.div className={styles.inner} style={{ y: contentY }}>
           <div className={styles.brand}>
-            <Link href="/" className={styles.logo} aria-label="Jomiez home">
+            <Link href="/" className={styles.logo} aria-label={`${site.name} home`}>
               <JomiezIcon size={44} />
               <Wordmark className={styles.logoWord} />
             </Link>
-            <p className={styles.blurb}>
-              Software with deep roots. Talk to {site.legalName} about the product you want to grow.
-            </p>
+            {footer.blurb && <p className={styles.blurb}>{fillTokens(footer.blurb)}</p>}
             <div className={styles.contactPill}>
               <a href={`mailto:${site.email}`} className={styles.contactEmail}>
                 {site.email}
               </a>
-              <PixelButton href="/contact" variant="primarySmall">
-                Start a project
-              </PixelButton>
+              {footer.cta?.label && (
+                <PixelButton href={footer.cta.href} variant="primarySmall">
+                  {footer.cta.label}
+                </PixelButton>
+              )}
             </div>
-            <div className={styles.follow}>
-              <p className="t-mono-sm">Follow us:</p>
-              <ul className={styles.socials}>
-                {site.socials.map((s) => (
-                  <li key={s.label}>
-                    <a href={s.href} target="_blank" rel="noopener" aria-label={s.label} className={styles.social}>
-                      <SocialIcon name={s.icon} size={20} />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {(site.socials?.length ?? 0) > 0 && (
+              <div className={styles.follow}>
+                {footer.followLabel && <p className="t-mono-sm">{footer.followLabel}</p>}
+                <ul className={styles.socials}>
+                  {site.socials?.map((s) => (
+                    <li key={s.id ?? s.label}>
+                      <a href={s.href} target="_blank" rel="noopener" aria-label={s.label} className={styles.social}>
+                        <SocialIcon name={s.icon} size={20} />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           <div className={styles.columns}>
-            {footerColumns.map((col) => (
-              <div key={col.title} className={styles.col}>
+            {footer.columns?.map((col) => (
+              <div key={col.id ?? col.title} className={styles.col}>
                 <p className={styles.colTitle}>{col.title}</p>
                 <ul>
-                  {col.links.map((l) => (
-                    <li key={l.label}>
+                  {col.links?.map((l) => (
+                    <li key={l.id ?? l.label}>
                       <Link href={l.href} className={styles.colLink}>
                         <span className={styles.dash} aria-hidden="true" />
                         {l.label}
@@ -93,13 +102,13 @@ export function Footer() {
           </div>
         </motion.div>
 
-        <motion.div className={styles.giant} style={{ y: wordY }} aria-hidden="true">
-          <GlassWordmark active={glassActive} textClassName={styles.giantText} />
-        </motion.div>
+        {footer.showWordmark !== false && (
+          <motion.div className={styles.giant} style={{ y: wordY }} aria-hidden="true">
+            <GlassWordmark text={site.name} active={glassActive} textClassName={styles.giantText} />
+          </motion.div>
+        )}
 
-        <p className={styles.copy}>
-          © {new Date().getFullYear()} {site.legalName}. All rights reserved.
-        </p>
+        {footer.copyright && <p className={styles.copy}>{fillTokens(footer.copyright)}</p>}
       </footer>
     </>
   );

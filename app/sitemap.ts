@@ -1,13 +1,19 @@
 import type { MetadataRoute } from "next";
-import { site } from "@/content/site";
-import { projects } from "@/content/projects";
-import { articles } from "@/content/articles";
+import { getArticles, getGlobal, getPageSlugs, getProjects } from "@/lib/cms";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const pages = ["", "/about", "/services", "/work", "/insights", "/contact", "/privacy-policy", "/terms-conditions"];
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [site, projects, articles, pages] = await Promise.all([
+    getGlobal("site"),
+    getProjects(),
+    getArticles(),
+    getPageSlugs(),
+  ]);
+  const base = site.url.replace(/\/$/, "");
+  const fixed = ["", "/about", "/services", "/work", "/insights", "/contact", "/privacy-policy", "/terms-conditions"];
   return [
-    ...pages.map((p) => ({ url: `${site.url}${p}`, changeFrequency: "monthly" as const, priority: p === "" ? 1 : 0.7 })),
-    ...projects.map((p) => ({ url: `${site.url}/work/${p.slug}`, changeFrequency: "yearly" as const, priority: 0.6 })),
-    ...articles.map((a) => ({ url: `${site.url}/insights/${a.slug}`, lastModified: a.date, priority: 0.5 })),
+    ...fixed.map((p) => ({ url: `${base}${p}`, changeFrequency: "monthly" as const, priority: p === "" ? 1 : 0.7 })),
+    ...pages.map((slug) => ({ url: `${base}/${slug}`, changeFrequency: "monthly" as const, priority: 0.6 })),
+    ...projects.map((p) => ({ url: `${base}/work/${p.slug}`, lastModified: p.updatedAt, priority: 0.6 })),
+    ...articles.map((a) => ({ url: `${base}/insights/${a.slug}`, lastModified: a.date, priority: 0.5 })),
   ];
 }

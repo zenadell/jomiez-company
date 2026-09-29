@@ -5,11 +5,12 @@ import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { JomiezMark } from "@/components/ui/JomiezMark";
-import { site } from "@/content/site";
+import { src } from "@/lib/media";
+import type { Home } from "@/payload-types";
 import styles from "./Showcase.module.css";
 
 /* Full-bleed image band ("Built to Endure.") with a scroll-driven zoom and the brand mark in the corner. */
-export function Showcase() {
+export function Showcase({ data }: { data: Pick<Home["showcase"], "image" | "lead" | "pill" | "title"> }) {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const scale = useTransform(scrollYProgress, [0, 1], [1.25, 1]);
@@ -18,20 +19,20 @@ export function Showcase() {
   return (
     <section ref={ref} className={styles.section}>
       <motion.div className={styles.media} style={{ scale, y }}>
-        <Image src="/media/showcase-dial.jpg" alt="" fill sizes="100vw" className={styles.img} />
+        <Image src={src(data.image, "/media/showcase-dial.jpg")} alt="" fill sizes="100vw" className={styles.img} />
       </motion.div>
       <div className={styles.overlay}>
         <div className={styles.top}>
-          <p className={styles.lead}>
-            Every product begins as a seed: an idea, handled with patience, grown into something that stands.
-          </p>
-          <span className={styles.pill}>
-            <Icon name="timer" size={18} />
-            {site.stats[0].value} years of craft
-          </span>
+          {data.lead && <p className={styles.lead}>{data.lead}</p>}
+          {data.pill && (
+            <span className={styles.pill}>
+              <Icon name="timer" size={18} />
+              {data.pill}
+            </span>
+          )}
         </div>
         <div className={styles.bottom}>
-          <h2 className={styles.title}>Built to Endure.</h2>
+          <h2 className={styles.title}>{data.title}</h2>
           <JomiezMark size={72} className={styles.mark} />
         </div>
       </div>

@@ -2,12 +2,14 @@
 
 The official site for **Jomiez Innovation**, a software company that makes its own AI products (Chaka AI, Chaka WAP) and builds custom software for businesses. Built in React with Next.js; the design and motion system is a code rebuild of the Spartan AI Framer template (purchased), and the copy is written in an ancient, natural voice to match the garden imagery.
 
+**Everything on the site is edited in the admin at `/admin`** (Payload CMS, built into this app). See **[ADMIN.md](ADMIN.md)** for the guide: what each part of the admin controls, drafts and live preview, the contact inbox, email, and going live.
+
 ## Run it
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
-npm run build      # production build (all pages are static)
+npm run dev        # http://localhost:3000, admin at http://localhost:3000/admin
+npm run build      # production build (prepares the database, then pre-builds every page)
 npm run lint
 npm run typecheck
 ```
@@ -18,12 +20,15 @@ Requires Node 20.9 or newer.
 
 | Path | What it is |
 | --- | --- |
-| `app/` | Pages: home, `about`, `services`, `work` + `work/[slug]` (our products get the product page; client builds get a case study), `insights` + `insights/[slug]`, `contact`, legal pages, 404, sitemap, robots |
+| `app/(site)/` | Pages: home, `about`, `services`, `work` + `work/[slug]` (our products get the product page; client builds get a case study), `insights` + `insights/[slug]`, `contact` (with its server action), legal pages, custom pages and redirects (`[...slug]`), 404 |
+| `app/(payload)/` | The admin (`/admin`) and its API (`/api`) |
+| `payload.config.ts`, `cms/` | The admin's configuration: content schema, access rules, migrations, seed, admin customisations (see ADMIN.md) |
+| `lib/cms.ts` | How pages read content from the admin |
 | `components/sections/home/` | Homepage sections (Hero, Intro, Work, Services, Mission, Impact, Showcase, Process, Studio, Pricing, FAQ, Insights) |
 | `components/ui/` | Shared pieces: `JomiezMark` / `JomiezIcon` (the Jomiez "Z" as a vector, and the full-colour app icon), `Icon` (the template's Phosphor icons), `PixelButton` (the pixel-arrow CTA), `PixelArrow`, `Marquee`, `BigMarquee`, `ScrollText`, `ProgressiveBlur`, `TechMark`, `Appear` motion helpers |
 | `components/product/` | The product page (template's "Digital Brain" layout): hero, stats, browser-framed showcase, mockup cards, statement, FAQ |
 | `components/layout/` | Nav (with phone menu), reveal footer, Lenis smooth scrolling, page transitions |
-| `content/` | **All copy and data.** Edit these files to change the site |
+| `cms/seed/content/` | The site's original content, loaded into the admin on first run. Edit content in the admin, not here |
 | `public/media/` | Optimised images used by the site |
 | `scripts/optimize-assets.mjs` | Rebuilds `public/media` from source images |
 | `scripts/brand-assets.mjs` | Builds the logo icon, favicon, app icon and Apple touch icon from the master logo in `scripts/brand/` |
@@ -31,11 +36,7 @@ Requires Node 20.9 or newer.
 
 ### Editing content
 
-- `content/site.ts` — company name, email, phone, socials, stats, nav and footer links
-- `content/products.ts` — product pages for Chaka AI and Chaka WAP (every fact is from their case studies)
-- `content/projects.ts` — products and case studies (add one here and it gets a card and a `/work/<slug>` page; `product: true` marks Jomiez's own products)
-- `content/articles.ts` — Insights articles
-- `content/services.ts`, `content/standards.ts` (the seven tenets), `content/faq.ts` (also holds pricing tiers), `content/legal.ts`
+Sign in at `/admin`. Every page, section, image, product, journal post, the nav and footer, contact details, SEO and the liquid-glass effects are there, with drafts, live preview and version history. The full map is in [ADMIN.md](ADMIN.md).
 
 ## Motion
 
@@ -50,13 +51,13 @@ Requires Node 20.9 or newer.
 ## Things to review before launch
 
 - **Copy voice** — the whole site was rewritten as a product company in an ancient, natural voice ("Where intelligence takes root.", the seven tenets, the four seasons of every build). Give the wording a read, especially the founder quote in the homepage intro.
-- **Founder portrait** — the Mission section shows a "T" monogram tile. Add a photo and swap it in `components/sections/home/Mission.tsx`.
-- **Contact form** — there's no email backend yet, so submitting opens the visitor's email app with the message addressed to hello@jomiez.com. Add an API route (e.g. Resend) to send directly.
+- **Founder portrait** — the Philosophy section shows a "T" monogram tile. Upload a photo in the admin: Site settings → Company → Founder → Portrait.
+- **Contact email** — messages arrive in the admin's Inbox. Add a Resend key to also get an email for each one and send visitors the automatic reply (ADMIN.md → Email).
 - **Pricing** — shows "Custom / quoted per milestone" because the template's dollar figures were Spartan's, not Jomiez's.
 - **Insights articles** — adapted from the Aethron copy map with unverifiable claims removed; give them a read.
 - **Imagery** — project screenshots and client avatars come from jomiez.com; the logo comes from the master file in `scripts/brand/`. Decorative images (hero landscape, footer scene, showcase band, textures, article covers) and the Gemini/OpenAI glyphs are from the purchased template; Claude, Hugging Face and the tech-stack logos are from Simple Icons (CC0).
-- **Location** — the contact page says "Enugu, Nigeria & working worldwide" (from the previous site); update in `components/sections/contact/ContactStandard.tsx` if needed.
+- **Location** — the contact page says "Enugu, Nigeria & working worldwide" (from the previous site); change it in Site settings → Contact.
 
 ## Deploy
 
-Works on Vercel out of the box (import the repo, framework preset: Next.js). `.vercelignore` keeps the `aethron/` reference folder out of the upload.
+Deploys to Vercel (framework preset: Next.js) once a database (Turso), image storage (Vercel Blob), `PAYLOAD_SECRET` and, optionally, email (Resend) are set up. The step-by-step is in [ADMIN.md → Going live](ADMIN.md#going-live-vercel). `.vercelignore` keeps the `aethron/` reference folder out of the upload.

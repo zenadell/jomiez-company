@@ -7,27 +7,25 @@ import { NewsTicker } from "@/components/ui/NewsTicker";
 import { Dial } from "@/components/ui/Dial";
 import { Icon } from "@/components/ui/Icon";
 import { JomiezIcon } from "@/components/ui/JomiezMark";
-import { site } from "@/content/site";
+import { useSiteData } from "@/components/cms/SiteData";
+import { src } from "@/lib/media";
+import type { Home } from "@/payload-types";
 import styles from "./Intro.module.css";
 
-const AVATARS = ["/media/clients/client-1.jpg", "/media/clients/client-2.jpg", "/media/clients/client-3.jpg", "/media/clients/client-4.jpg"];
-
-export function Intro() {
+export function Intro({ data }: { data: Home["intro"] }) {
+  const { site } = useSiteData();
+  const AVATARS = (site.avatars ?? []).map((a) => src(a)).filter(Boolean);
   return (
     <section className={styles.section}>
       <div className={styles.panel}>
         <div className={styles.stack}>
           <div className={styles.head}>
-            <ScrollText
-              className={styles.statement}
-              text="Trends wither; craft endures. In a world overgrown with noise, we grow software with deep roots, made to outlast the season."
-            />
-            <Appear inView delay={0.1} transition={springFirm}>
-              <p className={styles.sub}>
-                A software company of engineers and designers, building our own products and the products of those we
-                believe in.
-              </p>
-            </Appear>
+            <ScrollText className={styles.statement} text={data.statement} />
+            {data.sub && (
+              <Appear inView delay={0.1} transition={springFirm}>
+                <p className={styles.sub}>{data.sub}</p>
+              </Appear>
+            )}
           </div>
 
           <div className={styles.bento}>
@@ -36,11 +34,9 @@ export function Intro() {
                 <span className={styles.iconTile} aria-hidden="true">
                   <Icon name="trendUpLight" size={30} style={{ color: "#1f1f1f" }} />
                 </span>
-                <p className={styles.bigNumber}>80+</p>
+                <p className={styles.bigNumber}>{data.projects?.value}</p>
               </div>
-              <p className={styles.cardText}>
-                Projects grown from first sketch to production, for founders, businesses and our own product line.
-              </p>
+              <p className={styles.cardText}>{data.projects?.text}</p>
             </Appear>
 
             <div className={styles.col}>
@@ -53,20 +49,20 @@ export function Intro() {
                   ))}
                 </div>
                 <p className={styles.avatarNote}>
-                  <strong>100%</strong> client satisfaction
+                  <strong>{data.satisfaction?.value}</strong> {data.satisfaction?.label}
                 </p>
               </Appear>
               <Appear inView delay={0.2} transition={springFirm} className={`${styles.card} ${styles.soft} ${styles.inline}`}>
-                <p className={styles.midNumber}>7+</p>
-                <p className={styles.mutedText}>Years of craft, and still growing.</p>
+                <p className={styles.midNumber}>{data.years?.value}</p>
+                <p className={styles.mutedText}>{data.years?.text}</p>
               </Appear>
             </div>
 
             <Appear inView delay={0.3} transition={springFirm} className={`${styles.card} ${styles.soft} ${styles.dialCard}`}>
               <Dial />
               <div className={styles.dialText}>
-                <h3 className={styles.cardHeading}>Swift by nature</h3>
-                <p className={styles.mutedText}>Steady, reliable delivery from first commit to production.</p>
+                <h3 className={styles.cardHeading}>{data.speed?.title}</h3>
+                <p className={styles.mutedText}>{data.speed?.text}</p>
               </div>
             </Appear>
 
@@ -75,22 +71,17 @@ export function Intro() {
                 <Icon name="quotesFill" size={40} style={{ color: "#1f1f1f" }} />
                 <span className={styles.quoteBrand}>
                   <JomiezIcon size={22} />
-                  Jomiez
+                  {data.quote?.brand}
                 </span>
               </div>
               <div className={styles.quoteBody}>
-                <p className={styles.quote}>
-                  We don&apos;t chase what&apos;s fashionable. We plant ideas, tend them with patience, and build
-                  software meant to stand for years.
-                </p>
-                <p className={styles.quoteBy}>
-                  {site.founder.alias}, {site.founder.role}
-                </p>
+                <p className={styles.quote}>{data.quote?.text}</p>
+                <p className={styles.quoteBy}>{data.quote?.by}</p>
               </div>
             </Appear>
           </div>
         </div>
-        <NewsTicker className={styles.ticker} />
+        {data.showTicker !== false && <NewsTicker className={styles.ticker} />}
       </div>
     </section>
   );

@@ -16,3 +16,10 @@ next-env.d.ts
 .vercel
 npm-debug.log*
 scripts/.cache/
+
+# cms: local database and uploaded media (production uses Turso and Vercel Blob)
+/uploads/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
