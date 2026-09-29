@@ -2,10 +2,13 @@
 
 import { useRef } from "react";
 import { BigMarquee } from "@/components/ui/BigMarquee";
+import { JomiezMark } from "@/components/ui/JomiezMark";
 import { Appear, springFirm } from "@/components/ui/Motion";
 import { NewsTicker } from "@/components/ui/NewsTicker";
 import { standards } from "@/content/standards";
 import styles from "./Impact.module.css";
+
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
 export function Impact() {
   const track = useRef<HTMLDivElement>(null);
@@ -21,12 +24,12 @@ export function Impact() {
   return (
     <section className={styles.section}>
       <div className={styles.head}>
-        <BigMarquee text="Work & Impact" />
+        <BigMarquee text="Our Tenets" />
         <div className={styles.descRow}>
           <span className={styles.descLine} />
           <Appear inView transition={springFirm}>
             <p className={styles.desc}>
-              Empowering ambitious businesses through bespoke software architectures and intelligent digital solutions.
+              Seven principles carved into everything we make, from our own products to yours.
             </p>
           </Appear>
         </div>
@@ -35,13 +38,13 @@ export function Impact() {
       <div className={styles.carousel}>
         <div className={styles.controls}>
           <button type="button" className={styles.arrow} onClick={() => scroll(-1)} aria-label="Previous">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 3 5 8l5 5" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <path d="M22.5 12.5 15 20l7.5 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           <button type="button" className={styles.arrow} onClick={() => scroll(1)} aria-label="Next">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="m6 3 5 5-5 5" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <path d="M17.5 12.5 25 20l-7.5 7.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         </div>
@@ -49,21 +52,21 @@ export function Impact() {
           {standards.map((s, i) => (
             <article key={s.title} className={styles.card}>
               <div className={styles.cardTop}>
-                <span className={styles.tag}>{s.tag}</span>
-                <span className={styles.index}>{String(i + 1).padStart(2, "0")}</span>
+                <span className={styles.chip}>
+                  <span className={styles.avatar}>
+                    <JomiezMark size={13} />
+                  </span>
+                  <span className={styles.tag}>{s.tag}</span>
+                </span>
+                <span className={styles.index}>{ROMAN[i]}</span>
               </div>
-              <svg className={styles.quote} width="22" height="18" viewBox="0 0 22 18" aria-hidden="true">
-                <path
-                  d="M0 18V9.8C0 4.6 2.5 1.2 7.4.2l.9 2.3C5.7 3.4 4.3 5.3 4.2 8h4.4v10H0Zm12.6 0V9.8c0-5.2 2.5-8.6 7.4-9.6l.9 2.3c-2.6.9-4 2.8-4.1 5.5h4.4v10h-8.6Z"
-                  fill="currentColor"
-                />
-              </svg>
+              <QuoteMark />
               <p className={styles.cardText}>{s.body}</p>
               <div className={styles.cardFoot}>
                 <span className={styles.footRule} />
                 <div>
                   <p className={styles.footTitle}>{s.title}</p>
-                  <p className={styles.footSub}>The Jomiez standard</p>
+                  <p className={styles.footSub}>A Jomiez tenet</p>
                 </div>
               </div>
             </article>
@@ -73,5 +76,19 @@ export function Impact() {
 
       <NewsTicker className={styles.ticker} />
     </section>
+  );
+}
+
+/* The template's outlined quote mark (two rounded strokes, 20% ink). */
+const QUOTE =
+  "M 1 0 L 7 0 C 7.552 0 8 0.448 8 1 L 8 9.5 C 8 10.052 7.552 10.5 7 10.5 L 4.5 10.5 C 4.224 10.5 4 10.724 4 11 L 4 12 C 4 13.105 4.895 14 6 14 L 7 14 C 7.552 14 8 14.448 8 15 L 8 17 C 8 17.552 7.552 18 7 18 L 6 18 C 2.686 18 0 15.314 0 12 L 0 1 C 0 0.448 0.448 0 1 0 Z";
+
+function QuoteMark() {
+  return (
+    <svg className={styles.quote} width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      {[2, 14].map((x) => (
+        <path key={x} d={QUOTE} transform={`translate(${x} 3)`} stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+      ))}
+    </svg>
   );
 }

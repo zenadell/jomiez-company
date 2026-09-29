@@ -95,6 +95,7 @@
 .stepNum {
   flex: none;
   width: 28px;
+  white-space: nowrap;
   font-size: 14px;
   line-height: 21px;
   font-weight: 300;

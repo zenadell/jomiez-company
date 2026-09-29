@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { Appear, springFirm, springSlow, springSoft } from "@/components/ui/Motion";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { site } from "@/content/site";
+import { Icon } from "@/components/ui/Icon";
 import styles from "./ContactSplit.module.css";
 
 const BUDGETS = ["Not sure yet", "Under $2,000", "$2,000 – $5,000", "$5,000 – $15,000", "$15,000+"];
@@ -34,17 +35,10 @@ export function ContactSplit() {
       <Appear scale={1.05} transition={springSlow} delay={0.2} className={styles.visual}>
         <Image src="/media/showcase-dial.jpg" alt="" fill priority sizes="(max-width: 1199px) 100vw, 50vw" className={styles.img} />
         <div className={styles.visualCopy}>
-          <h2 className={styles.visualTitle}>Let&apos;s build your digital product together.</h2>
+          <h2 className={styles.visualTitle}>Let&apos;s grow something that lasts.</h2>
           <div className={styles.direct}>
             <a href={site.phoneHref} className={styles.phone}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                  d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <Icon name="phone" size={16} />
               {site.phone}
             </a>
             <a href={`mailto:${site.email}`} className={styles.email}>
@@ -56,12 +50,12 @@ export function ContactSplit() {
 
       <div className={styles.formCol}>
         <Appear delay={0.5} transition={springSoft}>
-          <h1 className={styles.title}>Start your project with Jomiez today.</h1>
+          <h1 className={styles.title}>Plant your idea with Jomiez.</h1>
         </Appear>
         <Appear delay={0.6} transition={springSoft}>
           <p className={styles.lead}>
-            Ready to turn your idea into production-ready software? Tell us what you are building and we will come back
-            with scope, timeline and cost.
+            Every lasting product began as a seed. Tell us what you want to grow and we will come back with scope,
+            timeline and cost.
           </p>
         </Appear>
         <Appear delay={0.7} transition={springFirm}>

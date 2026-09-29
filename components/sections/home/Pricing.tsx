@@ -1,5 +1,10 @@
+"use client";
+
 import Image from "next/image";
+import { motion } from "motion/react";
+import { useState } from "react";
 import { BigMarquee } from "@/components/ui/BigMarquee";
+import { Icon } from "@/components/ui/Icon";
 import { Appear, springFirm } from "@/components/ui/Motion";
 import { NewsTicker } from "@/components/ui/NewsTicker";
 import { PixelButton } from "@/components/ui/PixelButton";
@@ -8,18 +13,34 @@ import styles from "./Pricing.module.css";
 
 /* Engagement models. Jomiez scopes every project individually, so tiers show "Custom" rather than list prices. */
 export function Pricing() {
+  const [perMilestone, setPerMilestone] = useState(true);
+
   return (
     <section className={styles.section} id="pricing">
       <BigMarquee text="Pricing" />
       <div className={styles.introRow}>
-        <p className={styles.note}>
-          <span className={styles.noteDot} />
-          Scoped per project
-        </p>
+        <div className={styles.billing}>
+          <span>Per Sprint</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={perMilestone}
+            aria-label="Quote per milestone"
+            className={styles.switch}
+            data-on={perMilestone}
+            onClick={() => setPerMilestone((v) => !v)}
+          >
+            <motion.span layout transition={{ type: "spring", duration: 0.4, bounce: 0.2 }} className={styles.knob}>
+              <Icon name="check" size={16} />
+            </motion.span>
+          </button>
+          <span>Milestone</span>
+          <span className={styles.flex}>(Flexible)</span>
+        </div>
         <Appear inView transition={springFirm}>
           <p className={styles.intro}>
-            Transparent project scopes designed to scale with your business. Tell us what you are building and we come
-            back with scope, timeline and cost. No hidden fees.
+            Every build is scoped by hand. Tell us what you are growing and we return with scope, timeline and cost.
+            No hidden terms.
           </p>
         </Appear>
       </div>
@@ -40,7 +61,7 @@ export function Pricing() {
                 <div className={styles.priceRow}>
                   <p className={styles.price}>Custom</p>
                 </div>
-                <p className={styles.billing}>Quoted per milestone</p>
+                <p className={styles.billingNote}>{perMilestone ? "Quoted per milestone" : "Quoted per sprint"}</p>
               </div>
               <div className={styles.mid}>
                 <p className={styles.blurb}>{t.blurb}</p>

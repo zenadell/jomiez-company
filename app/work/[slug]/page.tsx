@@ -74,7 +74,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
 
       <section className={styles.intro}>
         <Appear delay={0.4} transition={springSoft}>
-          <p className={styles.kicker}>Case study</p>
+          <p className={styles.kicker}>{project.product ? "Our product" : "Case study"}</p>
           <h1 className={styles.title}>{project.name}</h1>
         </Appear>
         <dl className={styles.stats}>
@@ -116,12 +116,12 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
 
       <section className={styles.next}>
         <Link href={`/work/${next.slug}`} className={styles.nextCard}>
-          <span className={styles.nextLabel}>Next project</span>
+          <span className={styles.nextLabel}>{next.product ? "Next product" : "Next creation"}</span>
           <span className={styles.nextName}>{next.name}</span>
           <span className={styles.nextSummary}>{next.summary}</span>
         </Link>
         <div className={styles.cta}>
-          <h2 className={styles.ctaTitle}>Have a project like this in mind?</h2>
+          <h2 className={styles.ctaTitle}>Have something like this ready to grow?</h2>
           <PixelButton href="/contact">Start a project</PixelButton>
         </div>
       </section>

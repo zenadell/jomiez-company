@@ -12,7 +12,7 @@ export function ProjectCard({ project }: { project: Project }) {
     <Link href={`/work/${project.slug}`} className={styles.card}>
       <div className={styles.frame}>
         <div className={styles.media}>
-          <span className={styles.pill}>{project.category}</span>
+          <span className={styles.pill}>{project.product ? `Our product · ${project.category}` : project.category}</span>
           <span className={styles.mark}>{project.name}</span>
           {project.image ? (
             <Image

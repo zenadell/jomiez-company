@@ -2,9 +2,9 @@ export const site = {
   name: "Jomiez",
   legalName: "Jomiez Innovation",
   url: "https://jomiez.com",
-  title: "Jomiez | Software Development & AI Development Company",
+  title: "Jomiez | Software & AI Company",
   description:
-    "Jomiez Innovation is a software engineering and AI studio building custom software, web and mobile applications, and production AI systems for ambitious businesses worldwide.",
+    "Jomiez Innovation is a software company. We grow our own AI products, like Chaka AI, and build custom software, web and mobile apps and AI systems for businesses worldwide.",
   email: "hello@jomiez.com",
   phone: "+1 (425) 263-7569",
   phoneHref: "tel:+14252637569",
@@ -14,8 +14,8 @@ export const site = {
     role: "Founder & Lead Engineer",
   },
   stats: [
-    { value: "7+", label: "Years experience" },
-    { value: "80+", label: "Successful projects" },
+    { value: "7+", label: "Years of craft" },
+    { value: "80+", label: "Projects delivered" },
     { value: "100%", label: "Client satisfaction" },
   ],
   socials: [
@@ -27,9 +27,9 @@ export const site = {
 } as const;
 
 export const navLinks = [
-  { label: "Works", href: "/work" },
+  { label: "Products", href: "/work" },
   { label: "Services", href: "/#capabilities" },
-  { label: "Insights", href: "/insights" },
+  { label: "Journal", href: "/insights" },
   { label: "Pricing", href: "/#pricing" },
   { label: "Company", href: "/about" },
 ] as const;
@@ -40,8 +40,8 @@ export const footerColumns = [
     links: [
       { label: "Home", href: "/" },
       { label: "Services", href: "/services" },
-      { label: "Projects", href: "/work" },
-      { label: "Articles", href: "/insights" },
+      { label: "Products & Work", href: "/work" },
+      { label: "Journal", href: "/insights" },
     ],
   },
   {
@@ -63,4 +63,4 @@ export const footerColumns = [
 ] as const;
 
 export const tickerMessage =
-  "We are expanding our software engineering and AI capabilities globally, delivering fast, reliable web and mobile products to businesses worldwide.";
+  "Now growing: Chaka AI, our multimodal voice assistant, alongside new builds for founders and businesses around the world.";

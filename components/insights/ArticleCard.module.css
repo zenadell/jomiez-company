@@ -101,11 +101,16 @@
   place-items: center;
   border-radius: 50%;
   background: var(--ink);
+  color: var(--white);
+}
+
+.arrowIcon {
+  transform: rotate(-45deg);
   transition: transform 0.35s var(--spring);
 }
 
-.card:hover .arrow {
-  transform: rotate(45deg);
+.card:hover .arrowIcon {
+  transform: rotate(0deg);
 }
 
 @media (max-width: 809px) {

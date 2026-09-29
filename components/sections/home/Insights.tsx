@@ -9,15 +9,15 @@ export function Insights() {
   return (
     <div className={styles.wrap}>
       <div className={styles.marquee}>
-        <BigMarquee text="Insights" />
+        <BigMarquee text="Journal" onPanel />
       </div>
       <div className={styles.introRow}>
         <span />
         <Appear inView transition={springFirm} className={styles.intro}>
           <p className={styles.introText}>
-            Notes on software architecture, AI systems and product design from the team building them.
+            Field notes from the workshop: architecture, AI and the craft of building software that lasts.
           </p>
-          <PixelButton href="/insights">All articles</PixelButton>
+          <PixelButton href="/insights">Read the Journal</PixelButton>
         </Appear>
       </div>
       <div className={styles.grid}>

@@ -8,26 +8,27 @@ import { PixelButton } from "@/components/ui/PixelButton";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import styles from "./Process.module.css";
 
+/* The four seasons of every build: the same cycle we run for our own products and for clients. */
 const STEPS = [
   {
-    title: "Strategic Discovery & Scoping",
-    tag: "Scoping",
-    body: "We analyse your technical stack, product requirements and business goals to find the high-impact opportunities that match your growth objectives, then come back with scope, timeline and cost.",
+    title: "The Seed: Discovery & Scoping",
+    tag: "Seed",
+    body: "We study your idea, your stack and your goals until we find what is worth growing, then return with scope, timeline and cost.",
   },
   {
-    title: "Custom Architecture & Design",
-    tag: "Design",
-    body: "We design the interface and the system behind it together: user journeys, UI, data models and integrations, so the product is intuitive to use and solid under the hood.",
+    title: "The Root: Architecture & Design",
+    tag: "Root",
+    body: "The interface and the system beneath it are designed together: journeys, UI, data models and integrations, so what grows above ground is held firmly below.",
   },
   {
-    title: "Rapid Prototype Development",
-    tag: "Build",
-    body: "We ship working software early and iterate with you in short cycles, turning the design into responsive web, mobile and AI features you can click through.",
+    title: "The Growth: Rapid Development",
+    tag: "Growth",
+    body: "Working software appears early and grows in short cycles beside you, into web, mobile and AI features you can touch.",
   },
   {
-    title: "Production-Grade Deployment",
-    tag: "Launch",
-    body: "We launch on reliable cloud infrastructure, then stay on for SEO, maintenance and continuous improvement once you are live.",
+    title: "The Harvest: Launch & Care",
+    tag: "Harvest",
+    body: "We launch on reliable cloud ground, then keep tending: SEO, maintenance and continuous improvement long after release.",
   },
 ] as const;
 
@@ -38,10 +39,10 @@ export function Process() {
     <div className={styles.wrap}>
       <div className={styles.head}>
         <SectionLabel dark reverse>
-          Our process
+          The four seasons
         </SectionLabel>
         <Appear inView transition={springFirm}>
-          <h2 className={styles.title}>From discovery to production deployment. Our iterative development cycle.</h2>
+          <h2 className={styles.title}>From seed to harvest. The four seasons of every build.</h2>
         </Appear>
       </div>
 
@@ -104,11 +105,11 @@ export function Process() {
 
       <div className={styles.cta}>
         <p className={styles.mono}>
-          We don&apos;t just ship code; we deliver competitive advantages. Every product is designed to be fast,
-          resilient and scalable.
+          We do not rush what is meant to last. Every product is grown to be fast, resilient and ready for the
+          seasons ahead.
         </p>
         <PixelButton href="/contact" variant="secondary">
-          Get in Touch
+          Begin With Us
         </PixelButton>
       </div>
     </div>

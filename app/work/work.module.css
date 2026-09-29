@@ -38,8 +38,17 @@
 }
 
 .gridSection {
-  padding: 40px 0 120px;
+  padding: 40px 0 80px;
   background: var(--white);
+}
+
+.gridSection + .gridSection {
+  padding-top: 0;
+  padding-bottom: 120px;
+}
+
+.groupHead {
+  padding: 0 var(--gutter) 30px;
 }
 
 .grid {

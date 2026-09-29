@@ -6,8 +6,8 @@ import { articles } from "@/content/articles";
 import styles from "./insights.module.css";
 
 export const metadata: Metadata = {
-  title: "Insights",
-  description: "Notes on software architecture, AI systems and product design from the Jomiez team.",
+  title: "Journal",
+  description: "Field notes from the Jomiez workshop on software architecture, AI systems and product design.",
 };
 
 export default function InsightsPage() {
@@ -16,12 +16,11 @@ export default function InsightsPage() {
     <section className={styles.section}>
       <div className={styles.panel}>
         <div className={styles.marquee}>
-          <BigMarquee text="Insights" />
+          <BigMarquee text="Journal" />
         </div>
         <Appear delay={0.4} transition={springSoft}>
           <p className={styles.intro}>
-            A curated collection of notes on software architecture, AI systems and product design for founders
-            building what&apos;s next.
+            Field notes from the workshop: on architecture, AI and the craft of building software that lasts.
           </p>
         </Appear>
         <div className={styles.grid}>

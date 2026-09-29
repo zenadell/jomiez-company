@@ -34,6 +34,9 @@
 }
 
 .stackItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   padding: 0 28px;
   font-size: 22px;
   font-weight: 600;

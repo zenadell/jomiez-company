@@ -5,6 +5,8 @@ import { Appear, springFirm } from "@/components/ui/Motion";
 import { ScrollText } from "@/components/ui/ScrollText";
 import { NewsTicker } from "@/components/ui/NewsTicker";
 import { Dial } from "@/components/ui/Dial";
+import { Icon } from "@/components/ui/Icon";
+import { JomiezMark } from "@/components/ui/JomiezMark";
 import { site } from "@/content/site";
 import styles from "./Intro.module.css";
 
@@ -18,11 +20,12 @@ export function Intro() {
           <div className={styles.head}>
             <ScrollText
               className={styles.statement}
-              text="Automate the manual, accelerate the future. We engineer custom software, apps and AI systems that deliver measurable growth and operational excellence."
+              text="Trends wither; craft endures. In a world overgrown with noise, we grow software with deep roots, made to outlast the season."
             />
             <Appear inView delay={0.1} transition={springFirm}>
               <p className={styles.sub}>
-                Empowering modern teams with clean software, intuitive design, and robust engineering.
+                A software company of engineers and designers, building our own products and the products of those we
+                believe in.
               </p>
             </Appear>
           </div>
@@ -31,15 +34,12 @@ export function Intro() {
             <Appear inView delay={0} transition={springFirm} className={`${styles.card} ${styles.dark}`}>
               <div className={styles.cardTop}>
                 <span className={styles.iconTile} aria-hidden="true">
-                  <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-                    <path d="M4 21 12 13l5 5 9-10" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M19 8h7v7" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <Icon name="trendUpLight" size={30} style={{ color: "#1f1f1f" }} />
                 </span>
                 <p className={styles.bigNumber}>80+</p>
               </div>
               <p className={styles.cardText}>
-                Projects shipped for startups and growing businesses, from first prototype to production.
+                Projects grown from first sketch to production, for founders, businesses and our own product line.
               </p>
             </Appear>
 
@@ -58,32 +58,30 @@ export function Intro() {
               </Appear>
               <Appear inView delay={0.2} transition={springFirm} className={`${styles.card} ${styles.soft} ${styles.inline}`}>
                 <p className={styles.midNumber}>7+</p>
-                <p className={styles.mutedText}>Years building production software.</p>
+                <p className={styles.mutedText}>Years of craft, and still growing.</p>
               </Appear>
             </div>
 
             <Appear inView delay={0.3} transition={springFirm} className={`${styles.card} ${styles.soft} ${styles.dialCard}`}>
               <Dial />
               <div className={styles.dialText}>
-                <h3 className={styles.cardHeading}>Execution speed</h3>
-                <p className={styles.mutedText}>Fast, reliable delivery for production-ready deployments.</p>
+                <h3 className={styles.cardHeading}>Swift by nature</h3>
+                <p className={styles.mutedText}>Steady, reliable delivery from first commit to production.</p>
               </div>
             </Appear>
 
             <Appear inView delay={0.4} transition={springFirm} className={`${styles.card} ${styles.white}`}>
               <div className={styles.quoteTop}>
-                <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-                  <path
-                    d="M8 28V19.5C8 14.3 10.6 11 15.6 10l1 2.4c-2.8.9-4.2 2.8-4.3 5.6H17V28H8Zm15 0V19.5c0-5.2 2.6-8.5 7.6-9.5l1 2.4c-2.8.9-4.2 2.8-4.3 5.6H32V28h-9Z"
-                    fill="#1a1a1a"
-                  />
-                </svg>
-                <span className={styles.quoteBrand}>Jomiez</span>
+                <Icon name="quotesFill" size={40} style={{ color: "#1f1f1f" }} />
+                <span className={styles.quoteBrand}>
+                  <JomiezMark size={16} />
+                  Jomiez
+                </span>
               </div>
               <div className={styles.quoteBody}>
                 <p className={styles.quote}>
-                  We take projects from concept through design, development, launch and ongoing support, so you always
-                  have one team accountable for the result.
+                  We don&apos;t chase what&apos;s fashionable. We plant ideas, tend them with patience, and build
+                  software meant to stand for years.
                 </p>
                 <p className={styles.quoteBy}>
                   {site.founder.alias}, {site.founder.role}

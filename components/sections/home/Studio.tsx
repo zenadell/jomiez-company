@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { JomiezMark } from "@/components/ui/JomiezMark";
 import { Appear, springFirm } from "@/components/ui/Motion";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { ScrollText } from "@/components/ui/ScrollText";
@@ -13,28 +14,28 @@ const DISCIPLINES = [
     name: "Engineering",
     role: "Web & mobile products",
     image: "/media/work/zyro.jpg",
-    body: "Responsive websites, web applications, APIs and mobile apps built to be fast, scalable and secure.",
+    body: "Websites, web apps, APIs and mobile apps, built to be fast, sturdy and secure.",
     href: "/work/zyro",
   },
   {
     name: "AI Systems",
     role: "Multimodal & voice AI",
     image: "/media/work/chaka-ai.jpg",
-    body: "Production AI with real-time voice, vision, memory and research tools, like our Chaka AI platform.",
+    body: "Real-time voice, vision, memory and research, grown in-house in our own Chaka AI.",
     href: "/work/chaka-ai",
   },
   {
     name: "Automation",
     role: "Agents & integrations",
     image: "/media/work/chaka-wap.jpg",
-    body: "AI agents and integrations that work inside the tools your customers already use, WhatsApp included.",
+    body: "AI agents that live inside the tools people already use, WhatsApp included.",
     href: "/work/chaka-wap",
   },
   {
     name: "Design",
     role: "UI/UX, brand & motion",
     image: "/media/work/renok.jpg",
-    body: "Intuitive interfaces, memorable identities and motion that turns static screens into experiences.",
+    body: "Interfaces, identities and motion that turn still screens into living experiences.",
     href: "/work/renok",
   },
 ] as const;
@@ -46,13 +47,13 @@ export function Studio() {
         as="h2"
         className={styles.statement}
         from={0.15}
-        text="We are a studio of software engineers, designers and strategists dedicated to crafting exceptional digital products."
+        text="We are a company of engineers, designers and makers, building our own products and the products of those we believe in."
       />
       <div className={styles.introRow}>
         <span />
         <Appear inView transition={springFirm} className={styles.intro}>
           <p className={styles.introText}>
-            Bridging the gap between design vision and reliable production software with precision engineering.
+            One house, many crafts. Every discipline grows from the same roots and answers to the same tenets.
           </p>
           <PixelButton href="/about" variant="secondary">
             Our Story
@@ -65,7 +66,7 @@ export function Studio() {
           <Appear key={d.name} inView delay={i * 0.08} transition={springFirm} className={styles.card}>
             <div className={styles.media}>
               <Image src={d.image} alt="" fill sizes="(max-width: 809px) 100vw, 330px" className={styles.img} />
-              <span className={styles.mark} aria-hidden="true" />
+              <JomiezMark size={20} className={styles.mark} />
             </div>
             <div className={styles.caption}>
               <span className={styles.bar} />
@@ -81,7 +82,7 @@ export function Studio() {
                 <div>
                   <p className={styles.revealName}>{d.name}</p>
                   <Link href={d.href} className={styles.revealLink}>
-                    See the case study →
+                    Explore →
                   </Link>
                 </div>
               </div>

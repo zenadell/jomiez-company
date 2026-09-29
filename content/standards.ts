@@ -1,38 +1,38 @@
-/* How Jomiez works. Every statement is drawn from the jomiez.com FAQ or case studies. */
+/* The seven Jomiez tenets. Every claim is drawn from the jomiez.com FAQ or case studies. */
 export const standards = [
   {
-    title: "End-to-end delivery",
+    title: "One hand, first to last",
     tag: "Ownership",
-    body: "Concept, design, development, launch and ongoing support, handled by one accountable team.",
+    body: "From first sketch to launch and the seasons after, one accountable team tends your product.",
   },
   {
-    title: "Modern stack",
+    title: "Tools chosen to last",
     tag: "Engineering",
-    body: "We engineer with React, Next.js, Node.js and Python, and build AI products on Gemini, OpenAI and Claude.",
+    body: "React, Next.js, Node.js and Python for the craft; Gemini, OpenAI and Claude for the intelligence.",
   },
   {
-    title: "Production AI",
+    title: "Intelligence that lives",
     tag: "AI systems",
-    body: "From multimodal voice assistants to WhatsApp agents, our AI runs in production, not just in demos.",
+    body: "Our AI lives in the real world, not in demos: voice assistants, WhatsApp agents and memory that learns.",
   },
   {
-    title: "Responsive by default",
+    title: "Shaped for every screen",
     tag: "Design",
-    body: "Every interface is designed for desktop, tablet and mobile from day one, never squeezed in afterwards.",
+    body: "Each interface is shaped for desktop, tablet and phone from the first day, never squeezed in after.",
   },
   {
-    title: "Performance first",
+    title: "Swift and light",
     tag: "Speed",
-    body: "Local-first data, background workers and careful caching keep products fast and interfaces smooth.",
+    body: "Local-first data, background workers and careful caching keep every product quick and calm.",
   },
   {
-    title: "Clear scope",
+    title: "Clarity before craft",
     tag: "Process",
-    body: "Tell us what you are building and we come back with scope, timeline and cost before any work starts.",
+    body: "Tell us what you are building and receive scope, timeline and cost before a single line is written.",
   },
   {
-    title: "Life after launch",
+    title: "Tended after launch",
     tag: "Support",
-    body: "Once you are live we stay on for SEO, maintenance and iteration, so the product keeps improving.",
+    body: "Launch is a beginning. We stay for SEO, maintenance and growth, so your product keeps flourishing.",
   },
 ] as const;

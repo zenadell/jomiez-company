@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { footerColumns, site } from "@/content/site";
+import { JomiezMark } from "@/components/ui/JomiezMark";
 import { Wordmark } from "@/components/ui/Logo";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { SocialIcon } from "@/components/ui/SocialIcon";
@@ -28,10 +29,11 @@ export function Footer() {
         <motion.div className={styles.inner} style={{ y: contentY }}>
           <div className={styles.brand}>
             <Link href="/" className={styles.logo} aria-label="Jomiez home">
-              <Wordmark className={styles.logoMark} />
+              <JomiezMark size={30} />
+              <Wordmark className={styles.logoWord} />
             </Link>
             <p className={styles.blurb}>
-              Get in touch with {site.legalName} to bring your digital vision to life with precision and speed.
+              Software with deep roots. Talk to {site.legalName} about the product you want to grow.
             </p>
             <div className={styles.contactPill}>
               <a href={`mailto:${site.email}`} className={styles.contactEmail}>
@@ -47,7 +49,7 @@ export function Footer() {
                 {site.socials.map((s) => (
                   <li key={s.label}>
                     <a href={s.href} target="_blank" rel="noopener" aria-label={s.label} className={styles.social}>
-                      <SocialIcon name={s.icon} />
+                      <SocialIcon name={s.icon} size={20} />
                     </a>
                   </li>
                 ))}

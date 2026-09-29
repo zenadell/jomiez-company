@@ -185,6 +185,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 9px;
   height: 57px;
   min-width: 150px;
   padding: 0 24px;

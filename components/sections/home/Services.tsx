@@ -18,14 +18,14 @@ export function Services() {
         <Appear inView transition={springFirm} className={styles.intro}>
           <SectionLabel dark>Services</SectionLabel>
           <p className={styles.introText}>
-            We bridge the gap between complex technical ideas and intuitive digital products through bespoke
-            engineering.
+            Beyond our own products, we lend our craft to others, shaping raw ideas into software that feels as
+            natural as it looks.
           </p>
         </Appear>
         <Appear inView delay={0.1} transition={springFirm} className={styles.bottom}>
-          <h2 className={styles.title}>Custom Software for Modern Businesses.</h2>
+          <h2 className={styles.title}>Custom Software, Grown From Deep Roots.</h2>
           <PixelButton href="/contact" variant="secondary">
-            Get Started
+            Start a Project
           </PixelButton>
         </Appear>
       </div>

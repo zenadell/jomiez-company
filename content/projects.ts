@@ -1,8 +1,10 @@
-/* Jomiez case studies. All copy is taken from jomiez.com; facts shown as stats come from the case studies themselves. */
+/* Jomiez products and client builds. All copy is taken from jomiez.com; facts shown as stats come from the case studies themselves. */
 export type Project = {
   slug: string;
   name: string;
   category: string;
+  /** Made and owned by Jomiez, rather than built for a client. */
+  product?: boolean;
   summary: string;
   image?: string;
   link?: { label: string; href: string };
@@ -18,6 +20,7 @@ export const projects: Project[] = [
     slug: "chaka-ai",
     name: "Chaka AI",
     category: "AI Platform",
+    product: true,
     summary:
       "A high-performance humanoid multimodal AI platform with real-time voice interaction, emotional intelligence, advanced research ability and an episodic memory system.",
     image: "/media/work/chaka-ai.jpg",
@@ -68,6 +71,7 @@ export const projects: Project[] = [
     slug: "chaka-wap",
     name: "Chaka WAP",
     category: "AI Automation",
+    product: true,
     summary:
       "A multimodal, local-first AI engine that joins WhatsApp conversations as a human-like participant, with dynamic style learning and a robust failover architecture.",
     image: "/media/work/chaka-wap.jpg",
@@ -256,6 +260,9 @@ export const projects: Project[] = [
 ];
 
 export const featuredProjects = projects.slice(0, 6);
+
+export const ourProducts = projects.filter((p) => p.product);
+export const clientWork = projects.filter((p) => !p.product);
 
 export function getProject(slug: string) {
   return projects.find((p) => p.slug === slug);

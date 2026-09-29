@@ -14,14 +14,25 @@ export function Asterisk({ className }: { className?: string }) {
       transition={{ duration: 12, ease: "linear", repeat: Infinity }}
       aria-hidden="true"
     >
-      {Array.from({ length: 8 }, (_, i) => (
-        <rect key={i} x="67" y="0" width="16" height="62" rx="8" transform={`rotate(${i * 45} 75 75)`} fill="currentColor" />
+      {Array.from({ length: 12 }, (_, i) => (
+        <rect key={i} x="67" y="0" width="16" height="75" transform={`rotate(${i * 30} 75 75)`} fill="currentColor" />
       ))}
     </motion.svg>
   );
 }
 
-export function BigMarquee({ text, dark = false, className }: { text: string; dark?: boolean; className?: string }) {
+export function BigMarquee({
+  text,
+  dark = false,
+  onPanel = false,
+  className,
+}: {
+  text: string;
+  dark?: boolean;
+  /** On the grey #F0F0F0 panels the template draws the asterisk in white. */
+  onPanel?: boolean;
+  className?: string;
+}) {
   const unit = (
     <>
       <h2 className={styles.word}>{text}</h2>
@@ -29,7 +40,7 @@ export function BigMarquee({ text, dark = false, className }: { text: string; da
     </>
   );
   return (
-    <div className={`${styles.wrap} ${dark ? styles.dark : ""} ${className ?? ""}`}>
+    <div className={`${styles.wrap} ${dark ? styles.dark : ""} ${onPanel ? styles.onPanel : ""} ${className ?? ""}`}>
       <Marquee duration={28} gap={60}>
         {unit}
         {unit}

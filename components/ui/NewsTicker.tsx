@@ -1,4 +1,5 @@
 import { tickerMessage } from "@/content/site";
+import { JomiezMark } from "./JomiezMark";
 import { Marquee } from "./Marquee";
 import styles from "./NewsTicker.module.css";
 
@@ -7,7 +8,7 @@ export function NewsTicker({ className, dark = false }: { className?: string; da
   const item = (
     <span className={styles.item}>
       <span className={styles.tag}>
-        <span className={styles.pill} aria-hidden="true" />
+        <JomiezMark size={18} />
         {"//JOMIEZ"}
       </span>
       <span>{tickerMessage}</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import { Icon } from "./Icon";
 
 /*
  * The "Execution speed" gauge: a ring of radial ticks that light up in
@@ -49,9 +50,7 @@ export function Dial() {
           placeItems: "center",
         }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M13 3 5 13.5h6L10 21l8-10.5h-6L13 3Z" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round" />
-        </svg>
+        <Icon name="rocketLight" size={24} style={{ color: "#fff" }} />
       </span>
     </div>
   );

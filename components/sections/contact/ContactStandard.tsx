@@ -20,11 +20,11 @@ export function ContactStandard() {
           <p className={styles.location}>Enugu, Nigeria & working worldwide</p>
         </Appear>
         <div className={styles.right}>
-          <SectionLabel reverse>The Jomiez standard</SectionLabel>
+          <SectionLabel reverse>Speak with us</SectionLabel>
           <ScrollText
             as="h2"
             className={styles.title}
-            text="Building the reliable, intelligent software that ambitious businesses run on."
+            text="Rooted in craft, growing software that businesses and people rely on."
           />
           <p className={styles.body}>
             Prefer to talk it through? Send us a few times that suit you and we will set up a call to walk through your

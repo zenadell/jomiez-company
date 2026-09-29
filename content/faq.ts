@@ -1,12 +1,12 @@
-/* Answers taken from the FAQ on jomiez.com. */
+/* Answers based on the FAQ on jomiez.com. */
 export const faqs = [
   {
-    q: "What services do you offer?",
-    a: "We build custom software, websites, web and mobile applications, and AI integrations, plus the design work around them: UI/UX, branding and motion. We also handle SEO and ongoing maintenance.",
+    q: "What does Jomiez make?",
+    a: "Two kinds of things. Our own products, like Chaka AI, a multimodal voice assistant, and Chaka WAP, an AI engine that lives inside WhatsApp. And custom software for businesses: websites, web and mobile apps, APIs and AI systems, with the design around them.",
   },
   {
     q: "Are you taking on new projects?",
-    a: "Yes. We have capacity for new client work. Tell us what you are building and we will come back to you with scope, timeline and cost.",
+    a: "Yes. The workshop is open to new builds. Tell us what you are growing and we will come back with scope, timeline and cost.",
   },
   {
     q: "What tools and technologies do you use?",
@@ -18,32 +18,32 @@ export const faqs = [
   },
   {
     q: "Do you handle a project end to end?",
-    a: "Yes. We take projects from concept through design, development, launch and ongoing support, including SEO and maintenance once you are live.",
+    a: "Yes. From first sketch through design, development and launch, and in the seasons after: SEO, maintenance and continuous improvement.",
   },
 ] as const;
 
 export const pricingTiers = [
   {
     name: "MVP",
-    blurb: "Validate your idea with a production-ready first version.",
+    blurb: "Plant a production-ready first version and put your idea to the test.",
     features: ["Discovery & scoping", "UI/UX design", "Web or mobile build", "Launch support"],
     dark: false,
   },
   {
     name: "Growth",
-    blurb: "Custom web and mobile applications.",
+    blurb: "Custom web and mobile applications, grown to scale.",
     features: ["Multi-page web apps", "Scalable cloud database", "Admin dashboards", "SEO setup"],
     dark: false,
   },
   {
     name: "AI Systems",
-    blurb: "Custom AI products and automation.",
+    blurb: "Custom AI products and automation, from the craft behind Chaka AI.",
     features: ["LLM & multimodal integration", "RAG & memory pipelines", "WhatsApp & chat agents", "Model failover"],
     dark: true,
   },
   {
     name: "Partnership",
-    blurb: "Ongoing engineering after launch.",
+    blurb: "An engineering partner for the long seasons after launch.",
     features: ["Maintenance & updates", "SEO & performance", "New features", "Priority support"],
     dark: false,
   },

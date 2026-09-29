@@ -5,14 +5,16 @@ import { PixelButton } from "@/components/ui/PixelButton";
 import { ScrollText } from "@/components/ui/ScrollText";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { site } from "@/content/site";
+import { aiLogos } from "./aiLogos";
+import { LensIcon, OrbitIcon, RegionsIcon, SlidersIcon } from "./FeatureIcons";
 import styles from "./Mission.module.css";
 
 const FEATURES = [
-  { icon: "lens", text: "Intuitive interfaces and high-converting user journeys." },
-  { icon: "orbit", text: "Scalable cloud backends and responsive databases." },
-  { icon: "bars", text: "Modern web performance and sub-second interactions." },
-  { icon: "globe", text: "Global cloud deployment, optimised for performance and scale." },
-] as const;
+  { Icon: LensIcon, text: "Interfaces that feel familiar at first touch, and journeys that flow." },
+  { Icon: OrbitIcon, text: "Backends with deep roots: scalable, secure and calm under load." },
+  { Icon: SlidersIcon, text: "Sub-second interactions, tuned like a well-kept instrument." },
+  { Icon: RegionsIcon, text: "Deployed wherever your people are, ready for every season of scale." },
+];
 
 export function Mission() {
   return (
@@ -33,17 +35,17 @@ export function Mission() {
 
         <div className={styles.statementCol}>
           <SectionLabel dark reverse>
-            Our mission
+            Our philosophy
           </SectionLabel>
           <ScrollText
             className={styles.statement}
             from={0.15}
-            text="We believe that AI should not just automate tasks, but amplify the creative and strategic potential of every human."
+            text="We believe technology should grow like nature: patient in its making, quiet in its strength, and in service of the people who use it."
           />
           <Appear inView transition={springFirm}>
             <p className={styles.body}>
-              By merging engineering rigour with intuitive design, we build digital products that don&apos;t just solve
-              problems. They create new opportunities for growth.
+              We build our own products and our clients&apos; with the same hand. Every line is written to last, every
+              interface shaped to feel familiar, as if it had always been there.
             </p>
           </Appear>
         </div>
@@ -52,104 +54,39 @@ export function Mission() {
       <div className={styles.features}>
         <div className={styles.featuresHead}>
           <p className={styles.mono}>
-            Crafting digital experiences that scale with your ambition. We deliver custom software and AI solutions
-            tailored to your business.
+            We stand on the shoulders of giants, building on the world&apos;s leading AI models and shaping them into
+            tools people trust every day.
           </p>
           <div className={styles.headRight}>
-            <div className={styles.bubbles} aria-hidden="true">
-              {["code", "spark", "cloud", "phone"].map((k) => (
-                <span key={k} className={styles.bubble}>
-                  <BubbleIcon name={k} />
-                </span>
+            <ul className={styles.bubbles} aria-label="Models we build on">
+              {aiLogos.map((m) => (
+                <li key={m.name} className={styles.bubble} title={m.name}>
+                  {"mask" in m ? (
+                    <span className={styles.logoMask} style={{ maskImage: `url(${m.mask})`, WebkitMaskImage: `url(${m.mask})` }} />
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d={m.path} fill="currentColor" />
+                    </svg>
+                  )}
+                  <span className="sr-only">{m.name}</span>
+                </li>
               ))}
-            </div>
-            <PixelButton href="/services" variant="secondary">
-              Explore our services
+            </ul>
+            <PixelButton href="/work/chaka-ai" variant="secondary">
+              Meet Chaka AI
             </PixelButton>
           </div>
         </div>
         <div className={styles.featureRow}>
-          {FEATURES.map((f, i) => (
-            <Appear key={f.icon} inView delay={i * 0.08} transition={springFirm} className={styles.feature}>
-              <FeatureIcon name={f.icon} />
+          {FEATURES.map(({ Icon, text }, i) => (
+            <Appear key={text} inView delay={i * 0.08} transition={springFirm} className={styles.feature}>
+              <Icon />
               <span className={styles.rule} />
-              <p className={styles.featureText}>{f.text}</p>
+              <p className={styles.featureText}>{text}</p>
             </Appear>
           ))}
         </div>
       </div>
     </>
-  );
-}
-
-function BubbleIcon({ name }: { name: string }) {
-  const common = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "#1a1a1a", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-  switch (name) {
-    case "code":
-      return (
-        <svg {...common}>
-          <path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16" />
-        </svg>
-      );
-    case "spark":
-      return (
-        <svg {...common}>
-          <path d="M12 2c.6 5.2 4.8 9.4 10 10-5.2.6-9.4 4.8-10 10-.6-5.2-4.8-9.4-10-10 5.2-.6 9.4-4.8 10-10Z" />
-        </svg>
-      );
-    case "cloud":
-      return (
-        <svg {...common}>
-          <path d="M7 18h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.6 1.5A3.3 3.3 0 0 0 7 18Z" />
-        </svg>
-      );
-    default:
-      return (
-        <svg {...common}>
-          <rect x="6" y="2.5" width="12" height="19" rx="3" />
-          <path d="M11 18.5h2" />
-        </svg>
-      );
-  }
-}
-
-/* Small line icons for the feature row, each with a gentle idle animation. */
-function FeatureIcon({ name }: { name: string }) {
-  return (
-    <span className={styles.featureIcon} aria-hidden="true">
-      {name === "lens" && (
-        <svg width="36" height="55" viewBox="0 0 36 55" fill="none" stroke="#fff" strokeWidth="1.4">
-          <circle className={styles.lensGlass} cx="15" cy="20" r="11" />
-          <path d="m23 28 9 9" strokeLinecap="round" />
-          <path className={styles.lensSpark} d="M29 6v6M26 9h6" strokeLinecap="round" />
-        </svg>
-      )}
-      {name === "orbit" && (
-        <svg width="44" height="55" viewBox="0 0 44 55" fill="none" stroke="#fff" strokeWidth="1.4">
-          <circle cx="22" cy="28" r="17" strokeOpacity=".5" />
-          <circle cx="22" cy="28" r="3.5" fill="#fff" />
-          <g className={styles.orbitSpin}>
-            <circle cx="22" cy="11" r="3" fill="#fff" stroke="none" />
-          </g>
-        </svg>
-      )}
-      {name === "bars" && (
-        <svg width="36" height="55" viewBox="0 0 36 55" fill="#fff">
-          {[4, 12, 20, 28].map((x, i) => (
-            <g key={x}>
-              <rect x={x + 3} y="10" width="1" height="44" opacity=".5" />
-              <rect className={styles.slider} style={{ animationDelay: `${i * 0.4}s` }} x={x} y="30" width="7" height="3" />
-            </g>
-          ))}
-        </svg>
-      )}
-      {name === "globe" && (
-        <svg width="44" height="55" viewBox="0 0 44 55" fill="none" stroke="#fff" strokeWidth="1.4">
-          <circle cx="22" cy="28" r="17" />
-          <ellipse className={styles.globeSpin} cx="22" cy="28" rx="7" ry="17" />
-          <path d="M5 28h34M8 19h28M8 37h28" strokeOpacity=".6" />
-        </svg>
-      )}
-    </span>
   );
 }

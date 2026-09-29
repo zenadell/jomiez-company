@@ -1,16 +1,16 @@
-/* Service lines. Headline services drive the homepage accordion; the full list feeds /services. */
+/* What Jomiez builds for others. Headline services drive the homepage accordion; the full list feeds /services. */
 export const headlineServices = [
   {
     title: "Custom Software & AI Development",
-    body: "Architecting robust cloud environments, web platforms and AI integrations designed for speed and security.",
+    body: "Cloud platforms and AI systems laid like old stone: precise, secure and made to carry weight for years.",
   },
   {
     title: "Web & Mobile Applications",
-    body: "Fast, scalable and secure products tailored to your business: responsive websites, web apps, APIs and mobile apps, delivered production-ready.",
+    body: "Websites, web apps and mobile apps that feel as natural as the world around them: fast, responsive and ready for real use.",
   },
   {
     title: "Custom APIs & Integrations",
-    body: "Connecting your tools, data and AI models through reliable APIs, automations and third-party integrations that just keep working.",
+    body: "Roots that reach everything: APIs, automations and integrations that let your tools, data and AI models grow together.",
   },
 ] as const;
 
@@ -18,31 +18,31 @@ export const services = [
   {
     slug: "development",
     title: "Development",
-    body: "We build fast, scalable and secure digital products tailored to your business: responsive websites, web applications, APIs and mobile apps, delivered production-ready.",
+    body: "Websites, web applications, APIs and mobile apps, built to be fast, secure and sturdy, and delivered ready for the real world.",
   },
   {
     slug: "ai",
     title: "AI Development & Automation",
-    body: "Tailored AI development and automation to streamline your workflows and increase productivity, from multimodal assistants to WhatsApp agents and RAG pipelines.",
+    body: "The craft behind Chaka AI, turned to your workflows: multimodal assistants, WhatsApp agents, RAG pipelines and automation that quietly does the work.",
   },
   {
     slug: "ui-ux",
     title: "UI/UX Design",
-    body: "Intuitive, engaging and user-centred digital experiences that drive interaction and satisfaction.",
+    body: "Interfaces that feel familiar at first touch: clear, calm and shaped around the people who use them.",
   },
   {
     slug: "branding",
     title: "Branding",
-    body: "A strong, memorable visual identity that captures your brand's essence with clarity and simplicity.",
+    body: "Identities with the weight of a seal: simple, memorable marks that carry your essence for years.",
   },
   {
     slug: "motion",
     title: "Motion Design",
-    body: "Motion that turns static visuals into engaging, dynamic experiences that captivate audiences and elevate your brand.",
+    body: "Motion that breathes life into still screens, the way wind moves through a field.",
   },
   {
     slug: "marketing",
     title: "Marketing Design",
-    body: "The strategic fusion of visual communication and brand messaging to promote your products, services and ideas.",
+    body: "Visual stories that carry your products, services and ideas to the people who need them.",
   },
 ] as const;

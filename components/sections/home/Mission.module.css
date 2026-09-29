@@ -111,12 +111,12 @@
 }
 
 .featuresHead {
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
 }
 
 .mono {
-  width: 50%;
   max-width: 450px;
   padding-right: 70px;
   font-family: var(--font-geist-mono);
@@ -127,7 +127,6 @@
 }
 
 .headRight {
-  width: 50%;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -140,6 +139,7 @@
 }
 
 .bubble {
+  position: relative;
   width: 44px;
   height: 44px;
   margin-left: -14px;
@@ -147,8 +147,21 @@
   place-items: center;
   border-radius: 100%;
   background: var(--white);
+  color: var(--ink);
   box-shadow: -7px 0 5px 1px rgba(0, 0, 0, 0.12);
   transition: transform 0.4s var(--spring);
+}
+
+.logoMask {
+  width: 20px;
+  height: 20px;
+  background: currentColor;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
 }
 
 .bubbles:hover .bubble {
@@ -171,11 +184,6 @@
   padding-left: 0;
 }
 
-.featureIcon {
-  display: block;
-  height: 55px;
-}
-
 .rule {
   display: block;
   height: 1px;
@@ -188,75 +196,6 @@
   line-height: 22.5px;
   font-weight: 300;
   letter-spacing: 0.3px;
-}
-
-.lensGlass {
-  animation: lens 4s ease-in-out infinite;
-  transform-origin: 15px 20px;
-}
-
-.lensSpark {
-  animation: blink 2.4s ease-in-out infinite;
-}
-
-.orbitSpin {
-  transform-origin: 22px 28px;
-  animation: spin 5s linear infinite;
-}
-
-.slider {
-  animation: slide 3.2s ease-in-out infinite;
-}
-
-.globeSpin {
-  transform-origin: 22px 28px;
-  animation: globe 4s ease-in-out infinite;
-}
-
-@keyframes lens {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(3px, -2px);
-  }
-}
-
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes slide {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-16px);
-  }
-}
-
-@keyframes globe {
-  0%,
-  100% {
-    transform: scaleX(1);
-  }
-  50% {
-    transform: scaleX(0.2);
-  }
 }
 
 @media (max-width: 1199px) {
@@ -277,7 +216,7 @@
   }
 
   .featuresHead {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 30px;
   }
 

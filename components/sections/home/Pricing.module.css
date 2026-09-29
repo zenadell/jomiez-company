@@ -12,20 +12,48 @@
   padding: 40px var(--gutter) 60px;
 }
 
-.note {
+.billing {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
   font-size: 14px;
   line-height: 21px;
   letter-spacing: 0.28px;
 }
 
-.noteDot {
-  width: 29px;
-  height: 22px;
+.flex {
+  margin-left: -6px;
+  font-size: 12px;
+  color: var(--ink-40);
+}
+
+/* Billing switch: pale track, dark knob with a check (knob sits right for "Milestone"). */
+.switch {
+  display: flex;
+  justify-content: flex-start;
+  width: 50px;
+  height: 25px;
+  padding: 0;
+  border: 1px solid var(--ink-10);
   border-radius: 100px;
+  background: var(--panel);
+  cursor: pointer;
+  overflow: visible;
+}
+
+.switch[data-on="true"] {
+  justify-content: flex-end;
+}
+
+.knob {
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  margin: -3px;
+  border-radius: 50%;
   background: var(--ink);
+  color: var(--white);
 }
 
 .intro {
@@ -114,7 +142,7 @@
   letter-spacing: -2.16px;
 }
 
-.billing {
+.billingNote {
   font-size: 14px;
   line-height: 21px;
   font-weight: 300;
@@ -148,24 +176,10 @@
 }
 
 .features li {
-  position: relative;
-  padding-left: 16px;
   font-size: 14px;
   line-height: 21px;
   font-weight: 300;
   letter-spacing: 0.28px;
-}
-
-.features li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 9px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.5;
 }
 
 .ticker {

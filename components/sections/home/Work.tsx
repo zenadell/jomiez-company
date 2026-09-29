@@ -8,7 +8,7 @@ export function Work() {
   return (
     <div className={styles.panel} id="work">
       <div className={styles.marquee}>
-        <BigMarquee text="Our Work" />
+        <BigMarquee text="Creations" />
       </div>
       <div className={styles.grid}>
         {featuredProjects.map((p, i) => (

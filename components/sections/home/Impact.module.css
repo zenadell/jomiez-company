@@ -98,10 +98,26 @@
   justify-content: space-between;
 }
 
-.tag {
-  padding: 4px 12px;
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px 4px 4px;
   border-radius: 100px;
   background: var(--white);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--white);
+}
+
+.tag {
   font-family: var(--font-geist-mono);
   font-size: 10px;
   line-height: 16px;
@@ -116,7 +132,7 @@
 }
 
 .quote {
-  margin-top: 44px;
+  margin-top: 40px;
   color: rgba(26, 26, 26, 0.2);
 }
 
@@ -126,7 +142,7 @@
   line-height: 25.2px;
   font-weight: 400;
   letter-spacing: 0;
-  color: rgba(26, 26, 26, 0.85);
+  color: var(--ink);
 }
 
 .cardFoot {

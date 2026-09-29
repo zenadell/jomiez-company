@@ -49,10 +49,10 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.04em;
-  color: rgba(26, 26, 26, 0.3);
+  color: rgba(26, 26, 26, 0.88);
   white-space: nowrap;
   transition: opacity 0.4s ease;
 }

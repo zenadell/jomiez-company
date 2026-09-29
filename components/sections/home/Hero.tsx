@@ -3,9 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Appear, springFirm, springSlow, springStiff } from "@/components/ui/Motion";
+import { Icon } from "@/components/ui/Icon";
 import { Marquee } from "@/components/ui/Marquee";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { ProgressiveBlur } from "@/components/ui/ProgressiveBlur";
+import { TechMark } from "@/components/ui/TechMark";
 import { stack } from "@/content/home";
 import styles from "./Hero.module.css";
 
@@ -30,19 +32,19 @@ export function Hero() {
           <div className={styles.copy}>
             <Appear delay={0.5}>
               <h1 className={styles.title}>
-                <span className={styles.muted}>Scale your vision.</span>
+                <span className={styles.muted}>Where intelligence</span>
                 <br />
-                Build with Jomiez.
+                takes root.
               </h1>
             </Appear>
             <Appear delay={0.6}>
               <p className={styles.lead}>
-                Custom software, web and mobile apps, and production AI systems, engineered end to end in one
-                seamless flow.
+                A software company growing its own AI products and custom software for businesses, rooted deep and
+                built to endure.
               </p>
             </Appear>
             <Appear delay={0.7} transition={springFirm}>
-              <PixelButton href="/contact">Get Started</PixelButton>
+              <PixelButton href="/contact">Start a Project</PixelButton>
             </Appear>
           </div>
 
@@ -61,12 +63,10 @@ export function Hero() {
               <div className={styles.cardMeta}>
                 <div>
                   <p className={styles.cardTitle}>Chaka AI</p>
-                  <p className={styles.cardSub}>{"// Multimodal voice AI"}</p>
+                  <p className={styles.cardSub}>{"// Our flagship product"}</p>
                 </div>
                 <span className={styles.cardArrow} aria-hidden="true">
-                  <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-                    <path d="M8 18 18 8M10 8h8v8" stroke="currentColor" strokeWidth="1.4" />
-                  </svg>
+                  <Icon name="arrowRightLight" size={26} />
                 </span>
               </div>
             </Link>
@@ -76,13 +76,14 @@ export function Hero() {
         <div className={styles.bottom}>
           <Appear delay={1.1} transition={springFirm}>
             <p className={styles.note}>
-              Delivering reliable, modern software for fast-growing companies and forward-thinking founders.
+              The tools of our craft, chosen as masons choose stone: for strength, and for time.
             </p>
           </Appear>
           <Appear delay={1.2} x={150} transition={springStiff} className={styles.tickerWrap}>
             <Marquee duration={40} gap={10} fade>
               {stack.map((s) => (
                 <span key={s} className={styles.stackItem}>
+                  <TechMark name={s} />
                   {s}
                 </span>
               ))}

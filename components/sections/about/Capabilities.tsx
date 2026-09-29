@@ -3,6 +3,7 @@ import { Marquee } from "@/components/ui/Marquee";
 import { ScrollText } from "@/components/ui/ScrollText";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { stack } from "@/content/home";
+import { TechMark } from "@/components/ui/TechMark";
 import styles from "./Capabilities.module.css";
 
 const CARDS = [
@@ -33,22 +34,23 @@ export function Capabilities() {
     <section className={styles.section}>
       <div className={styles.inner}>
         <SectionLabel dark reverse>
-          Services
+          Our crafts
         </SectionLabel>
         <ScrollText
           as="h2"
           className={styles.statement}
           from={0.15}
-          text="We help ambitious companies ship reliable software and practical AI."
+          text="What we learn growing our own products, we bring to yours."
         />
         <p className={styles.lead}>
-          We build custom software, web and mobile applications and AI integrations, delivering fast, scalable and
-          secure digital products from concept to launch.
+          Custom software, web and mobile applications and AI integrations: fast, sturdy and secure, from first idea
+          to launch and beyond.
         </p>
       </div>
       <Marquee duration={40} gap={10} fade>
         {stack.map((s) => (
           <span key={s} className={styles.stackItem}>
+            <TechMark name={s} size={20} />
             {s}
           </span>
         ))}

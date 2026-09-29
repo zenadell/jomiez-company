@@ -10,7 +10,7 @@ import styles from "./services.module.css";
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Custom software, web and mobile applications, AI development and automation, UI/UX, branding and motion design from Jomiez Innovation.",
+    "The craft behind Jomiez products, turned to yours: custom software, web and mobile applications, AI development and automation, UI/UX, branding and motion design.",
 };
 
 export default function ServicesPage() {
@@ -18,8 +18,8 @@ export default function ServicesPage() {
     <>
       <PageHero
         eyebrow="Services"
-        title="From first idea to production software, with design and AI built in."
-        lead="We build custom software, websites, web and mobile applications and AI integrations, plus the design work around them. We also handle SEO and ongoing maintenance once you are live."
+        title="The craft behind our products, turned to yours."
+        lead="Custom software, websites, web and mobile applications and AI integrations, with the design around them. And once you are live, we stay to tend it: SEO, maintenance and growth."
         cta={{ label: "Start a project", href: "/contact" }}
       />
       <section className={styles.dark}>
@@ -29,7 +29,7 @@ export default function ServicesPage() {
         </div>
       </section>
       <section className={styles.list}>
-        <h2 className={styles.listTitle}>Everything we do</h2>
+        <h2 className={styles.listTitle}>Every craft we practise</h2>
         <div className={styles.grid}>
           {services.map((s, i) => (
             <Appear key={s.slug} inView delay={(i % 3) * 0.08} transition={springFirm} className={styles.card}>

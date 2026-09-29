@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { Icon } from "@/components/ui/Icon";
 import { Appear, springFirm } from "@/components/ui/Motion";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -15,11 +16,11 @@ export function Faq() {
     <div className={styles.row}>
       <div className={styles.left}>
         <div className={styles.head}>
-          <SectionLabel>Common queries</SectionLabel>
-          <p className={styles.sub}>Find answers about how we scope, build and ship your project, and what to expect working with us.</p>
+          <SectionLabel>The inquiry</SectionLabel>
+          <p className={styles.sub}>Answers on how we scope, build and care for your product, and on the products we make ourselves.</p>
         </div>
         <Appear inView transition={springFirm} className={styles.bottom}>
-          <h2 className={styles.title}>Everything you need to know about working with Jomiez.</h2>
+          <h2 className={styles.title}>Everything you should know before we begin.</h2>
           <PixelButton href="/contact">Contact Us</PixelButton>
         </Appear>
       </div>
@@ -41,10 +42,8 @@ export function Faq() {
                 onClick={() => setOpen(isOpen ? -1 : i)}
               >
                 <span>{f.q}</span>
-                <motion.span className={styles.icon} animate={{ rotate: isOpen ? 45 : 0 }} aria-hidden="true">
-                  <svg width="14" height="14" viewBox="0 0 14 14">
-                    <path d="M7 1v12M1 7h12" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
+                <motion.span className={styles.icon} animate={{ rotate: isOpen ? 0 : 45 }} aria-hidden="true">
+                  <Icon name="xBold" size={16} />
                 </motion.span>
               </button>
               <AnimatePresence initial={false}>

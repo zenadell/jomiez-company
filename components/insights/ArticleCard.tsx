@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Icon } from "@/components/ui/Icon";
 import { formatDate, type Article } from "@/content/articles";
 import styles from "./ArticleCard.module.css";
 
@@ -24,9 +25,7 @@ export function ArticleCard({ article, flip = false }: { article: Article; flip?
             </p>
           </div>
           <span className={styles.arrow} aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M3 11 11 3M5 3h6v6" stroke="#fff" strokeWidth="1.5" />
-            </svg>
+            <Icon name="arrowRight" size={18} className={styles.arrowIcon} />
           </span>
         </div>
       </div>

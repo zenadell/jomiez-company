@@ -40,10 +40,13 @@
 
 .logo {
   display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
   color: var(--white);
 }
 
-.logoMark {
+.logoWord {
   font-size: 40px;
 }
 
@@ -94,7 +97,7 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--white-10);
   color: var(--white);
   transition: background 0.25s ease;
@@ -163,7 +166,8 @@
   position: absolute;
   left: -1%;
   right: -1%;
-  bottom: -2.5vw;
+  /* Letters rise to about the same line as the template's wordmark and run off the bottom edge. */
+  bottom: -8.5vw;
   z-index: 1;
   pointer-events: none;
 }
@@ -218,6 +222,16 @@
     z-index: 0;
     min-height: 100svh;
     padding-top: 110px;
+  }
+
+  /* Keeps the link columns legible where they cross the glowing cube. */
+  .footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.45) 45%, rgba(0, 0, 0, 0.1) 100%);
+    pointer-events: none;
   }
 
   .inner {

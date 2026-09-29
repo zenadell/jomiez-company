@@ -5,7 +5,7 @@ import { FaqPanel } from "@/components/sections/FaqPanel";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Start your project with Jomiez Innovation: custom software, web and mobile apps, and AI integrations.",
+  description: "Plant your idea with Jomiez Innovation: custom software, web and mobile apps, and AI systems from the makers of Chaka AI.",
 };
 
 export default function ContactPage() {

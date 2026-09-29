@@ -19,7 +19,11 @@
   flex: none;
   width: 151px;
   height: 151px;
-  color: rgba(26, 26, 26, 0.1);
+  color: var(--panel);
+}
+
+.onPanel .star {
+  color: var(--white);
 }
 
 .dark .star {

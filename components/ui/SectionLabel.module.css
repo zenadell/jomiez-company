@@ -14,12 +14,8 @@
   flex-direction: row-reverse;
 }
 
-.pill {
+.mark {
   flex: none;
-  width: 36px;
-  height: 20px;
-  border-radius: 100px;
-  border: 3.5px solid currentColor;
 }
 
 .line {

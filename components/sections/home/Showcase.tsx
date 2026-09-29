@@ -3,10 +3,12 @@
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
+import { Icon } from "@/components/ui/Icon";
+import { JomiezMark } from "@/components/ui/JomiezMark";
 import { site } from "@/content/site";
 import styles from "./Showcase.module.css";
 
-/* Full-bleed image band ("Engineering by Design.") with a scroll-driven zoom and a rotating badge. */
+/* Full-bleed image band ("Built to Endure.") with a scroll-driven zoom and the brand mark in the corner. */
 export function Showcase() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
@@ -21,35 +23,18 @@ export function Showcase() {
       <div className={styles.overlay}>
         <div className={styles.top}>
           <p className={styles.lead}>
-            Engineering modern web apps and digital products that redefine what is possible for growing businesses.
+            Every product begins as a seed: an idea, handled with patience, grown into something that stands.
           </p>
           <span className={styles.pill}>
-            <span className={styles.dot} />
-            {site.stats[0].value} years building
+            <Icon name="timer" size={18} />
+            {site.stats[0].value} years of craft
           </span>
         </div>
         <div className={styles.bottom}>
-          <h2 className={styles.title}>Engineering by Design.</h2>
-          <RotatingBadge />
+          <h2 className={styles.title}>Built to Endure.</h2>
+          <JomiezMark size={72} className={styles.mark} />
         </div>
       </div>
     </section>
-  );
-}
-
-function RotatingBadge() {
-  const text = "JOMIEZ INNOVATION • ENGINEERING BY DESIGN • ";
-  return (
-    <div className={styles.badge} aria-hidden="true">
-      <svg viewBox="0 0 120 120" className={styles.badgeRing}>
-        <defs>
-          <path id="badge-circle" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0" />
-        </defs>
-        <text className={styles.badgeText}>
-          <textPath href="#badge-circle">{text}</textPath>
-        </text>
-      </svg>
-      <span className={styles.badgeCore}>J</span>
-    </div>
   );
 }

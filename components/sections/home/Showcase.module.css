@@ -58,8 +58,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 14px 6px 10px;
+  padding: 7px 16px 7px 10px;
   border-radius: 100px;
+  border: 1px solid var(--white-20);
   background: var(--white-06);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -70,21 +71,6 @@
   white-space: nowrap;
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #7cf29c;
-  box-shadow: 0 0 0 4px rgba(124, 242, 156, 0.2);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  50% {
-    box-shadow: 0 0 0 7px rgba(124, 242, 156, 0.05);
-  }
-}
-
 .title {
   max-width: 400px;
   font-size: 54px;
@@ -93,45 +79,8 @@
   letter-spacing: -2.16px;
 }
 
-.badge {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  flex: none;
-  display: grid;
-  place-items: center;
-}
-
-.badgeRing {
-  position: absolute;
-  inset: 0;
-  animation: rotate 14s linear infinite;
-}
-
-.badgeText {
-  font-family: var(--font-geist-mono);
-  font-size: 9.6px;
-  letter-spacing: 2.2px;
-  fill: var(--white);
-}
-
-.badgeCore {
-  width: 54px;
-  height: 54px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--white);
-  color: var(--ink);
-  font-family: var(--font-pixel);
-  font-size: 34px;
-  line-height: 1;
-}
-
-@keyframes rotate {
-  to {
-    transform: rotate(360deg);
-  }
+.mark {
+  color: var(--white);
 }
 
 @media (max-width: 809px) {
@@ -149,8 +98,8 @@
     letter-spacing: -1.6px;
   }
 
-  .badge {
-    width: 96px;
-    height: 96px;
+  .mark {
+    width: 58px;
+    height: 55px;
   }
 }
