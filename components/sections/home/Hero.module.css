@@ -27,6 +27,22 @@
   object-position: center 60%;
 }
 
+/* The liquid-glass dewdrop layer; the drop fades in as it mounts, after the entrance. */
+.dew {
+  position: absolute;
+  inset: 0;
+}
+
+.dew > * {
+  animation: dew-in 1.2s ease both;
+}
+
+@keyframes dew-in {
+  from {
+    opacity: 0;
+  }
+}
+
 .shade {
   position: absolute;
   left: 0;

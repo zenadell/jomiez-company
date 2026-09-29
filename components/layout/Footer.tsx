@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
+import { motion, useInView, useScroll, useTransform } from "motion/react";
+import { useRef, useSyncExternalStore } from "react";
 import { footerColumns, site } from "@/content/site";
+import { GlassOver } from "@/components/ui/GlassOver";
 import { JomiezIcon } from "@/components/ui/JomiezMark";
 import { Wordmark } from "@/components/ui/Logo";
 import { PixelButton } from "@/components/ui/PixelButton";
@@ -14,17 +15,33 @@ import styles from "./Footer.module.css";
 /*
  * Reveal footer: fixed behind the page (z-index 1) and uncovered by a
  * transparent spacer after the content. The giant wordmark rises as it's revealed.
+ * On phones it flows after the content instead (the spacer is hidden).
  */
+const FLOWING = "(max-width: 809px)";
+const watchFlowing = (cb: () => void) => {
+  const mq = window.matchMedia(FLOWING);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+};
+
 export function Footer() {
   const spacer = useRef<HTMLDivElement>(null);
+  const footer = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: spacer, offset: ["start end", "end end"] });
   const wordY = useTransform(scrollYProgress, [0, 1], ["45%", "0%"]);
   const contentY = useTransform(scrollYProgress, [0, 1], [80, 0]);
 
+  // A fixed footer always "intersects" the viewport, so the reveal spacer says when
+  // it is actually uncovered; the glass only runs then.
+  const flowing = useSyncExternalStore(watchFlowing, () => window.matchMedia(FLOWING).matches, () => false);
+  const revealed = useInView(spacer);
+  const onScreen = useInView(footer);
+  const glassActive = flowing ? onScreen : revealed;
+
   return (
     <>
       <div ref={spacer} className={styles.spacer} aria-hidden="true" />
-      <footer className={styles.footer}>
+      <footer ref={footer} className={styles.footer} data-glass-frame="">
         <Image src="/media/footer-cube.webp" alt="" fill sizes="100vw" className={styles.bg} />
         <motion.div className={styles.inner} style={{ y: contentY }}>
           <div className={styles.brand}>
@@ -35,14 +52,23 @@ export function Footer() {
             <p className={styles.blurb}>
               Software with deep roots. Talk to {site.legalName} about the product you want to grow.
             </p>
-            <div className={styles.contactPill}>
-              <a href={`mailto:${site.email}`} className={styles.contactEmail}>
-                {site.email}
-              </a>
-              <PixelButton href="/contact" variant="primarySmall">
-                Start a project
-              </PixelButton>
-            </div>
+            {/* Liquid glass over the moss: the bar refracts the scene behind it. */}
+            <GlassOver
+              src="/media/footer-cube.webp"
+              objectPosition="center 30%"
+              radius={17}
+              active={glassActive}
+              className={styles.contactGlass}
+            >
+              <div className={styles.contactPill}>
+                <a href={`mailto:${site.email}`} className={styles.contactEmail}>
+                  {site.email}
+                </a>
+                <PixelButton href="/contact" variant="primarySmall">
+                  Start a project
+                </PixelButton>
+              </div>
+            </GlassOver>
             <div className={styles.follow}>
               <p className="t-mono-sm">Follow us:</p>
               <ul className={styles.socials}>

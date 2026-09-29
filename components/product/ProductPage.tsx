@@ -13,6 +13,8 @@ import styles from "./ProductPage.module.css";
 
 const AVATARS = ["/media/clients/client-1.jpg", "/media/clients/client-2.jpg", "/media/clients/client-3.jpg", "/media/clients/client-4.jpg"];
 const CARD_ART = ["/media/product/card-1.jpg", "/media/product/card-2.jpg"];
+const CARD_SIZES = "(max-width: 1199px) 100vw, 50vw";
+const CARD_SHADE = "linear-gradient(180deg, rgba(84, 84, 84, 0) 0%, var(--dark) 70.93%)";
 
 /*
  * A Jomiez product page, built on the template's "Digital Brain" layout:
@@ -119,10 +121,16 @@ export function ProductPage({ product }: { product: ProductPageData }) {
 
       <section className={styles.cards}>
         {product.cards.map((c, i) => (
-          <Appear key={c.title} inView delay={i * 0.08} transition={springFirm} className={styles.card}>
-            <Image src={CARD_ART[i % CARD_ART.length]} alt="" fill sizes="(max-width: 1199px) 100vw, 50vw" className={styles.cardBg} />
-            <div className={styles.cardShade} />
-            <div className={styles.cardMock}>{c.mock === "research" ? <ResearchMock title={c.mockTitle} /> : <PromptMock placeholder={c.mockTitle} />}</div>
+          <Appear key={c.title} inView delay={i * 0.08} transition={springFirm} className={styles.card} data-glass-frame="">
+            <Image src={CARD_ART[i % CARD_ART.length]} alt="" fill sizes={CARD_SIZES} className={styles.cardBg} />
+            <div className={styles.cardShade} style={{ background: CARD_SHADE }} />
+            <div className={styles.cardMock}>
+              {c.mock === "research" ? (
+                <ResearchMock title={c.mockTitle} art={{ src: CARD_ART[i % CARD_ART.length], sizes: CARD_SIZES, shade: CARD_SHADE }} />
+              ) : (
+                <PromptMock placeholder={c.mockTitle} art={{ src: CARD_ART[i % CARD_ART.length], sizes: CARD_SIZES, shade: CARD_SHADE }} />
+              )}
+            </div>
             <div className={styles.cardCopy}>
               <h3 className={styles.cardTitle}>{c.title}</h3>
               <p className={styles.cardText}>{c.text}</p>

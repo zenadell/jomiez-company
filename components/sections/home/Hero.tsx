@@ -9,6 +9,7 @@ import { PixelButton } from "@/components/ui/PixelButton";
 import { ProgressiveBlur } from "@/components/ui/ProgressiveBlur";
 import { TechMark } from "@/components/ui/TechMark";
 import { stack } from "@/content/home";
+import { HeroDew } from "./HeroDew";
 import styles from "./Hero.module.css";
 
 export function Hero() {
@@ -24,6 +25,7 @@ export function Hero() {
             sizes="100vw"
             className={styles.bgImg}
           />
+          <HeroDew src="/media/hero-crt.webp" sizes="100vw" imageClassName={styles.bgImg} className={styles.dew} />
           <div className={styles.shade} />
           <ProgressiveBlur className={styles.bgBlur} direction="up" />
         </Appear>

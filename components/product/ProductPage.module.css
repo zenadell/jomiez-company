@@ -280,10 +280,10 @@
   filter: grayscale(1);
 }
 
+/* Its gradient is set inline, shared with the glass window that refracts it. */
 .cardShade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(84, 84, 84, 0) 0%, var(--dark) 70.93%);
 }
 
 .cardMock,

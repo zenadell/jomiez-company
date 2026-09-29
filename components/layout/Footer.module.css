@@ -61,15 +61,34 @@
   letter-spacing: 0.02em;
 }
 
+.contactGlass {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* With the lens on, the glass does the frosting; a lit rim and a float shadow sell the depth. */
+.contactGlass[data-glass] {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+.contactGlass[data-glass] .contactPill {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
 .contactPill {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  width: 100%;
-  max-width: 420px;
   padding: 6px 6px 6px 18px;
   border-radius: 17px;
+}
+
+/* Without the lens (no GPU, or not yet revealed) the bar is plain frosted glass, as before. */
+.contactGlass:not([data-glass]) .contactPill {
   background: var(--white-20);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);

@@ -9,9 +9,13 @@
   font-family: var(--font-display);
 }
 
-.window {
+.glass {
   position: relative;
   z-index: 1;
+}
+
+.window {
+  position: relative;
   height: 260px;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 20px;
@@ -19,6 +23,13 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   overflow: hidden;
+}
+
+/* With the lens on, the glass frosts and bends the art itself. */
+.glass[data-glass] .window {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .sheet {
