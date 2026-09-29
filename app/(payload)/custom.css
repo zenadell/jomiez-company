@@ -111,3 +111,115 @@
 .jomiez-view-site:hover {
   background: var(--theme-elevation-150);
 }
+
+/* Custom page section rows: number, kind, headline. */
+.jz-block-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.jz-block-label__title {
+  overflow: hidden;
+  color: var(--theme-elevation-600);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* "Choose a page" under every link. */
+.jz-picker {
+  position: relative;
+  margin-top: 6px;
+}
+
+.jz-picker__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 999px;
+  background: var(--theme-elevation-50);
+  color: var(--theme-elevation-800);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.jz-picker__button:hover {
+  border-color: var(--theme-elevation-400);
+}
+
+.jz-picker__panel {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 6px);
+  left: 0;
+  width: min(420px, 90vw);
+  max-height: 380px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 12px;
+  background: var(--theme-elevation-0);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.25);
+}
+
+.jz-picker__search {
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 8px;
+  background: var(--theme-elevation-50);
+  color: var(--theme-text);
+  font: inherit;
+}
+
+.jz-picker__heading {
+  margin: 8px 6px 4px;
+  color: var(--theme-elevation-500);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.jz-picker__option {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.jz-picker__option:hover,
+.jz-picker__option[aria-selected="true"] {
+  background: var(--theme-elevation-100);
+}
+
+.jz-picker__option code {
+  color: var(--theme-elevation-500);
+  font-size: 11px;
+}
+
+.jz-picker__option em {
+  grid-column: 1 / -1;
+  color: var(--theme-warning-500, #c58400);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.jz-picker__empty {
+  margin: 8px;
+  color: var(--theme-elevation-500);
+  font-size: 13px;
+}

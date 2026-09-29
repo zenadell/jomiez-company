@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LegalPage } from "@/components/sections/LegalPage";
+import { Live } from "@/components/cms/live/Live";
 import { getGlobal } from "@/lib/cms";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -10,5 +10,5 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PrivacyPolicyPage() {
   const [page, site] = await Promise.all([getGlobal("privacy"), getGlobal("site")]);
-  return <LegalPage data={page} site={site} />;
+  return <Live view="legal" doc={{ field: "page", global: "privacy" }} props={{ page, site }} />;
 }

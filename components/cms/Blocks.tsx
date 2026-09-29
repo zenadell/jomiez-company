@@ -9,8 +9,7 @@ import { Appear, springFirm } from "@/components/ui/Motion";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ProjectCard } from "@/components/work/ProjectCard";
-import { getArticles, getGlobal } from "@/lib/cms";
-import type { Page, Project } from "@/payload-types";
+import type { Article, Home, JournalPage, Page, Project } from "@/payload-types";
 import listStyles from "@/app/(site)/services/services.module.css";
 import workStyles from "@/app/(site)/work/work.module.css";
 import { RichTextBody } from "./RichTextBody";
@@ -18,16 +17,18 @@ import styles from "./Blocks.module.css";
 
 type Block = NonNullable<Page["layout"]>[number];
 
-/* Renders a custom page's sections, in the order they were arranged in the admin. */
-export async function Blocks({ blocks }: { blocks: Block[] }) {
-  const needsHome = blocks.some((b) => ["faq", "tenets", "pricing"].includes(b.blockType));
-  const needsArticles = blocks.some((b) => b.blockType === "journal");
-  const [home, articles, journal] = await Promise.all([
-    needsHome ? getGlobal("home") : null,
-    needsArticles ? getArticles() : [],
-    needsArticles ? getGlobal("journal-page") : null,
-  ]);
+export type BlocksProps = { blocks: Block[]; home: Home | null; articles: Article[]; journal: JournalPage | null };
 
+/* Which shared content a set of sections needs (so the live site only reads what it uses). */
+export function blockNeeds(blocks: Block[]) {
+  return {
+    home: blocks.some((b) => ["faq", "tenets", "pricing"].includes(b.blockType)),
+    articles: blocks.some((b) => b.blockType === "journal"),
+  };
+}
+
+/* Renders a custom page's sections, in the order they were arranged in the admin. */
+export function Blocks({ blocks, home, articles, journal }: BlocksProps) {
   return (
     <>
       {blocks.map((b, i) => {

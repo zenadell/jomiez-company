@@ -2,6 +2,7 @@ import config from "@payload-config";
 import { draftMode } from "next/headers";
 import { getPayload, type Where } from "payload";
 import { cache } from "react";
+import { navPageOf, type NavPage } from "./navPages";
 import type { Article, Config, Page, Project } from "@/payload-types";
 
 /*
@@ -119,6 +120,29 @@ export const getPageSlugs = cache(async (): Promise<string[]> => {
     select: { slug: true },
   });
   return docs.map((d) => d.slug).filter((s): s is string => Boolean(s));
+});
+
+/** Custom pages that link themselves into the top menu or footer. */
+export const getNavPages = cache(async (): Promise<NavPage[]> => {
+  const payload = await payloadClient();
+  const draft = await isPreview();
+  const { docs } = await payload.find({
+    collection: "pages",
+    draft,
+    where: {
+      and: [
+        { or: [{ "placement.menu": { equals: true } }, { "placement.footer": { equals: true } }] },
+        ...(draft ? [] : [{ _status: { equals: "published" } } as Where]),
+      ],
+    },
+    sort: "createdAt",
+    depth: 0,
+    limit: 100,
+    pagination: false,
+    overrideAccess: true,
+    select: { title: true, slug: true, placement: true },
+  });
+  return docs.filter((d) => d.slug).map(navPageOf);
 });
 
 export const getRedirect = cache(async (from: string) => {

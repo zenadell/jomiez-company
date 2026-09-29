@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { publishedOrSignedIn, signedIn } from "../access";
 import { faqItems, image, link, stats, strings } from "../fields";
-import { revalidateAfterDelete, revalidateCollection } from "../hooks";
+import { redirectOldAddress, revalidateAfterDelete, revalidateCollection } from "../hooks";
 import { slugField } from "../slug";
 
 /* The icons a product's system notes can use: the site's own icon set (components/ui/Icon.tsx). */
@@ -245,5 +245,5 @@ export const Projects: CollectionConfig = {
     },
     slugField("name", "/work/"),
   ],
-  hooks: { afterChange: [revalidateCollection], afterDelete: [revalidateAfterDelete] },
+  hooks: { afterChange: [redirectOldAddress("/work/"), revalidateCollection], afterDelete: [revalidateAfterDelete] },
 };

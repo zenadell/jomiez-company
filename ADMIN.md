@@ -20,14 +20,14 @@ On that first run the database file is created (`jomiez.db`, not committed) and 
 | **Inbox** | Messages from the contact form. Mark them *New*, *In progress*, *Replied*, *Archived* or *Spam*, and keep private team notes. The dashboard shows how many are new. |
 | **Pages → Home page** | Every home section, one tab each, top to bottom: hero, introduction, Creations, services, philosophy, tenets, image band, four seasons, company, pricing, questions and journal. Each tab has a **Show this section** switch. |
 | **Pages → About / Services / Products & work / Journal / Contact** | Those pages' words, images and buttons. The Contact page includes the form's labels, budget options and thank-you message. |
-| **Pages → Custom pages** | Brand-new pages at `jomiez.com/<address>`, built by stacking the site's own sections: page opener, text, image band, numbered cards, products & work grid, latest posts, tenets, pricing, questions and a call to action. |
+| **Pages → Custom pages** | Brand-new pages at `jomiez.com/<address>`, built by stacking the site's own sections: page opener, text, image band, numbered cards, products & work grid, latest posts, tenets, pricing, questions and a call to action. Under **Where it appears**, tick *Show in the top menu* and/or *Show in the footer* (and pick the footer column) to link the page from every page of the site. |
 | **Content → Products & work** | Every product and client project. Drag rows to reorder them. Tick **This is one of our own products** to get the full product page (hero, stats, showcase, feature cards, system notes, FAQ). |
 | **Content → Journal** | Posts, written in a rich text editor with headings, quotes, lists, links and images. |
 | **Content → Media library** | Every image. Replace a file and it changes everywhere it's used. Fill in the description (alt text) for accessibility and search. |
-| **Settings → Nav & footer** | The top bar links, the "Hire Us" button, the footer columns, copyright line and the giant glass wordmark. |
+| **Settings → Nav & footer** | The top bar links, the "Hire Us" button, the footer columns, copyright line and the giant glass wordmark. Custom pages can also add themselves to the menu and footer (see Custom pages). |
 | **Settings → Site settings** | Company name, founder (add a portrait here to replace the "T" monogram), stats, client avatars, the tools strip, email, phone, location, social links, the announcement ticker, default search/sharing details, and where contact messages go (plus the automatic reply). |
 | **Settings → Effects** | The liquid glass (cursor lens and its size, glass nav, glass footer letters, hero dewdrop), page transitions and smooth scrolling. |
-| **Settings → Redirects** | Send old links to new pages, for example after renaming a project. |
+| **Settings → Redirects** | Send old links to new pages. Renaming the address of a published page, product or post adds one automatically, so old links keep working. |
 | **Settings → Team** | Who can sign in. **Admins** manage everything, including the team and site settings; **Editors** manage content. Five wrong passwords lock an account for 10 minutes. |
 | **Settings → Page not found (404)** | The words on the broken-link page. |
 | **Legal** | The privacy policy and terms. |
@@ -35,7 +35,9 @@ On that first run the database file is created (`jomiez.db`, not committed) and 
 ## Drafts, preview and publishing
 
 - Pages, products, posts and the nav **autosave as drafts** while you type. The live site doesn't change until you press **Publish changes**.
-- The **eye button** opens a live preview beside the editor, with phone, tablet and laptop sizes. It updates as you type and shows your draft; visitors still see the published version.
+- The **eye button** opens a live preview beside the editor, with phone, tablet and laptop sizes. It changes as you type, letter by letter, before anything is saved: add a section, switch one off, tick "Show in the top menu" and you see the result at once. Visitors still see the published version until you publish.
+- Every **Goes to** box has a **Choose a page** list: every page, section, custom page, product, post and contact link on the site, searchable. You can still type any address.
+- On custom pages, each section in the list is named after its own headline, so a long page reads like a table of contents.
 - **Versions** keeps up to 50 past versions of each document. Open one to compare it with the current version or restore it.
 - Every page has an **SEO** tab for its Google title, description and sharing image.
 
@@ -99,6 +101,9 @@ npm run payload -- migrate:create <name>   # after changing the schema: record a
 | `cms/seed/` | The site's original content and the seed that loads it |
 | `cms/admin/` | Admin customisations: logo, dashboard, list-row labels, "View the site" link |
 | `lib/cms.ts` | How the site reads content (published, or drafts in preview) |
+| `components/views/` | Every page's content as a plain component of its data: rendered on the server for visitors, and in the browser in live preview |
+| `components/cms/live/` | Live preview: follows the edit form as you type (`useLiveDoc`), including the nav, footer, settings and effects |
+| `cms/admin/PagePicker.tsx`, `BlockLabel.tsx`, `FooterColumnField.tsx` | The "Choose a page" list, section names on custom pages, the footer column picker |
 | `app/(site)/` | The public site; `app/(payload)/` is the admin and its API |
 | `app/(site)/contact/actions.ts` | The contact form's server side |
 | `app/(site)/[...slug]/` | Custom pages and redirects |

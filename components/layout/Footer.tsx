@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { useRef, useSyncExternalStore } from "react";
-import { useSiteData } from "@/components/cms/SiteData";
+import { useMenus, useSiteData } from "@/components/cms/SiteData";
 import { fill, src } from "@/lib/media";
 import { JomiezIcon } from "@/components/ui/JomiezMark";
 import { Wordmark } from "@/components/ui/Logo";
@@ -29,6 +29,7 @@ const watchFlowing = (cb: () => void) => {
 export function Footer() {
   const { site, nav, effects } = useSiteData();
   const footer = nav.footer ?? {};
+  const { columns } = useMenus();
   const bg = src(footer.background, "/media/footer-cube.webp");
   const spacer = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLElement>(null);
@@ -84,12 +85,12 @@ export function Footer() {
           </div>
 
           <div className={styles.columns}>
-            {footer.columns?.map((col) => (
-              <div key={col.id ?? col.title} className={styles.col}>
+            {columns.map((col) => (
+              <div key={col.id} className={styles.col}>
                 <p className={styles.colTitle}>{col.title}</p>
                 <ul>
-                  {col.links?.map((l) => (
-                    <li key={l.id ?? l.label}>
+                  {col.links.map((l) => (
+                    <li key={l.id}>
                       <Link href={l.href} className={styles.colLink}>
                         <span className={styles.dash} aria-hidden="true" />
                         {l.label}

@@ -1,4 +1,4 @@
-import { enabled, faqItems, image, link, marquee, paragraph, strings, text, ticker } from "../fields";
+import { PAGE_PICKER, enabled, faqItems, image, link, marquee, paragraph, strings, text, ticker } from "../fields";
 import { pageGlobal } from "./page";
 
 /*
@@ -52,7 +52,7 @@ export const HomePage = pageGlobal({
                   fields: [
                     { name: "title", label: "Title", type: "text", admin: { width: "33%" } },
                     { name: "subtitle", label: "Subtitle", type: "text", admin: { width: "33%" } },
-                    { name: "href", label: "Goes to", type: "text", admin: { width: "34%" } },
+                    { name: "href", label: "Goes to", type: "text", admin: { width: "34%", components: { afterInput: [PAGE_PICKER] } } },
                   ],
                 },
                 image("image", "Screenshot"),
@@ -326,7 +326,13 @@ export const HomePage = pageGlobal({
                   type: "row",
                   fields: [
                     { ...image("image", "Image"), admin: { width: "50%" } },
-                    { name: "href", label: "Goes to", type: "text", required: true, admin: { width: "50%" } },
+                    {
+                      name: "href",
+                      label: "Goes to",
+                      type: "text",
+                      required: true,
+                      admin: { width: "50%", components: { afterInput: [PAGE_PICKER] } },
+                    },
                   ],
                 },
               ],

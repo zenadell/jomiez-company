@@ -1,5 +1,5 @@
 import type { ArrayField } from "payload";
-import { image, link } from "../fields";
+import { PAGE_PICKER, image, link } from "../fields";
 import { pageGlobal } from "./page";
 
 const links = (name: string, label: string): ArrayField => ({
@@ -13,7 +13,13 @@ const links = (name: string, label: string): ArrayField => ({
       type: "row",
       fields: [
         { name: "label", label: "Text", type: "text", required: true, admin: { width: "40%" } },
-        { name: "href", label: "Goes to", type: "text", required: true, admin: { width: "60%" } },
+        {
+          name: "href",
+          label: "Goes to",
+          type: "text",
+          required: true,
+          admin: { width: "60%", components: { afterInput: [PAGE_PICKER] } },
+        },
       ],
     },
   ],
@@ -33,7 +39,13 @@ export const Navigation = pageGlobal({
           name: "header",
           label: "Top bar",
           fields: [
-            links("links", "Links"),
+            {
+              ...links("links", "Links"),
+              admin: {
+                ...links("links", "Links").admin,
+                description: "Custom pages can add themselves here too: open the page and tick \"Show in the top menu\".",
+              },
+            },
             { name: "showHire", label: "Show the button on the right", type: "checkbox", defaultValue: true },
             link("hire", "Button on the right"),
           ],

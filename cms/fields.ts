@@ -5,6 +5,9 @@ import type { ArrayField, CheckboxField, Field, GroupField, TextField, UploadFie
  * section toggle and list looks and behaves the same across the whole admin.
  */
 
+/** The "Choose a page" list under every "Goes to" box (cms/admin/PagePicker.tsx). */
+export const PAGE_PICKER = "/cms/admin/PagePicker#PagePicker";
+
 /** A button or link: its words and where it goes. */
 export function link(name: string, label: string, description?: string): GroupField {
   return {
@@ -24,7 +27,8 @@ export function link(name: string, label: string, description?: string): GroupFi
             required: true,
             admin: {
               width: "50%",
-              description: "A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.",
+              description: "Choose a page, or type any address (/about, /#pricing, https://…).",
+              components: { afterInput: [PAGE_PICKER] },
             },
           },
         ],

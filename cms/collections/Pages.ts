@@ -1,7 +1,7 @@
 import type { Block, CollectionConfig } from "payload";
 import { publishedOrSignedIn, signedIn } from "../access";
 import { faqItems, image, link } from "../fields";
-import { revalidateAfterDelete, revalidateCollection } from "../hooks";
+import { redirectOldAddress, revalidateAfterDelete, revalidateCollection } from "../hooks";
 import { slugField } from "../slug";
 
 /* Addresses the site's own pages already use; a new page can't take them. */
@@ -18,7 +18,9 @@ export const RESERVED_SLUGS = [
   "next",
 ];
 
-const blocks: Block[] = [
+const BLOCK_ADMIN: Block["admin"] = { disableBlockName: true, components: { Label: "/cms/admin/BlockLabel#BlockLabel" } };
+
+const sections: Block[] = [
   {
     slug: "pageHero",
     labels: { singular: "Page opener", plural: "Page openers" },
@@ -126,6 +128,9 @@ const blocks: Block[] = [
   { slug: "pricing", labels: { singular: "Pricing", plural: "Pricing" }, fields: [] },
 ];
 
+// Each section row is named after its own headline (cms/admin/BlockLabel.tsx).
+const blocks = sections.map((b) => ({ ...b, admin: { ...BLOCK_ADMIN, ...b.admin } }));
+
 /*
  * Brand-new pages, built from the site's own sections. Each lives at
  * /<address> and uses the same nav, footer and effects as the rest of the site.
@@ -146,10 +151,42 @@ export const Pages: CollectionConfig = {
     {
       name: "layout",
       label: "Sections",
+      labels: { singular: "Section", plural: "Sections" },
       type: "blocks",
       blocks,
       minRows: 1,
       admin: { initCollapsed: false },
+    },
+    {
+      name: "placement",
+      label: "Where it appears",
+      type: "group",
+      admin: {
+        position: "sidebar",
+        description: "Link to this page from every page of the site.",
+      },
+      fields: [
+        { name: "menu", label: "Show in the top menu", type: "checkbox", defaultValue: false },
+        { name: "footer", label: "Show in the footer", type: "checkbox", defaultValue: false },
+        {
+          name: "column",
+          label: "Footer column",
+          type: "text",
+          admin: {
+            condition: (_, siblings) => Boolean(siblings?.footer),
+            components: { Field: "/cms/admin/FooterColumnField#FooterColumnField" },
+          },
+        },
+        {
+          name: "label",
+          label: "Link text",
+          type: "text",
+          admin: {
+            condition: (_, siblings) => Boolean(siblings?.menu || siblings?.footer),
+            description: "Leave empty to use the page title.",
+          },
+        },
+      ],
     },
     {
       ...slugField("title", "/"),
@@ -159,5 +196,5 @@ export const Pages: CollectionConfig = {
           : true,
     },
   ],
-  hooks: { afterChange: [revalidateCollection], afterDelete: [revalidateAfterDelete] },
+  hooks: { afterChange: [redirectOldAddress("/"), revalidateCollection], afterDelete: [revalidateAfterDelete] },
 };

@@ -24,6 +24,7 @@ Requires Node 20.9 or newer.
 | `app/(payload)/` | The admin (`/admin`) and its API (`/api`) |
 | `payload.config.ts`, `cms/` | The admin's configuration: content schema, access rules, migrations, seed, admin customisations (see ADMIN.md) |
 | `lib/cms.ts` | How pages read content from the admin |
+| `components/views/` | Each page's content as a component of its data (shared by the live site and the admin's live preview) |
 | `components/sections/home/` | Homepage sections (Hero, Intro, Work, Services, Mission, Impact, Showcase, Process, Studio, Pricing, FAQ, Insights) |
 | `components/ui/` | Shared pieces: `JomiezMark` / `JomiezIcon` (the Jomiez "Z" as a vector, and the full-colour app icon), `Icon` (the template's Phosphor icons), `PixelButton` (the pixel-arrow CTA), `PixelArrow`, `Marquee`, `BigMarquee`, `ScrollText`, `ProgressiveBlur`, `TechMark`, `Appear` motion helpers |
 | `components/product/` | The product page (template's "Digital Brain" layout): hero, stats, browser-framed showcase, mockup cards, statement, FAQ |

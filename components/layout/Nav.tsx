@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSiteData } from "@/components/cms/SiteData";
+import { useMenus, useSiteData } from "@/components/cms/SiteData";
 import { LogoLink } from "@/components/ui/Logo";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { GlassText } from "@/components/ui/GlassText";
@@ -56,7 +56,7 @@ const MENU_GLASS: Partial<GlassOptics> = { ...NAV_GLASS, frost: 7 };
 export function Nav() {
   const pathname = usePathname();
   const { nav, effects } = useSiteData();
-  const navLinks = nav.header?.links ?? [];
+  const navLinks = useMenus().header;
   const hire = nav.header?.showHire !== false && nav.header?.hire?.label ? nav.header.hire : null;
   // The menu remembers the path it was opened on, so navigating anywhere closes it.
   const [openOn, setOpenOn] = useState<string | null>(null);

@@ -10,12 +10,11 @@ import "@fontsource/jaini/400.css";
 import "./globals.css";
 import { LivePreview } from "@/components/cms/LivePreview";
 import { SiteDataProvider } from "@/components/cms/SiteData";
+import { LiveSiteData } from "@/components/cms/live/LiveSiteData";
 import { Footer } from "@/components/layout/Footer";
 import { Nav } from "@/components/layout/Nav";
-import { PageTransitions } from "@/components/layout/PageTransitions";
-import { SmoothScroll } from "@/components/layout/SmoothScroll";
-import { CursorLens } from "@/components/ui/CursorLens";
-import { getGlobal, img, isPreview } from "@/lib/cms";
+import { SiteLens, SiteMotion } from "@/components/layout/SiteEffects";
+import { getGlobal, getNavPages, img, isPreview } from "@/lib/cms";
 
 const interDisplay = localFont({
   src: [
@@ -55,25 +54,28 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [site, nav, effects, preview] = await Promise.all([
+  const [site, nav, effects, pages, preview] = await Promise.all([
     getGlobal("site"),
     getGlobal("navigation"),
     getGlobal("effects"),
+    getNavPages(),
     isPreview(),
   ]);
+
+  // In the admin's live preview, the shared settings follow their edit forms as they're typed.
+  const Provider = preview ? LiveSiteData : SiteDataProvider;
 
   return (
     <html lang="en" className={interDisplay.variable}>
       <body>
-        <SiteDataProvider value={{ site, nav, effects }}>
-          {effects.smoothScroll !== false && <SmoothScroll />}
-          {effects.pageTransitions !== false && <PageTransitions />}
+        <Provider value={{ site, nav, effects, pages }}>
+          <SiteMotion />
           <Nav />
           <main className="page-shell">{children}</main>
           <Footer />
-          {effects.cursorLens !== false && <CursorLens size={effects.lensSize ?? 132} />}
+          <SiteLens preview={preview} />
           {preview && <LivePreview />}
-        </SiteDataProvider>
+        </Provider>
       </body>
     </html>
   );

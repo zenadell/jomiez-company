@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect, redirect } from "next/navigation";
-import { Blocks } from "@/components/cms/Blocks";
-import { getPage, getPageSlugs, getRedirect } from "@/lib/cms";
+import { blockNeeds } from "@/components/cms/Blocks";
+import { Live } from "@/components/cms/live/Live";
+import { getArticles, getGlobal, getPage, getPageSlugs, getRedirect, isPreview } from "@/lib/cms";
 import { pageMetadata } from "@/lib/metadata";
 
 /*
@@ -25,7 +26,19 @@ export default async function CustomPage({ params }: Params) {
   const { slug } = await params;
   const path = `/${slug.map(decodeURIComponent).join("/")}`;
   const page = slug.length === 1 ? await getPage(slug[0]) : null;
-  if (page) return <Blocks blocks={page.layout ?? []} />;
+  if (page) {
+    // Visitors' pages read only the shared content their sections use; the
+    // preview reads it all, since sections can be added while editing.
+    const needs = (await isPreview()) ? { home: true, articles: true } : blockNeeds(page.layout ?? []);
+    const [home, articles, journal] = await Promise.all([
+      needs.home ? getGlobal("home") : null,
+      needs.articles ? getArticles() : [],
+      needs.articles ? getGlobal("journal-page") : null,
+    ]);
+    return (
+      <Live view="page" doc={{ field: "page", collection: "pages", id: page.id }} props={{ page, home, articles, journal }} />
+    );
+  }
 
   const rule = await getRedirect(path);
   if (rule) {

@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { publishedOrSignedIn, signedIn } from "../access";
 import { image } from "../fields";
-import { revalidateAfterDelete, revalidateCollection } from "../hooks";
+import { redirectOldAddress, revalidateAfterDelete, revalidateCollection } from "../hooks";
 import { slugField } from "../slug";
 
 /* Journal posts at /insights/<address>. Written in the rich text editor. */
@@ -47,5 +47,5 @@ export const Articles: CollectionConfig = {
       admin: { position: "sidebar", date: { pickerAppearance: "dayOnly", displayFormat: "d MMM yyyy" } },
     },
   ],
-  hooks: { afterChange: [revalidateCollection], afterDelete: [revalidateAfterDelete] },
+  hooks: { afterChange: [redirectOldAddress("/insights/"), revalidateCollection], afterDelete: [revalidateAfterDelete] },
 };

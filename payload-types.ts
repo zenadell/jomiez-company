@@ -197,7 +197,7 @@ export interface Page {
             cta?: {
               label: string;
               /**
-               * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+               * Choose a page, or type any address (/about, /#pricing, https://…).
                */
               href: string;
             };
@@ -286,7 +286,7 @@ export interface Page {
             cta: {
               label: string;
               /**
-               * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+               * Choose a page, or type any address (/about, /#pricing, https://…).
                */
               href: string;
             };
@@ -306,6 +306,18 @@ export interface Page {
           }
       )[]
     | null;
+  /**
+   * Link to this page from every page of the site.
+   */
+  placement?: {
+    menu?: boolean | null;
+    footer?: boolean | null;
+    column?: string | null;
+    /**
+     * Leave empty to use the page title.
+     */
+    label?: string | null;
+  };
   /**
    * The last part of the link: /<address>. Made from the title if left empty.
    */
@@ -422,7 +434,7 @@ export interface Project {
       cta: {
         label: string;
         /**
-         * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+         * Choose a page, or type any address (/about, /#pricing, https://…).
          */
         href: string;
       };
@@ -872,6 +884,14 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  placement?:
+    | T
+    | {
+        menu?: T;
+        footer?: T;
+        column?: T;
+        label?: T;
+      };
   slug?: T;
   meta?:
     | T
@@ -1167,7 +1187,7 @@ export interface Home {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1241,7 +1261,7 @@ export interface Home {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1267,7 +1287,7 @@ export interface Home {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1327,7 +1347,7 @@ export interface Home {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1339,7 +1359,7 @@ export interface Home {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1388,7 +1408,7 @@ export interface Home {
           cta: {
             label: string;
             /**
-             * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+             * Choose a page, or type any address (/about, /#pricing, https://…).
              */
             href: string;
           };
@@ -1405,7 +1425,7 @@ export interface Home {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1427,7 +1447,7 @@ export interface Home {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1459,7 +1479,7 @@ export interface About {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1477,7 +1497,7 @@ export interface About {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1533,7 +1553,7 @@ export interface ServicesPage {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1595,7 +1615,7 @@ export interface WorkPage {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1634,7 +1654,7 @@ export interface JournalPage {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1693,7 +1713,7 @@ export interface ContactPage {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1720,6 +1740,9 @@ export interface ContactPage {
 export interface Navigation {
   id: number;
   header: {
+    /**
+     * Custom pages can add themselves here too: open the page and tick "Show in the top menu".
+     */
     links?:
       | {
           label: string;
@@ -1731,7 +1754,7 @@ export interface Navigation {
     hire: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1748,7 +1771,7 @@ export interface Navigation {
     cta: {
       label: string;
       /**
-       * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+       * Choose a page, or type any address (/about, /#pricing, https://…).
        */
       href: string;
     };
@@ -1905,7 +1928,7 @@ export interface NotFound {
   cta: {
     label: string;
     /**
-     * A page on this site (/about, /work/chaka-ai, /#pricing) or a full web address.
+     * Choose a page, or type any address (/about, /#pricing, https://…).
      */
     href: string;
   };
