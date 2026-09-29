@@ -5,8 +5,13 @@
 }
 
 .footer {
-  /* Width of the giant wordmark; the bottom quarter of its letters runs off the edge. */
-  --giant-w: min(90vw, 150vh);
+  /*
+   * Width of the giant wordmark, shown whole above the bottom edge. Its height is
+   * 0.238 x its width; on short screens it shrinks so the 350px link block above
+   * it still clears the nav (100vh - 560px leaves room for both, with gaps).
+   */
+  --giant-w: min(90vw, 150vh, max(40vw, calc((100vh - 560px) * 4.2)));
+  --giant-bottom: 44px;
   position: fixed;
   inset: 0;
   z-index: 1;
@@ -29,8 +34,8 @@
   z-index: 1;
   display: flex;
   align-items: flex-start;
-  /* Clear the visible part of the giant wordmark (75% of its 0.238 x width height), plus breathing room. */
-  padding-bottom: calc(var(--giant-w) * 0.1785 + 40px);
+  /* Clear the whole wordmark (0.238 x its width, raised by --giant-bottom) with 60px to spare. */
+  padding-bottom: calc(var(--giant-w) * 0.238 + var(--giant-bottom) + 20px);
 }
 
 .brand {
@@ -168,7 +173,7 @@
 .giant {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--giant-w) * -0.0595);
+  bottom: var(--giant-bottom);
   z-index: 1;
   width: var(--giant-w);
   margin-left: calc(var(--giant-w) / -2);

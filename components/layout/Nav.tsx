@@ -4,13 +4,14 @@ import { Glass, type GlassOptics } from "@samasante/liquid-glass";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { navLinks } from "@/content/site";
 import { LogoLink } from "@/components/ui/Logo";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { ProgressiveBlur } from "@/components/ui/ProgressiveBlur";
 import { useLiveGlass } from "@/components/ui/useGlassSupport";
 import styles from "./Nav.module.css";
+import { useNavTone } from "./useNavTone";
 
 // Framer appear effect for the nav: drops 100px, spring 0.8s, no bounce, 0.5s delay.
 const DROP = {
@@ -20,28 +21,29 @@ const DROP = {
 } as const;
 
 /*
- * Thick liquid glass for the nav pills (github.com/samasante/liquid-glass): the
- * page scrolling underneath swells through the middle and pours around a deep,
- * rainbow-edged rim, under a milky veil that keeps the links readable. It bends
+ * Deep, clear liquid glass for the nav pills (github.com/samasante/liquid-glass):
+ * the page scrolling underneath swells through a strongly magnifying body and
+ * pours around a rainbow-edged rim, under only a whisper of tint. The link text
+ * flips between white and ink with whatever is behind it (useNavTone). It bends
  * the live page, so it runs where useLiveGlass allows (Chromium with a GPU);
  * elsewhere the pills stay solid white.
  */
 const NAV_GLASS: Partial<GlassOptics> = {
   mapSize: 256,
-  strength: 0.075,
-  depth: 0.8,
-  curvature: 0.55,
-  bend: 0.9,
-  bendWidth: 0.3,
-  dispersion: 1,
-  frost: 2,
-  saturate: 1.35,
-  specular: 1.4,
+  strength: 0.12,
+  depth: 1,
+  curvature: 0.6,
+  bend: 1,
+  bendWidth: 0.36,
+  dispersion: 0.45,
+  frost: 0.8,
+  saturate: 1.4,
+  specular: 1.5,
   sheenAngle: 40,
-  sheen: 1.1,
+  sheen: 1.2,
   sheenWidth: 3,
   sheenFalloff: 1.4,
-  glow: 0.25,
+  glow: 0.22,
   glowSpread: 1,
   glowFalloff: 0.6,
 };
@@ -57,15 +59,20 @@ export function Nav() {
   const live = useLiveGlass();
   const [dropped, setDropped] = useState(false);
   const glass = live && dropped;
+  const pill = useRef<HTMLElement>(null);
+  const hire = useRef<HTMLDivElement>(null);
+  useNavTone(glass, [pill, hire], pathname);
 
   return (
     <>
       <ProgressiveBlur className={styles.topBlur} direction="down" />
 
       <motion.nav
+        ref={pill}
         className={styles.pill}
         aria-label="Main"
         data-glass={glass ? "" : undefined}
+        data-open={open ? "" : undefined}
         onAnimationComplete={() => setDropped(true)}
         {...DROP}
       >
@@ -79,7 +86,7 @@ export function Nav() {
           <ul className={styles.links}>
             {navLinks.map((l) => (
               <li key={l.href}>
-                <Link href={l.href} className={styles.link} data-active={pathname === l.href}>
+                <Link href={l.href} className={styles.link} data-active={pathname === l.href} data-tone-target="">
                   {l.label}
                 </Link>
               </li>
@@ -88,6 +95,7 @@ export function Nav() {
           <button
             type="button"
             className={styles.burger}
+            data-tone-target=""
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -132,7 +140,7 @@ export function Nav() {
         </AnimatePresence>
       </motion.nav>
 
-      <motion.div className={styles.hire} data-glass={glass ? "" : undefined} {...DROP}>
+      <motion.div ref={hire} className={styles.hire} data-glass={glass ? "" : undefined} data-tone-target="" {...DROP}>
         {glass && (
           <Glass optics={NAV_GLASS} className={styles.glass}>
             <span />

@@ -17,13 +17,19 @@
   transition: background 0.5s ease;
 }
 
-/* Liquid glass behind the pill's content; its milky tint keeps the links legible. */
+/* Liquid glass behind the pill's content, with just a whisper of tint. */
 .glass {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.4s ease;
   animation: glass-in 0.6s ease both;
+}
+
+/* The open phone menu sits on a milkier sheet so its big links stay readable. */
+.pill[data-open] .glass {
+  background: rgba(255, 255, 255, 0.82);
 }
 
 @keyframes glass-in {
@@ -34,7 +40,7 @@
 
 .pill[data-glass] {
   background: rgba(255, 255, 255, 0);
-  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.1);
+  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.08);
 }
 
 .row {
@@ -55,16 +61,38 @@
   padding: 7px 16px;
   font-size: 14px;
   line-height: 19.6px;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0.02em;
   color: var(--ink);
-  opacity: 0.65;
-  transition: opacity 0.25s ease;
+  opacity: 0.7;
+  transition:
+    opacity 0.25s ease,
+    color 0.3s ease,
+    text-shadow 0.3s ease;
 }
 
 .link:hover,
 .link[data-active="true"] {
   opacity: 1;
+}
+
+/* On clear glass the text takes the opposite shade of what's behind it. */
+.pill[data-glass] .link {
+  opacity: 0.88;
+}
+
+.pill[data-glass] .link:hover,
+.pill[data-glass] .link[data-active="true"] {
+  opacity: 1;
+}
+
+.pill[data-glass] .link[data-tone="dark"] {
+  color: var(--white);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+}
+
+.pill[data-glass] .link[data-tone="light"] {
+  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.5);
 }
 
 .burger {
@@ -84,6 +112,14 @@
   background: var(--ink);
 }
 
+.pill[data-glass]:not([data-open]) .burger[data-tone="dark"] .bar {
+  background: var(--white);
+}
+
+.bar {
+  transition: background 0.3s ease;
+}
+
 .bar:first-child {
   top: 8px;
 }
@@ -101,7 +137,7 @@
 }
 
 .hire[data-glass] {
-  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.1);
+  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.08);
 }
 
 .hire .hireBtn {
@@ -112,6 +148,10 @@
 .hire[data-glass] .hireBtn {
   background: rgba(255, 255, 255, 0);
   border-color: transparent;
+}
+
+.hire[data-glass][data-tone="dark"] {
+  --pb-label: var(--white);
 }
 
 .mobileMenu {
