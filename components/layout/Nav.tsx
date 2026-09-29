@@ -1,5 +1,6 @@
 "use client";
 
+import { Glass, type GlassOptics } from "@samasante/liquid-glass";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { usePathname } from "next/navigation";
@@ -8,6 +9,7 @@ import { navLinks } from "@/content/site";
 import { LogoLink } from "@/components/ui/Logo";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { ProgressiveBlur } from "@/components/ui/ProgressiveBlur";
+import { useLiveGlass } from "@/components/ui/useGlassSupport";
 import styles from "./Nav.module.css";
 
 // Framer appear effect for the nav: drops 100px, spring 0.8s, no bounce, 0.5s delay.
@@ -17,18 +19,61 @@ const DROP = {
   transition: { type: "spring", duration: 0.8, bounce: 0, delay: 0.5 },
 } as const;
 
+/*
+ * Thick liquid glass for the nav pills (github.com/samasante/liquid-glass): the
+ * page scrolling underneath swells through the middle and pours around a deep,
+ * rainbow-edged rim, under a milky veil that keeps the links readable. It bends
+ * the live page, so it runs where useLiveGlass allows (Chromium with a GPU);
+ * elsewhere the pills stay solid white.
+ */
+const NAV_GLASS: Partial<GlassOptics> = {
+  mapSize: 256,
+  strength: 0.075,
+  depth: 0.8,
+  curvature: 0.55,
+  bend: 0.9,
+  bendWidth: 0.3,
+  dispersion: 1,
+  frost: 2,
+  saturate: 1.35,
+  specular: 1.4,
+  sheenAngle: 40,
+  sheen: 1.1,
+  sheenWidth: 3,
+  sheenFalloff: 1.4,
+  glow: 0.25,
+  glowSpread: 1,
+  glowFalloff: 0.6,
+};
+
 export function Nav() {
   const pathname = usePathname();
   // The menu remembers the path it was opened on, so navigating anywhere closes it.
   const [openOn, setOpenOn] = useState<string | null>(null);
   const open = openOn === pathname;
   const setOpen = (next: boolean) => setOpenOn(next ? pathname : null);
+  // The pills turn to glass once they've dropped in: while the drop fades them in,
+  // their opacity would cut the glass off from the page it bends.
+  const live = useLiveGlass();
+  const [dropped, setDropped] = useState(false);
+  const glass = live && dropped;
 
   return (
     <>
       <ProgressiveBlur className={styles.topBlur} direction="down" />
 
-      <motion.nav className={styles.pill} aria-label="Main" {...DROP}>
+      <motion.nav
+        className={styles.pill}
+        aria-label="Main"
+        data-glass={glass ? "" : undefined}
+        onAnimationComplete={() => setDropped(true)}
+        {...DROP}
+      >
+        {glass && (
+          <Glass optics={NAV_GLASS} className={styles.glass}>
+            <span />
+          </Glass>
+        )}
         <div className={styles.row}>
           <LogoLink />
           <ul className={styles.links}>
@@ -87,8 +132,13 @@ export function Nav() {
         </AnimatePresence>
       </motion.nav>
 
-      <motion.div className={styles.hire} {...DROP}>
-        <PixelButton href="/contact" variant="primarySmall">
+      <motion.div className={styles.hire} data-glass={glass ? "" : undefined} {...DROP}>
+        {glass && (
+          <Glass optics={NAV_GLASS} className={styles.glass}>
+            <span />
+          </Glass>
+        )}
+        <PixelButton href="/contact" variant="primarySmall" className={styles.hireBtn}>
           Hire Us
         </PixelButton>
       </motion.div>

@@ -4,7 +4,7 @@ import { Glass, glassValue, type GlassOptics } from "@samasante/liquid-glass";
 import { useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useGlassSupport } from "@/components/ui/useGlassSupport";
+import { useCursorLens, useGlassSupport } from "@/components/ui/useGlassSupport";
 
 /*
  * A dewdrop of liquid glass (github.com/samasante/liquid-glass) drifting over the
@@ -13,6 +13,8 @@ import { useGlassSupport } from "@/components/ui/useGlassSupport";
  * pixels, inside it the grass magnifies with a chromatic rim. The drop follows the
  * cursor, wanders along the horizon when left alone, rests still under reduced
  * motion and pauses off screen. Browsers without a GPU keep the plain photo.
+ * Where the site-wide cursor lens runs (Chromium with a mouse), that lens bends
+ * the hero, headline and all, so this drop stands down.
  */
 
 const DEW: Partial<GlassOptics> = {
@@ -57,7 +59,8 @@ type HeroDewProps = {
 
 export function HeroDew(props: HeroDewProps) {
   const supported = useGlassSupport();
-  return supported ? <Dew {...props} /> : null;
+  const cursorLens = useCursorLens();
+  return supported && !cursorLens ? <Dew {...props} /> : null;
 }
 
 function Dew({ src, sizes, imageClassName, className }: HeroDewProps) {

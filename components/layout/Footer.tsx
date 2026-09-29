@@ -5,11 +5,11 @@ import Link from "next/link";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { useRef, useSyncExternalStore } from "react";
 import { footerColumns, site } from "@/content/site";
-import { GlassOver } from "@/components/ui/GlassOver";
 import { JomiezIcon } from "@/components/ui/JomiezMark";
 import { Wordmark } from "@/components/ui/Logo";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { SocialIcon } from "@/components/ui/SocialIcon";
+import { GlassWordmark } from "./GlassWordmark";
 import styles from "./Footer.module.css";
 
 /*
@@ -31,8 +31,8 @@ export function Footer() {
   const wordY = useTransform(scrollYProgress, [0, 1], ["45%", "0%"]);
   const contentY = useTransform(scrollYProgress, [0, 1], [80, 0]);
 
-  // A fixed footer always "intersects" the viewport, so the reveal spacer says when
-  // it is actually uncovered; the glass only runs then.
+  // The glass wordmark only runs while the footer can be seen. A fixed footer
+  // always "intersects" the viewport, so on desktop the reveal spacer decides.
   const flowing = useSyncExternalStore(watchFlowing, () => window.matchMedia(FLOWING).matches, () => false);
   const revealed = useInView(spacer);
   const onScreen = useInView(footer);
@@ -41,7 +41,7 @@ export function Footer() {
   return (
     <>
       <div ref={spacer} className={styles.spacer} aria-hidden="true" />
-      <footer ref={footer} className={styles.footer} data-glass-frame="">
+      <footer ref={footer} className={styles.footer}>
         <Image src="/media/footer-cube.webp" alt="" fill sizes="100vw" className={styles.bg} />
         <motion.div className={styles.inner} style={{ y: contentY }}>
           <div className={styles.brand}>
@@ -52,23 +52,14 @@ export function Footer() {
             <p className={styles.blurb}>
               Software with deep roots. Talk to {site.legalName} about the product you want to grow.
             </p>
-            {/* Liquid glass over the moss: the bar refracts the scene behind it. */}
-            <GlassOver
-              src="/media/footer-cube.webp"
-              objectPosition="center 30%"
-              radius={17}
-              active={glassActive}
-              className={styles.contactGlass}
-            >
-              <div className={styles.contactPill}>
-                <a href={`mailto:${site.email}`} className={styles.contactEmail}>
-                  {site.email}
-                </a>
-                <PixelButton href="/contact" variant="primarySmall">
-                  Start a project
-                </PixelButton>
-              </div>
-            </GlassOver>
+            <div className={styles.contactPill}>
+              <a href={`mailto:${site.email}`} className={styles.contactEmail}>
+                {site.email}
+              </a>
+              <PixelButton href="/contact" variant="primarySmall">
+                Start a project
+              </PixelButton>
+            </div>
             <div className={styles.follow}>
               <p className="t-mono-sm">Follow us:</p>
               <ul className={styles.socials}>
@@ -103,12 +94,7 @@ export function Footer() {
         </motion.div>
 
         <motion.div className={styles.giant} style={{ y: wordY }} aria-hidden="true">
-          {/* viewBox hugs the ink of "Jomiez" (Inter Display 800, 330px, -14px tracking), baseline at y=0. */}
-          <svg viewBox="5 -248 1067 254">
-            <text x="0" y="0" className={styles.giantText}>
-              Jomiez
-            </text>
-          </svg>
+          <GlassWordmark active={glassActive} textClassName={styles.giantText} />
         </motion.div>
 
         <p className={styles.copy}>

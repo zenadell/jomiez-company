@@ -13,6 +13,7 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { PageTransitions } from "@/components/layout/PageTransitions";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
+import { CursorLens } from "@/components/ui/CursorLens";
 
 const interDisplay = localFont({
   src: [
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Nav />
         <main className="page-shell">{children}</main>
         <Footer />
+        <CursorLens />
       </body>
     </html>
   );
