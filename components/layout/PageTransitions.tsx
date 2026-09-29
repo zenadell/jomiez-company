@@ -30,9 +30,11 @@ export function PageTransitions() {
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const link = (e.target as Element | null)?.closest?.("a");
-      if (!link || (link.target && link.target !== "_self") || link.hasAttribute("download")) return;
+      if (!link || (link.target && link.target !== "_self") || link.hasAttribute("download") || link.hasAttribute("data-reload")) return;
       const url = new URL(link.href, window.location.href);
       if (url.origin !== window.location.origin || url.pathname === window.location.pathname) return;
+      // The admin, its API and the preview switches aren't site pages: let the browser load them.
+      if (/^\/(admin|api|next)(\/|$)/.test(url.pathname)) return;
       if (!document.startViewTransition || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
       // Handled here, so next/link skips its own navigation.

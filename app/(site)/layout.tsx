@@ -9,6 +9,7 @@ import "@fontsource/ibm-plex-mono/500.css";
 import "@fontsource/jaini/400.css";
 import "./globals.css";
 import { LivePreview } from "@/components/cms/LivePreview";
+import { PreviewBar } from "@/components/cms/PreviewBar";
 import { SiteDataProvider } from "@/components/cms/SiteData";
 import { LiveSiteData } from "@/components/cms/live/LiveSiteData";
 import { Footer } from "@/components/layout/Footer";
@@ -73,8 +74,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Nav />
           <main className="page-shell">{children}</main>
           <Footer />
-          <SiteLens preview={preview} />
+          <SiteLens />
           {preview && <LivePreview />}
+          {preview && <PreviewBar />}
         </Provider>
       </body>
     </html>

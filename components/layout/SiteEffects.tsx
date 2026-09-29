@@ -1,5 +1,6 @@
 "use client";
 
+import { useInPreviewPane } from "@/components/cms/PreviewBar";
 import { useSiteData } from "@/components/cms/SiteData";
 import { PageTransitions } from "@/components/layout/PageTransitions";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
@@ -16,9 +17,14 @@ export function SiteMotion() {
   );
 }
 
-/* The cursor lens. It stays off in the admin's preview pane, where it would sit over what's being edited. */
-export function SiteLens({ preview }: { preview: boolean }) {
+/*
+ * The cursor lens. It stays off inside the admin's preview pane, where it would
+ * sit over what's being edited, but not in ordinary tabs that happen to be in
+ * preview mode.
+ */
+export function SiteLens() {
   const { effects } = useSiteData();
-  if (preview || effects.cursorLens === false) return null;
+  const inPane = useInPreviewPane();
+  if (inPane || effects.cursorLens === false) return null;
   return <CursorLens size={effects.lensSize ?? 132} />;
 }

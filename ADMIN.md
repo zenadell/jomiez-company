@@ -36,6 +36,7 @@ On that first run the database file is created (`jomiez.db`, not committed) and 
 
 - Pages, products, posts and the nav **autosave as drafts** while you type. The live site doesn't change until you press **Publish changes**.
 - The **eye button** opens a live preview beside the editor, with phone, tablet and laptop sizes. It changes as you type, letter by letter, before anything is saved: add a section, switch one off, tick "Show in the top menu" and you see the result at once. Visitors still see the published version until you publish.
+- Opening the preview puts your browser in **preview mode**, so the site shows drafts in your other tabs too. A dark bar at the bottom of the page says so; press **Show the live site** to leave it.
 - Every **Goes to** box has a **Choose a page** list: every page, section, custom page, product, post and contact link on the site, searchable. You can still type any address.
 - On custom pages, each section in the list is named after its own headline, so a long page reads like a table of contents.
 - **Versions** keeps up to 50 past versions of each document. Open one to compare it with the current version or restore it.
