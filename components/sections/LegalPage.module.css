@@ -1,0 +1,112 @@
+.section {
+  padding: var(--page-inset);
+  background: var(--white);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+  padding: 170px var(--gutter) 120px;
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 720px;
+}
+
+.eyebrow {
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  font-weight: 300;
+  text-transform: uppercase;
+  color: var(--ink-70);
+}
+
+.title {
+  font-size: 70px;
+  line-height: 1.05;
+  font-weight: 500;
+  letter-spacing: -2.8px;
+}
+
+.intro {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 300;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  counter-reset: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 40px;
+  padding: 30px 0;
+  border-top: 1px solid var(--ink-10);
+}
+
+.itemTitle {
+  display: flex;
+  gap: 16px;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 500;
+  letter-spacing: -0.4px;
+}
+
+.itemTitle span {
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  line-height: 28px;
+  font-weight: 300;
+  color: var(--ink-60);
+}
+
+.itemBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 680px;
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 300;
+}
+
+.itemBody ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 18px;
+  list-style: disc;
+}
+
+.itemBody a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 809px) {
+  .panel {
+    padding-top: 120px;
+  }
+
+  .title {
+    font-size: 44px;
+    letter-spacing: -1.6px;
+  }
+
+  .item {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}

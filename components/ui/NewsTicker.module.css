@@ -1,0 +1,25 @@
+.wrap {
+  font-size: 14px;
+  line-height: 19.6px;
+  font-weight: 400;
+  letter-spacing: 0.28px;
+  color: var(--ink);
+}
+
+.dark {
+  color: var(--white);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 100px;
+  white-space: nowrap;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+

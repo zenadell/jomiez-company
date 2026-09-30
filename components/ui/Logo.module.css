@@ -1,0 +1,18 @@
+.wordmark {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-size: 20px;
+  color: inherit;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 4px 0 0;
+  border-radius: 100px;
+  color: var(--ink);
+}

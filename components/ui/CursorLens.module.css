@@ -1,0 +1,16 @@
+.lens {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  will-change: transform;
+  transform: translate3d(-400px, -400px, 0);
+}
+
+.glass {
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 12px 30px rgba(26, 26, 26, 0.14);
+  transition: opacity 0.35s ease;
+}

@@ -1,0 +1,276 @@
+.spacer {
+  position: relative;
+  height: min(774px, 86vh);
+  pointer-events: none;
+}
+
+.footer {
+  /*
+   * Width of the giant wordmark, shown whole above the bottom edge. Its height is
+   * 0.238 x its width; on short screens it shrinks so the 350px link block above
+   * it still clears the nav (100vh - 560px leaves room for both, with gaps).
+   */
+  --giant-w: min(90vw, 150vh, max(40vw, calc((100vh - 560px) * 4.2)));
+  --giant-bottom: 44px;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 170px var(--gutter) 40px;
+  background: var(--dark);
+  color: var(--white);
+  overflow: hidden;
+}
+
+.bg {
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  /* Clear the whole wordmark (0.238 x its width, raised by --giant-bottom) with 60px to spare. */
+  padding-bottom: calc(var(--giant-w) * 0.238 + var(--giant-bottom) + 20px);
+}
+
+.brand {
+  width: 50%;
+  padding-right: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--white);
+}
+
+.logoWord {
+  font-size: 40px;
+}
+
+.blurb {
+  max-width: 400px;
+  font-size: 15px;
+  line-height: 22.5px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+.contactPill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+  padding: 6px 6px 6px 18px;
+  border-radius: 17px;
+  background: var(--white-20);
+  backdrop-filter: blur(10px);
+}
+
+.contactEmail {
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: var(--white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.follow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.socials {
+  display: flex;
+  gap: 10px;
+}
+
+.social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--white-10);
+  color: var(--white);
+  transition: background 0.25s ease;
+}
+
+.social:hover {
+  background: var(--white-20);
+}
+
+.columns {
+  width: 50%;
+  display: flex;
+  padding-right: 80px;
+}
+
+.col {
+  width: 200px;
+  padding-left: 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.colTitle {
+  font-family: var(--font-geist-mono);
+  font-size: 16px;
+  line-height: 22.4px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.colLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  transition: transform 0.35s var(--spring);
+}
+
+.dash {
+  position: absolute;
+  left: -35px;
+  top: 50%;
+  width: 15px;
+  height: 1px;
+  background: var(--white-50);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.3s ease, transform 0.35s var(--spring);
+}
+
+.colLink:hover {
+  transform: translateX(8px);
+}
+
+.colLink:hover .dash {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.giant {
+  position: absolute;
+  left: 50%;
+  bottom: var(--giant-bottom);
+  z-index: 1;
+  width: var(--giant-w);
+  margin-left: calc(var(--giant-w) / -2);
+  pointer-events: none;
+}
+
+.giant svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.giantText {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 330px;
+  letter-spacing: -14px;
+  fill: var(--white);
+}
+
+.copy {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 14px;
+  z-index: 2;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--white-70);
+}
+
+@media (max-width: 1199px) {
+  .brand {
+    padding-right: 30px;
+  }
+
+  .columns {
+    padding-right: 0;
+  }
+
+  .col {
+    width: auto;
+    flex: 1;
+  }
+}
+
+@media (max-width: 809px) {
+  /* On phones the footer is taller than the screen, so it flows normally instead of being revealed. */
+  .spacer {
+    display: none;
+  }
+
+  .footer {
+    position: relative;
+    inset: auto;
+    z-index: 0;
+    min-height: 100svh;
+    padding-top: 110px;
+  }
+
+  /* Keeps the link columns legible where they cross the glowing cube. */
+  .footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.45) 45%, rgba(0, 0, 0, 0.1) 100%);
+    pointer-events: none;
+  }
+
+  .inner {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .brand,
+  .columns {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .columns {
+    flex-wrap: wrap;
+    gap: 24px 0;
+  }
+
+  .col {
+    width: 50%;
+    flex: none;
+    padding-left: 0;
+  }
+
+  .colTitle {
+    font-size: 14px;
+  }
+
+  .copy {
+    left: var(--gutter);
+    right: auto;
+  }
+}

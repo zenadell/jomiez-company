@@ -1,4 +1,25 @@
+# dependencies
 node_modules/
+
+# next.js
 .next/
+out/
+next-env.d.ts
+
+# env
 .env*
+!.env.example
+
+# misc
 .DS_Store
+*.tsbuildinfo
+.vercel
+npm-debug.log*
+scripts/.cache/
+
+# cms: local database and uploaded media (production uses Turso and Vercel Blob)
+/uploads/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
