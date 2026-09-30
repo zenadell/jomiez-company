@@ -1,6 +1,8 @@
 "use server";
 
 import { headers } from "next/headers";
+import { after } from "next/server";
+import { originOf } from "@/cms/preview";
 import { fill, payloadClient } from "@/lib/cms";
 
 /*
@@ -103,6 +105,13 @@ export async function sendInquiry(_prev: InquiryState, form: FormData): Promise<
     } catch (err) {
       payload.logger.error({ err, msg: "Contact form: the message was saved but an email could not be sent." });
     }
+
+    // After the visitor has their answer, the agent reads and sorts the message (if switched on).
+    const origin = originOf(h) || site.url.replace(/\/$/, "");
+    after(async () => {
+      const { triageInquiry } = await import("@/cms/agent/triage");
+      await triageInquiry(payload, inquiry.id, origin).catch((err) => payload.logger.error({ err, msg: "Agent triage failed" }));
+    });
 
     return { status: "sent" };
   } catch (err) {

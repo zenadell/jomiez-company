@@ -1,6 +1,5 @@
 import path from "path";
 import { fileURLToPath } from "url";
-import { sqliteAdapter } from "@payloadcms/db-sqlite";
 import { resendAdapter } from "@payloadcms/email-resend";
 import { redirectsPlugin } from "@payloadcms/plugin-redirects";
 import { seoPlugin } from "@payloadcms/plugin-seo";
@@ -9,6 +8,7 @@ import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import { buildConfig, type Migration } from "payload";
 import sharp from "sharp";
 import { signedIn } from "./cms/access";
+import { AgentMemory, AgentRoutines, AgentSettings, AgentThreads } from "./cms/agent/config";
 import { Articles } from "./cms/collections/Articles";
 import { Inquiries } from "./cms/collections/Inquiries";
 import { Media } from "./cms/collections/Media";
@@ -30,8 +30,9 @@ import {
 import { Navigation } from "./cms/globals/Navigation";
 import { SiteSettings } from "./cms/globals/SiteSettings";
 import { revalidateAfterDelete, revalidateCollection } from "./cms/hooks";
-import { migrations } from "./cms/migrations";
+import { database, migrations } from "./cms/db";
 import { originOf, previewPath, serverUrl } from "./cms/preview";
+import { cloudinaryConfigured, cloudinaryStorage } from "./cms/storage/cloudinary";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -82,7 +83,10 @@ export default buildConfig({
     components: {
       graphics: { Logo: "/cms/admin/Logo#Logo", Icon: "/cms/admin/Icon#Icon" },
       beforeDashboard: ["/cms/admin/Dashboard#Dashboard"],
-      afterNavLinks: ["/cms/admin/ViewSite#ViewSite"],
+      afterNavLinks: ["/cms/admin/agent/AgentNavLink#AgentNavLink", "/cms/admin/ViewSite#ViewSite"],
+      // The agent on every admin screen, and its console at /admin/agent.
+      providers: ["/cms/admin/agent/AgentDrawer#AgentDrawer"],
+      views: { agent: { Component: "/cms/admin/agent/AgentView#AgentView", path: "/agent" } },
     },
     livePreview: {
       url: ({ data, collectionConfig, globalConfig, req }) =>
@@ -98,8 +102,8 @@ export default buildConfig({
       ],
     },
   },
-  // Order sets the admin's sidebar: Inbox, Pages, Content, Settings, Legal.
-  collections: [Inquiries, Pages, Projects, Articles, Media, Users],
+  // Order sets the admin's sidebar: Inbox, Agent, Pages, Content, Settings, Legal.
+  collections: [Inquiries, AgentThreads, AgentRoutines, AgentMemory, Pages, Projects, Articles, Media, Users],
   globals: [
     HomePage,
     AboutPage,
@@ -113,24 +117,16 @@ export default buildConfig({
     NotFoundPage,
     PrivacyPage,
     TermsPage,
+    AgentSettings,
   ],
   editor: lexicalEditor(),
-  db: sqliteAdapter({
-    client: {
-      url: process.env.DATABASE_URI || `file:${path.resolve(dirname, "jomiez.db")}`,
-      authToken: process.env.DATABASE_AUTH_TOKEN,
-    },
-    // The schema only ever changes through migrations (cms/migrations), in
-    // development and production alike, so the two never drift apart.
-    push: false,
-    migrationDir: path.resolve(dirname, "cms/migrations"),
-    prodMigrations: migrations as Migration[],
-  }),
+  // Postgres (Supabase) in production, SQLite locally: see cms/db.ts.
+  db: database(),
   sharp,
   email: process.env.RESEND_API_KEY
     ? resendAdapter({
         apiKey: process.env.RESEND_API_KEY,
-        defaultFromAddress: process.env.EMAIL_FROM || "hello@jomiez.com",
+        defaultFromAddress: process.env.EMAIL_FROM || process.env.LEAD_FROM_EMAIL || "hello@jomiez.com",
         defaultFromName: process.env.EMAIL_FROM_NAME || "Jomiez",
       })
     : undefined,
@@ -162,14 +158,19 @@ export default buildConfig({
         hooks: { afterChange: [revalidateCollection], afterDelete: [revalidateAfterDelete] },
       },
     }),
+    // Images: Cloudinary when its keys are set, else Vercel Blob, else the local uploads/ folder.
+    cloudinaryStorage(),
     vercelBlobStorage({
-      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN) && !cloudinaryConfigured,
       collections: { media: { disablePayloadAccessControl: true } },
       token: process.env.BLOB_READ_WRITE_TOKEN,
     }),
   ],
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
   onInit: async (payload) => {
+    // The agent's routine clock (long-running servers only; see cms/agent/routines.ts).
+    const { startClock } = await import("./cms/agent/routines");
+    startClock(payload);
     // Development: bring the database up to date and fill it with the site's
     // content on first run. Production does this before the build instead
     // (npm run cms:prepare), where it can't race between build workers.

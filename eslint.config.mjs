@@ -12,7 +12,7 @@ const config = [
       "next-env.d.ts",
       "payload-types.ts",
       "app/(payload)/admin/importMap.js",
-      "cms/migrations/**",
+      "cms/migrations/**", "cms/migrations-pg/**",
     ],
   },
 ];

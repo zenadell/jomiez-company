@@ -1,3 +1,4 @@
+import { OpenConsole as OpenConsole_a801ef8d3bb9e0c49b2cd7efd4ab0862 } from '../../../cms/admin/agent/OpenConsole'
 import { PagePicker as PagePicker_e1da0b76e0f80bbf9425ab500ab2952c } from '../../../cms/admin/PagePicker'
 import { BlockLabel as BlockLabel_cd76889bbf3a150766585388be60a820 } from '../../../cms/admin/BlockLabel'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -30,15 +31,21 @@ import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c08
 import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
+import { SecretField as SecretField_68ba7bcb8c607790274b0bc4919b9738 } from '../../../cms/admin/agent/SecretField'
+import { PermissionsNote as PermissionsNote_26c03031cad2ac0ce11b33a1667590d4 } from '../../../cms/admin/agent/PermissionsNote'
 import { Icon as Icon_4c7444b93dbccf84094c9864fd2f1234 } from '../../../cms/admin/Icon'
 import { Logo as Logo_67b5933b1125a92daeb072b605fa27b4 } from '../../../cms/admin/Logo'
+import { AgentNavLink as AgentNavLink_3f26179e5640f81f3da5e43277498979 } from '../../../cms/admin/agent/AgentNavLink'
 import { ViewSite as ViewSite_781a884015c2a824789c5ac1fb7a3a32 } from '../../../cms/admin/ViewSite'
 import { Dashboard as Dashboard_bcc9457ef7c3b677576160df84c91a20 } from '../../../cms/admin/Dashboard'
+import { AgentDrawer as AgentDrawer_a506b92e525b233e2450d8a08013bbb9 } from '../../../cms/admin/agent/AgentDrawer'
+import { AgentView as AgentView_e28051c22a9ae00ecaf999506cee4ee6 } from '../../../cms/admin/agent/AgentView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/cms/admin/agent/OpenConsole#OpenConsole": OpenConsole_a801ef8d3bb9e0c49b2cd7efd4ab0862,
   "/cms/admin/PagePicker#PagePicker": PagePicker_e1da0b76e0f80bbf9425ab500ab2952c,
   "/cms/admin/BlockLabel#BlockLabel": BlockLabel_cd76889bbf3a150766585388be60a820,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -71,10 +78,15 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaDescriptionComponent": MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
+  "/cms/admin/agent/SecretField#SecretField": SecretField_68ba7bcb8c607790274b0bc4919b9738,
+  "/cms/admin/agent/PermissionsNote#PermissionsNote": PermissionsNote_26c03031cad2ac0ce11b33a1667590d4,
   "/cms/admin/Icon#Icon": Icon_4c7444b93dbccf84094c9864fd2f1234,
   "/cms/admin/Logo#Logo": Logo_67b5933b1125a92daeb072b605fa27b4,
+  "/cms/admin/agent/AgentNavLink#AgentNavLink": AgentNavLink_3f26179e5640f81f3da5e43277498979,
   "/cms/admin/ViewSite#ViewSite": ViewSite_781a884015c2a824789c5ac1fb7a3a32,
   "/cms/admin/Dashboard#Dashboard": Dashboard_bcc9457ef7c3b677576160df84c91a20,
+  "/cms/admin/agent/AgentDrawer#AgentDrawer": AgentDrawer_a506b92e525b233e2450d8a08013bbb9,
+  "/cms/admin/agent/AgentView#AgentView": AgentView_e28051c22a9ae00ecaf999506cee4ee6,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e
 }

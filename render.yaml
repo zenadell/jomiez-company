@@ -1,0 +1,44 @@
+# Render blueprint for jomiez.com (Render → New → Blueprint → this repository).
+# Step by step, including moving the domain from the old portfolio, in ADMIN.md → Going live.
+# Values marked `sync: false` are asked for when the blueprint is created; they
+# use the same names as the old portfolio, so they can be copied across from it.
+services:
+  - type: web
+    name: jomiez-site
+    runtime: node
+    # Always on: the agent's routines run on the server's own clock, and the
+    # free plan sleeps when idle. Pick the region nearest the Supabase project.
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Signs admin logins and encrypts the agent's API keys. Generated once; never change it.
+      - key: PAYLOAD_SECRET
+        generateValue: true
+      # Supabase → Project settings → Database → Connection string (URI). The site
+      # keeps its tables in their own schema, jomiez_site.
+      - key: SUPABASE_DATABASE_URL
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: hello@jomiez.com
+      # Where the agent's "what I did on my own" emails go (can also be set in Agent settings).
+      - key: ADMIN_NOTIFY_EMAIL
+        sync: false
+      # Lets the agent run on Gemini straight away (choose any model later in Agent settings).
+      - key: GEMINI_API_KEY
+        sync: false
+      # For an outside scheduler calling /api/agent/tick, if you ever use one.
+      - key: CRON_SECRET
+        generateValue: true

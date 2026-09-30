@@ -68,6 +68,9 @@ export interface Config {
   blocks: {};
   collections: {
     inquiries: Inquiry;
+    'agent-threads': AgentThread;
+    'agent-routines': AgentRoutine;
+    'agent-memory': AgentMemory;
     pages: Page;
     projects: Project;
     articles: Article;
@@ -82,6 +85,9 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
+    'agent-threads': AgentThreadsSelect<false> | AgentThreadsSelect<true>;
+    'agent-routines': AgentRoutinesSelect<false> | AgentRoutinesSelect<true>;
+    'agent-memory': AgentMemorySelect<false> | AgentMemorySelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
@@ -110,6 +116,7 @@ export interface Config {
     'not-found': NotFound;
     privacy: Privacy;
     terms: Term;
+    agent: Agent;
   };
   globalsSelect: {
     home: HomeSelect<false> | HomeSelect<true>;
@@ -124,6 +131,7 @@ export interface Config {
     'not-found': NotFoundSelect<false> | NotFoundSelect<true>;
     privacy: PrivacySelect<false> | PrivacySelect<true>;
     terms: TermsSelect<false> | TermsSelect<true>;
+    agent: AgentSelect<false> | AgentSelect<true>;
   };
   locale: null;
   widgets: {
@@ -175,6 +183,158 @@ export interface Inquiry {
     page?: string | null;
     userAgent?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Every task the agent has worked on: what it was asked, each step it took, and every change it made.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "agent-threads".
+ */
+export interface AgentThread {
+  id: number;
+  title: string;
+  owner?: (number | null) | User;
+  source?: ('console' | 'page' | 'routine' | 'inbox') | null;
+  status?: ('idle' | 'running' | 'waiting' | 'stopped' | 'error') | null;
+  context?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  messages?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  events?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  plan?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  pending?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  changes?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  model?: string | null;
+  usage?: {
+    input?: number | null;
+    output?: number | null;
+  };
+  routine?: (number | null) | AgentRoutine;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Everyone who can sign in to this admin.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  name: string;
+  /**
+   * Admins manage the team and site settings; editors manage content.
+   */
+  roles: ('admin' | 'editor')[];
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * Work the agent does on its own, on a schedule, with the permissions of the person who set it up.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "agent-routines".
+ */
+export interface AgentRoutine {
+  id: number;
+  name: string;
+  /**
+   * Write it as you would to a colleague. It can read, change and report on anything it's allowed to.
+   */
+  instruction: string;
+  enabled?: boolean | null;
+  schedule: 'hourly' | 'daily' | 'weekdays' | 'weekly' | 'monthly';
+  /**
+   * 24-hour time
+   */
+  time?: string | null;
+  weekday?: ('0' | '1' | '2' | '3' | '4' | '5' | '6') | null;
+  timezone?: string | null;
+  mode?: ('inherit' | 'ask' | 'drafts' | 'trusted' | 'full') | null;
+  owner?: (number | null) | User;
+  nextRunAt?: string | null;
+  lastRunAt?: string | null;
+  lastStatus?: string | null;
+  lastThread?: (number | null) | AgentThread;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * What the agent knows and keeps in mind in every task: facts about the company, your preferences, and lessons from changes you turned down. Edit or delete anything.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "agent-memory".
+ */
+export interface AgentMemory {
+  id: number;
+  content: string;
+  kind?: ('fact' | 'preference' | 'voice' | 'lesson' | 'contact') | null;
+  source?: ('you' | 'agent' | 'correction') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -586,39 +746,6 @@ export interface Article {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Everyone who can sign in to this admin.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  name: string;
-  /**
-   * Admins manage the team and site settings; editors manage content.
-   */
-  roles: ('admin' | 'editor')[];
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  resetPasswordRequestedAt?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
  * Send old links to new pages (for example after renaming a project).
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -675,6 +802,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'inquiries';
         value: number | Inquiry;
+      } | null)
+    | ({
+        relationTo: 'agent-threads';
+        value: number | AgentThread;
+      } | null)
+    | ({
+        relationTo: 'agent-routines';
+        value: number | AgentRoutine;
+      } | null)
+    | ({
+        relationTo: 'agent-memory';
+        value: number | AgentMemory;
       } | null)
     | ({
         relationTo: 'pages';
@@ -760,6 +899,64 @@ export interface InquiriesSelect<T extends boolean = true> {
         page?: T;
         userAgent?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "agent-threads_select".
+ */
+export interface AgentThreadsSelect<T extends boolean = true> {
+  title?: T;
+  owner?: T;
+  source?: T;
+  status?: T;
+  context?: T;
+  messages?: T;
+  events?: T;
+  plan?: T;
+  pending?: T;
+  changes?: T;
+  model?: T;
+  usage?:
+    | T
+    | {
+        input?: T;
+        output?: T;
+      };
+  routine?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "agent-routines_select".
+ */
+export interface AgentRoutinesSelect<T extends boolean = true> {
+  name?: T;
+  instruction?: T;
+  enabled?: T;
+  schedule?: T;
+  time?: T;
+  weekday?: T;
+  timezone?: T;
+  mode?: T;
+  owner?: T;
+  nextRunAt?: T;
+  lastRunAt?: T;
+  lastStatus?: T;
+  lastThread?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "agent-memory_select".
+ */
+export interface AgentMemorySelect<T extends boolean = true> {
+  content?: T;
+  kind?: T;
+  source?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2017,6 +2214,82 @@ export interface Term {
   createdAt?: string | null;
 }
 /**
+ * The model that powers the agent, what it may do on its own, its voice and its limits.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "agent".
+ */
+export interface Agent {
+  id: number;
+  /**
+   * Off stops every conversation, routine and automatic action at once.
+   */
+  enabled?: boolean | null;
+  name: string;
+  provider:
+    | 'anthropic'
+    | 'openai'
+    | 'google'
+    | 'openrouter'
+    | 'groq'
+    | 'deepseek'
+    | 'xai'
+    | 'mistral'
+    | 'together'
+    | 'ollama'
+    | 'custom';
+  /**
+   * The model's ID. Claude: claude-opus-5-5, claude-sonnet-5-5, claude-haiku-4-5-20251001, claude-fable-5-1. Others: see the provider's model list.
+   */
+  model: string;
+  /**
+   * Stored encrypted and never shown again, not even to the agent.
+   */
+  apiKey?: string | null;
+  apiKeyHint?: string | null;
+  /**
+   * Only needed for your own server or a service not in the list, e.g. http://localhost:11434/v1 for Ollama.
+   */
+  baseURL?: string | null;
+  /**
+   * A cheaper model, same provider, for background work: sorting messages and helper tasks. Empty: the main model does everything.
+   */
+  fastModel?: string | null;
+  /**
+   * How hard it thinks before acting, on models that support it.
+   */
+  thinking?: ('provider-default' | 'none' | 'low' | 'medium' | 'high' | 'xhigh') | null;
+  mode?: ('ask' | 'drafts' | 'trusted' | 'full') | null;
+  deletes?: ('never' | 'ask' | 'auto') | null;
+  email?: ('never' | 'ask' | 'auto') | null;
+  web?: boolean | null;
+  /**
+   * Read before every task. Its memory (Agent → Memory) adds what it learns over time.
+   */
+  persona?: string | null;
+  /**
+   * It sorts the message (lead, question, spam), writes a summary in the notes and marks obvious spam. It never replies on its own.
+   */
+  triage?: boolean | null;
+  triageDraft?: boolean | null;
+  /**
+   * After each routine and each new message it reads: what it did, what it changed and anything waiting for your approval. Every one also appears under the bell in the Agent console.
+   */
+  notifyAuto?: boolean | null;
+  /**
+   * Empty: ADMIN_NOTIFY_EMAIL, else the address in Site settings. Needs email set up (RESEND_API_KEY).
+   */
+  notifyEmail?: string | null;
+  maxSteps?: number | null;
+  dailyRuns?: number | null;
+  /**
+   * Keeps the model bill predictable.
+   */
+  dailyTokens?: number | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "home_select".
  */
@@ -2771,6 +3044,36 @@ export interface TermsSelect<T extends boolean = true> {
         image?: T;
       };
   _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "agent_select".
+ */
+export interface AgentSelect<T extends boolean = true> {
+  enabled?: T;
+  name?: T;
+  provider?: T;
+  model?: T;
+  apiKey?: T;
+  apiKeyHint?: T;
+  baseURL?: T;
+  fastModel?: T;
+  thinking?: T;
+  mode?: T;
+  deletes?: T;
+  email?: T;
+  web?: T;
+  persona?: T;
+  triage?: T;
+  triageDraft?: T;
+  notifyAuto?: T;
+  notifyEmail?: T;
+  maxSteps?: T;
+  dailyRuns?: T;
+  dailyTokens?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

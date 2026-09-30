@@ -41,21 +41,28 @@ export async function seed(payload: Payload, { fresh = false } = {}) {
   payload.logger.info("Seed: loading the Jomiez site content…");
 
   /* ---- Images ---- */
-  const media = new Map<string, number>();
-  const img = async (src: string, alt = ""): Promise<number> => {
+  // Each image is uploaded once, and one at a time: parallel uploads of the
+  // same file would race for the same filename (Postgres runs them at once).
+  const media = new Map<string, Promise<number>>();
+  let queue: Promise<unknown> = Promise.resolve();
+  const img = (src: string, alt = ""): Promise<number> => {
     const hit = media.get(src);
     if (hit) return hit;
     const filePath = path.join(publicDir, src);
     if (!fs.existsSync(filePath)) throw new Error(`Seed: missing image ${src}`);
-    const created = await payload.create({
-      collection: "media",
-      data: { alt },
-      filePath,
-      overrideAccess: true,
-      context: ctx,
+    const upload = queue.then(async () => {
+      const created = await payload.create({
+        collection: "media",
+        data: { alt },
+        filePath,
+        overrideAccess: true,
+        context: ctx,
+      });
+      return created.id as number;
     });
-    media.set(src, created.id as number);
-    return created.id as number;
+    queue = upload.catch(() => {});
+    media.set(src, upload);
+    return upload;
   };
 
   /* ---- Products & work ---- */
