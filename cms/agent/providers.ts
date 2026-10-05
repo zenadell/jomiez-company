@@ -4,6 +4,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModel } from "ai";
+import { PROVIDERS, type ProviderId } from "./provider-list";
 
 /*
  * The agent runs on any model: pick a provider and a model in Agent → Settings.
@@ -12,39 +13,7 @@ import type { LanguageModel } from "ai";
  * Ollama runs models on your own machine).
  */
 
-export type ProviderId =
-  | "anthropic"
-  | "openai"
-  | "google"
-  | "openrouter"
-  | "groq"
-  | "deepseek"
-  | "xai"
-  | "mistral"
-  | "together"
-  | "ollama"
-  | "custom";
-
-type Provider = { label: string; env?: string; baseURL?: string; keyless?: boolean; example: string };
-
-export const PROVIDERS: Record<ProviderId, Provider> = {
-  anthropic: { label: "Anthropic (Claude)", env: "ANTHROPIC_API_KEY", example: "claude-opus-5-5" },
-  openai: { label: "OpenAI", env: "OPENAI_API_KEY", example: "gpt-5" },
-  google: { label: "Google (Gemini)", env: "GEMINI_API_KEY", example: "gemini-2.5-pro" },
-  openrouter: {
-    label: "OpenRouter (hundreds of models)",
-    env: "OPENROUTER_API_KEY",
-    baseURL: "https://openrouter.ai/api/v1",
-    example: "anthropic/claude-opus-5-5",
-  },
-  groq: { label: "Groq", env: "GROQ_API_KEY", baseURL: "https://api.groq.com/openai/v1", example: "openai/gpt-oss-120b" },
-  deepseek: { label: "DeepSeek", env: "DEEPSEEK_API_KEY", baseURL: "https://api.deepseek.com", example: "deepseek-v4-flash" },
-  xai: { label: "xAI (Grok)", env: "XAI_API_KEY", baseURL: "https://api.x.ai/v1", example: "grok-4" },
-  mistral: { label: "Mistral", env: "MISTRAL_API_KEY", baseURL: "https://api.mistral.ai/v1", example: "mistral-large-latest" },
-  together: { label: "Together AI", env: "TOGETHER_API_KEY", baseURL: "https://api.together.xyz/v1", example: "meta-llama/Llama-3.3-70B-Instruct-Turbo" },
-  ollama: { label: "Ollama (your own machine)", baseURL: "http://localhost:11434/v1", keyless: true, example: "llama3.3" },
-  custom: { label: "Any OpenAI-compatible service", env: "AGENT_API_KEY", example: "your-model-id" },
-};
+export { PROVIDERS, type ProviderId };
 
 export const DEFAULT_PROVIDER: ProviderId = "anthropic";
 export const DEFAULT_MODEL = "claude-opus-5-5";
@@ -65,7 +34,7 @@ export function missingSetup(s: ModelSettings): string | null {
   if (!p) return `Unknown provider "${s.provider}".`;
   if (!s.model.trim()) return "Choose a model in Agent → Settings.";
   if (!p.keyless && !resolveKey(s.provider, s.apiKey)) {
-    return `Add an API key for ${p.label} in Agent → Settings${p.env ? ` (or set ${p.env})` : ""}.`;
+    return `Add a key for ${p.label} in Agent settings → Model → Your providers${p.env ? ` (or set ${p.env})` : ""}.`;
   }
   if (s.provider === "custom" && !s.baseURL) return "Add the service's address (base URL) in Agent → Settings.";
   return null;

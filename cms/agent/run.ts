@@ -5,7 +5,7 @@ import { fold, type AgentEvent, type PlanStep, type TranscriptItem } from "./eve
 import { decide, type Mode, type Permissions, type Risk } from "./policy";
 import { buildInstructions } from "./prompt";
 import { situation } from "./situation";
-import { buildModel, missingSetup, type ProviderId } from "./providers";
+import { buildModel, missingSetup, PROVIDERS, resolveKey, type ProviderId } from "./providers";
 import { targetsOf } from "./schema";
 import { decrypt } from "./secrets";
 import { notifyAddress, reportAutomaticRun } from "./notify";
@@ -48,12 +48,17 @@ type Thread = {
   title: string;
   status?: string | null;
   messages?: unknown;
+  /** The provider whose model last worked on it. */
+  provider?: string | null;
   events?: unknown;
   pending?: unknown;
   changes?: unknown;
   plan?: unknown;
   usage?: { input?: number | null; output?: number | null } | null;
 };
+
+/** A provider from Agent settings → Your providers. */
+export type Connection = { provider: ProviderId; apiKey: string; baseURL: string | null; fastModel: string };
 
 export type AgentConfig = {
   enabled: boolean;
@@ -63,6 +68,8 @@ export type AgentConfig = {
   fastModel: string;
   apiKey: string;
   baseURL: string | null;
+  /** Every provider with a saved key (the one in use included). */
+  providers: Connection[];
   thinking: string;
   perms: Permissions;
   persona: string;
@@ -86,16 +93,31 @@ export async function loadConfig(payload: Payload): Promise<AgentConfig> {
     overrideAccess: true,
     context: { revealAgentKey: true },
   })) as unknown as Record<string, unknown>;
-  const stored = typeof g.apiKey === "string" ? g.apiKey : "";
   const num = (v: unknown, d: number) => (typeof v === "number" && Number.isFinite(v) ? v : d);
+  const provider = (g.provider as ProviderId) || "anthropic";
+  const providers: Connection[] = ((g.providers as Record<string, unknown>[] | undefined) ?? [])
+    .filter((r) => r?.provider)
+    .map((r) => ({
+      provider: r.provider as ProviderId,
+      apiKey: decrypt(typeof r.apiKey === "string" ? r.apiKey : ""),
+      baseURL: (r.baseURL as string) || null,
+      fastModel: String(r.fastModel || ""),
+    }));
+  // Before Your providers there was one key, for whichever provider was chosen: still honoured if the list has none for it.
+  const legacy: Connection | null =
+    typeof g.apiKey === "string" && g.apiKey
+      ? { provider, apiKey: decrypt(g.apiKey), baseURL: (g.baseURL as string) || null, fastModel: String(g.fastModel || "") }
+      : null;
+  const active = providers.find((c) => c.provider === provider) ?? legacy;
   return {
     enabled: g.enabled !== false,
     name: String(g.name || "Keeper"),
-    provider: (g.provider as ProviderId) || "anthropic",
+    provider,
     model: String(g.model || ""),
-    fastModel: fastFor((g.provider as ProviderId) || "anthropic", String(g.fastModel || "")),
-    apiKey: decrypt(stored),
-    baseURL: (g.baseURL as string) || null,
+    fastModel: fastFor(provider, active ? active.fastModel : String(g.fastModel || "")),
+    apiKey: active?.apiKey ?? "",
+    baseURL: active?.baseURL ?? null,
+    providers: legacy && !providers.some((c) => c.provider === provider) ? [...providers, legacy] : providers,
     thinking: String(g.thinking || "provider-default"),
     perms: {
       mode: ((g.mode as Mode) || "drafts") as Mode,
@@ -123,6 +145,33 @@ export async function loadConfig(payload: Payload): Promise<AgentConfig> {
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
+
+/**
+ * A conversation's history, made safe for another provider's model. Replies keep
+ * provider-only extras (reasoning with its signatures, message ids) that another
+ * provider refuses; the words, tool calls and tool results all stay.
+ */
+export function forProvider(messages: ModelMessage[], provider: ProviderId): ModelMessage[] {
+  type Part = { type: string; providerOptions?: Record<string, unknown> };
+  const own = (opts?: Record<string, unknown>) => (opts && provider in opts ? { [provider]: opts[provider] } : undefined);
+  const out: ModelMessage[] = [];
+  for (const m of messages) {
+    const { providerOptions, ...rest } = m as ModelMessage & { providerOptions?: Record<string, unknown> };
+    const base = { ...rest, ...(own(providerOptions) ? { providerOptions: own(providerOptions) } : {}) } as ModelMessage;
+    if (typeof base.content === "string") {
+      out.push(base);
+      continue;
+    }
+    const parts = (base.content as Part[])
+      .filter((p) => p.type !== "reasoning")
+      .map((p) => {
+        const { providerOptions: po, ...part } = p;
+        return own(po) ? { ...part, providerOptions: own(po) } : part;
+      });
+    if (parts.length) out.push({ ...base, content: parts } as ModelMessage);
+  }
+  return out;
+}
 
 /* The quick model must belong to the main provider: a Claude ID left over after switching to, say, DeepSeek is ignored. */
 function fastFor(provider: ProviderId, fast: string) {
@@ -269,6 +318,8 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
   let plan: PlanStep[] = Array.isArray(thread.plan) ? (thread.plan as PlanStep[]) : [];
   let pending: Pending[] = Array.isArray(thread.pending) ? (thread.pending as Pending[]) : [];
   let messages: ModelMessage[] = Array.isArray(thread.messages) ? (thread.messages as ModelMessage[]) : [];
+  // Switched to another provider since the last request: its replies' provider-only parts would be refused.
+  if (thread.provider && thread.provider !== cfg.provider) messages = forProvider(messages, cfg.provider);
 
   /* ----- What was asked ----- */
   if (input.decisions?.length) {
@@ -538,6 +589,7 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
   // Pending approvals must stay answerable: keep the whole message history when waiting.
   await save({
     messages: status === "stopped" ? (thread.messages ?? []) : messages,
+    ...(status === "stopped" ? {} : { provider: cfg.provider }),
     events,
     plan,
     pending: status === "waiting" ? pending : [],
@@ -603,11 +655,26 @@ export function sightOf(cfg: AgentConfig): Sight {
   };
 }
 
-/** The Gemini key for voice: its own, else the main key when the main provider is Google, else the environment. */
+/** One provider's saved key and address (the key from the environment when none is saved). */
+export function connectionFor(cfg: AgentConfig, provider: ProviderId): Connection | null {
+  return cfg.providers.find((c) => c.provider === provider) ?? null;
+}
+
+/** The providers the agent can switch to: those with a key saved, or one in the environment. */
+export function usableProviders(cfg: AgentConfig): ProviderId[] {
+  return (Object.keys(PROVIDERS) as ProviderId[]).filter((id) => {
+    const c = connectionFor(cfg, id);
+    if (id === "custom" && !c?.baseURL) return false;
+    if (PROVIDERS[id].keyless) return Boolean(c);
+    return Boolean(resolveKey(id, c?.apiKey ?? ""));
+  });
+}
+
+/** The Gemini key for voice: its own, else the Google key from Your providers, else the environment. */
 export function voiceKey(cfg: AgentConfig): string {
   return (
     cfg.voice.apiKey ||
-    (cfg.provider === "google" ? cfg.apiKey : "") ||
+    connectionFor(cfg, "google")?.apiKey ||
     process.env.GEMINI_API_KEY ||
     process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
     process.env.GOOGLE_API_KEY ||

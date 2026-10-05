@@ -21,7 +21,7 @@ On that first run the database file is created (`jomiez.db`, not committed) and 
 | **Agent → Conversations** | Everything the agent has worked on, step by step, with every change it made. Open one in the console to continue it or undo it. |
 | **Agent → Routines** | Work the agent does on its own on a schedule ("every Monday at 08:00, check the site and brief me"). |
 | **Agent → Memory** | What it keeps in mind in every task: facts, your preferences, and lessons from changes you turned down. Edit or delete anything. |
-| **Agent → Agent settings** | Its model and key, what it may do on its own, its voice, notifications and limits (admins only). |
+| **Agent → Agent settings** | Its model and your providers' keys, what it may do on its own, its voice, notifications and limits (admins only). A button at the top goes back to the conversation you were in. |
 | **Pages → Home page** | Every home section, one tab each, top to bottom: hero, introduction, Creations, services, philosophy, tenets, image band, four seasons, company, pricing, questions and journal. Each tab has a **Show this section** switch. |
 | **Pages → About / Services / Products & work / Journal / Contact** | Those pages' words, images and buttons. The Contact page includes the form's labels, budget options and thank-you message. |
 | **Pages → Custom pages** | Brand-new pages at `jomiez.com/<address>`, built by stacking the site's own sections: page opener, text, image band, numbered cards, products & work grid, latest posts, tenets, pricing, questions and a call to action. Under **Where it appears**, tick *Show in the top menu* and/or *Show in the footer* (and pick the footer column) to link the page from every page of the site. |
@@ -75,12 +75,13 @@ Seeing and making images use the Gemini key from the Voice tab (or `GEMINI_API_K
 
 On a Linux server the browser (about 60 MB) is downloaded the first time a screenshot is needed, not at install. It needs about 300 MB of memory on top of the site, so on a server with less than 1.5 GB (Render's Free and Starter plans) it doesn't start: the agent says screenshots aren't available there, and the site carries on. Point `BROWSER_WS_ENDPOINT` at a browser service (Browserless has a free plan) to have them anyway, or use Render's Standard plan (2 GB). Seeing images, finding free photos and making images work on any plan. On your Mac it uses Google Chrome (or set `BROWSER_EXECUTABLE_PATH`).
 
-**Any model.** In *Agent settings → Model*, pick a provider and model: Anthropic (Claude), OpenAI, Google (Gemini), OpenRouter (hundreds of models), Groq, DeepSeek, xAI, Mistral, Together, Ollama on your own machine, or any OpenAI-compatible service.
+**Any model, several providers at once.** Anthropic (Claude), OpenAI, Google (Gemini), OpenRouter (hundreds of models), Groq, DeepSeek, xAI, Mistral, Together, Ollama on your own machine, or any OpenAI-compatible service.
 
-- Paste the key there (it's stored encrypted and never shown again, not even to the agent) or set it as an environment variable (`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, …).
-- The model box takes the model's **ID**, exactly as the provider writes it: `deepseek-v4-flash`, not "DeepSeek V4 Flash". **Choose from your account** under the box asks the provider which models your key can use right now and fills in the exact ID, so new models show up the day they're released.
-- **Test the connection** checks it. If the name isn't one the provider knows, it says which IDs are closest.
-- The quick model (optional) does background work cheaply. It must come from the same provider; a leftover model from another provider is ignored.
+- **Your providers** (*Agent settings → Model*): press **Add Provider** for each one you use and paste its key (stored encrypted, never shown again, not even to the agent). Each can also have a quick model: a cheaper one from the same provider for background work. A provider whose key is in the environment (`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, …) works without a row.
+- **Switching**: click the model name at the top of the console. It lists every provider with a key, and the models each key can use, read live from the provider. Pick one and the agent uses it from the next message, in the same conversation. (The **Provider** and **Model** boxes in settings do the same.)
+- The model is always an **ID**, exactly as the provider writes it: `deepseek-v4-flash`, not "DeepSeek V4.1 Flash" (DeepSeek's API keeps the same ID as it releases newer versions). Picking from the list avoids guessing; **Choose from your account** under the Model box does the same.
+- **Test the connection** checks the model in use. If the name isn't one the provider knows, it says which IDs are closest.
+- The Google key in Your providers also powers voice and seeing images, unless the Voice tab has its own.
 
 ### Talking to it
 
@@ -90,7 +91,7 @@ Press the microphone next to *Send* and talk. It answers out loud, and it acts w
   - **Live model**: `gemini-3.1-flash-live-preview` by default. **Choose from your account** lists the live-audio models your key can use.
   - **Its voice**: Kore by default, or any Gemini voice (Puck, Charon, Fenrir, Aoede, Leda, Orus, Zephyr, …).
   - **Language** (optional): e.g. `en-GB`. Empty means it follows you.
-  - **Gemini key for voice**: only needed if neither of these applies: the main provider is Google, or `GEMINI_API_KEY` is set.
+  - **Gemini key for voice**: only needed if Your providers has no Google key and `GEMINI_API_KEY` isn't set.
 - Your key never reaches the browser. Each conversation gets a single-use pass from Google that expires within minutes and is locked to that conversation's model, voice, instructions and actions.
 - The same rules apply as for typed requests. Anything that needs your approval shows as a card on screen; it tells you so, and carries on when you click **Approve** or **Decline**. Every change is recorded and can be undone.
 - It works like a person at the next desk. "Hold on, let me check" is followed by the check, and then it comes back with what it found; you never have to say "go ahead". It finds the exact spot, changes it, looks at the result and only then tells you.

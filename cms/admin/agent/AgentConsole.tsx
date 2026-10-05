@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Composer, Transcript } from "./Chat";
+import { lastThread, rememberThread } from "./lastThread";
 import { Markdown } from "./Markdown";
+import { ModelSwitch } from "./ModelSwitch";
 import { useAgentStatus, useThread } from "./useAgent";
 import { MicIcon, VoiceBar, VoiceCaptions, VoiceHello } from "./Voice";
 import { useVoice } from "./useVoice";
@@ -70,6 +72,15 @@ export function AgentConsole() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [talking, voice.state.threadId]);
 
+  // The open conversation is remembered, so leaving for Settings (or any screen) and coming back reopens it.
+  useEffect(() => {
+    if (!api.threadId) return;
+    rememberThread(api.threadId);
+    if (new URLSearchParams(window.location.search).get("thread") !== api.threadId) {
+      window.history.replaceState(null, "", `/admin/agent?thread=${api.threadId}`);
+    }
+  }, [api.threadId]);
+
   const loadThreads = useCallback(async () => {
     const res = await fetch("/api/agent/threads", { credentials: "include", cache: "no-store" });
     if (res.ok) setThreads((await res.json()).docs ?? []);
@@ -79,8 +90,8 @@ export function AgentConsole() {
     const first = setTimeout(loadThreads, 0);
     const t = setInterval(loadThreads, 20_000);
     window.addEventListener("jomiez-agent-changed", loadThreads);
-    // Opened from a notice or email: go straight to that conversation.
-    const id = new URLSearchParams(window.location.search).get("thread");
+    // Opened from a notice or email: go straight to that conversation. Otherwise, the one left open last.
+    const id = new URLSearchParams(window.location.search).get("thread") ?? lastThread();
     if (id) void api.load(id);
     return () => {
       clearTimeout(first);
@@ -98,6 +109,7 @@ export function AgentConsole() {
   const fresh = () => {
     setUndoResult(null);
     api.reset();
+    rememberThread(null);
     window.history.replaceState(null, "", "/admin/agent");
   };
 
@@ -156,7 +168,18 @@ export function AgentConsole() {
           <div>
             <h1>{name}</h1>
             <p>
-              {status ? (status.ready ? `${status.model} · ${modeText(status.mode)}` : "Not set up yet") : "…"}
+              {!status ? (
+                "…"
+              ) : status.canConfigure ? (
+                <>
+                  <ModelSwitch status={status} onSwitched={() => void refresh()} />
+                  {status.ready ? ` · ${modeText(status.mode)}` : " · not set up yet"}
+                </>
+              ) : status.ready ? (
+                `${status.model} · ${modeText(status.mode)}`
+              ) : (
+                "Not set up yet"
+              )}
             </p>
           </div>
         </div>

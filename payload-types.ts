@@ -216,6 +216,7 @@ export interface AgentThread {
     | number
     | boolean
     | null;
+  provider?: string | null;
   events?:
     | {
         [k: string]: unknown;
@@ -915,6 +916,7 @@ export interface AgentThreadsSelect<T extends boolean = true> {
   status?: T;
   context?: T;
   messages?: T;
+  provider?: T;
   events?: T;
   plan?: T;
   pending?: T;
@@ -2230,6 +2232,9 @@ export interface Agent {
    */
   enabled?: boolean | null;
   name: string;
+  /**
+   * The one it uses now. Its key comes from Your providers below.
+   */
   provider:
     | 'anthropic'
     | 'openai'
@@ -2247,22 +2252,46 @@ export interface Agent {
    */
   model: string;
   /**
-   * Stored encrypted and never shown again, not even to the agent.
-   */
-  apiKey?: string | null;
-  apiKeyHint?: string | null;
-  /**
-   * Only needed for your own server or a service not in the list, e.g. http://localhost:11434/v1 for Ollama.
-   */
-  baseURL?: string | null;
-  /**
-   * A cheaper model, same provider, for background work: sorting messages and helper tasks. Empty: the main model does everything.
-   */
-  fastModel?: string | null;
-  /**
    * How hard it thinks before acting, on models that support it.
    */
   thinking?: ('provider-default' | 'none' | 'low' | 'medium' | 'high' | 'xhigh') | null;
+  /**
+   * Add a key for each provider you use (OpenAI, DeepSeek, Gemini, Claude…). Then switch between their models from the console, or with the Provider and Model boxes above, without entering keys again.
+   */
+  providers?:
+    | {
+        provider:
+          | 'anthropic'
+          | 'openai'
+          | 'google'
+          | 'openrouter'
+          | 'groq'
+          | 'deepseek'
+          | 'xai'
+          | 'mistral'
+          | 'together'
+          | 'ollama'
+          | 'custom';
+        /**
+         * A cheaper model from this provider for background work (sorting messages, helper tasks). Empty: the main model does everything.
+         */
+        fastModel?: string | null;
+        /**
+         * Stored encrypted and never shown again, not even to the agent. Empty: the provider's key from the environment, if set.
+         */
+        apiKey?: string | null;
+        apiKeyHint?: string | null;
+        /**
+         * Only needed for your own server or a service not in the list, e.g. http://localhost:11434/v1 for Ollama.
+         */
+        baseURL?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  apiKey?: string | null;
+  apiKeyHint?: string | null;
+  baseURL?: string | null;
+  fastModel?: string | null;
   voiceEnabled?: boolean | null;
   /**
    * A Gemini model that supports live audio. Choose from your account to see the ones your key can use.
@@ -2277,7 +2306,7 @@ export interface Agent {
    */
   voiceLanguage?: string | null;
   /**
-   * Empty: the main key when the main provider is Google, else GEMINI_API_KEY from the environment.
+   * Empty: the Google (Gemini) key from Model → Your providers, else GEMINI_API_KEY from the environment.
    */
   voiceApiKey?: string | null;
   voiceApiKeyHint?: string | null;
@@ -3087,11 +3116,21 @@ export interface AgentSelect<T extends boolean = true> {
   name?: T;
   provider?: T;
   model?: T;
+  thinking?: T;
+  providers?:
+    | T
+    | {
+        provider?: T;
+        fastModel?: T;
+        apiKey?: T;
+        apiKeyHint?: T;
+        baseURL?: T;
+        id?: T;
+      };
   apiKey?: T;
   apiKeyHint?: T;
   baseURL?: T;
   fastModel?: T;
-  thinking?: T;
   voiceEnabled?: T;
   voiceModel?: T;
   voiceName?: T;

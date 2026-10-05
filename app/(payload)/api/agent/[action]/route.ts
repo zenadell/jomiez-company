@@ -7,7 +7,7 @@ import type { AgentEvent } from "@/cms/agent/events";
 import { listNotices, markNoticesRead } from "@/cms/agent/notify";
 import { buildModel, listModels, missingSetup, PROVIDERS, type ModelInfo, type ModelPurpose, type ProviderId } from "@/cms/agent/providers";
 import { tickRoutines } from "@/cms/agent/routines";
-import { loadConfig, requestStop, runAgent, undoThread, usageToday, voiceKey, type Decision } from "@/cms/agent/run";
+import { connectionFor, loadConfig, requestStop, runAgent, undoThread, usableProviders, usageToday, voiceKey, type Decision } from "@/cms/agent/run";
 import { answerVoiceApproval, logVoice, runVoiceCalls, startVoice } from "@/cms/agent/voice";
 import { getShot } from "@/cms/agent/eyes";
 
@@ -199,12 +199,13 @@ export async function POST(req: Request, { params }: Params) {
       if (!PROVIDERS[provider]) return json({ error: "Choose a provider first." }, 400);
       const typedKey = typeof body.apiKey === "string" ? body.apiKey.trim() : "";
       const typedBase = onGemini || typeof body.baseURL !== "string" ? "" : body.baseURL.trim().replace(/\/$/, "");
-      const savedBase = provider === cfg.provider ? (cfg.baseURL ?? "").trim().replace(/\/$/, "") : "";
+      const saved = connectionFor(cfg, provider);
+      const savedBase = (saved?.baseURL ?? "").trim().replace(/\/$/, "");
       let apiKey = typedKey;
       if (!apiKey) {
         // A saved key only ever goes to the address it was saved with.
         if (typedBase && typedBase !== savedBase) return json({ error: "Type the key for this address in the key box first (or save the address)." });
-        apiKey = onGemini ? voiceKey(cfg) : provider === cfg.provider ? cfg.apiKey : "";
+        apiKey = onGemini ? voiceKey(cfg) : (saved?.apiKey ?? "");
       }
       try {
         const models = await listModels({ provider, apiKey, baseURL: typedBase || savedBase || null }, purpose);
@@ -214,6 +215,17 @@ export async function POST(req: Request, { params }: Params) {
         const msg = (err as Error).message;
         return json({ error: /^(401|403)/.test(msg) ? `The provider refused the key (${msg.slice(0, 160)}).` : `Couldn't list the models: ${msg.slice(0, 200)}` });
       }
+    }
+    case "switch": {
+      // Use another model, from any provider in Your providers. Conversations carry on with it.
+      if (!isAdmin(user)) return json({ error: "Only admins can change the model." }, 403);
+      const cfg = await loadConfig(payload);
+      const provider = String(body.provider || "") as ProviderId;
+      const model = typeof body.model === "string" ? body.model.trim() : "";
+      if (!PROVIDERS[provider] || !model) return json({ error: "Choose a provider and a model." }, 400);
+      if (!usableProviders(cfg).includes(provider)) return json({ error: `Add a key for ${PROVIDERS[provider].label} in Agent settings → Your providers first.` }, 400);
+      await payload.updateGlobal({ slug: "agent", data: { provider, model } as never, overrideAccess: true, depth: 0 });
+      return json({ ok: true, provider, model });
     }
     case "voice-session": {
       try {
@@ -329,6 +341,8 @@ export async function GET(req: Request, { params }: Params) {
       setup: admin ? setup : setup ? "The agent isn't set up yet. Ask an admin." : null,
       model: cfg.model,
       provider: cfg.provider,
+      // What the model switcher offers (admins only).
+      providers: admin ? usableProviders(cfg).map((id) => ({ id, label: PROVIDERS[id].label })) : [],
       mode: cfg.perms.mode,
       waiting: waiting.totalDocs,
       working: working.totalDocs,
