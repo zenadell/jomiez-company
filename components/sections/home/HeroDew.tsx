@@ -2,7 +2,7 @@
 
 import { Glass, glassValue, type GlassOptics } from "@samasante/liquid-glass";
 import { useReducedMotion } from "motion/react";
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useCursorLens, useGlassSupport } from "@/components/ui/useGlassSupport";
 

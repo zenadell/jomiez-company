@@ -1,6 +1,6 @@
 import { RichText, type JSXConvertersFunction } from "@payloadcms/richtext-lexical/react";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import { img } from "@/lib/media";
 import type { Media } from "@/payload-types";
 

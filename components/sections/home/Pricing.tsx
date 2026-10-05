@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { BigMarquee } from "@/components/ui/BigMarquee";

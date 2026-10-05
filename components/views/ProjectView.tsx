@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import Link from "next/link";
 import { Appear, springFirm, springSlow, springSoft } from "@/components/ui/Motion";
 import { PixelButton } from "@/components/ui/PixelButton";

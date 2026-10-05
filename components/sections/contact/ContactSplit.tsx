@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import { useActionState, useEffect, useRef } from "react";
 import { sendInquiry, type InquiryState } from "@/app/(site)/contact/actions";
 import { useSiteData } from "@/components/cms/SiteData";

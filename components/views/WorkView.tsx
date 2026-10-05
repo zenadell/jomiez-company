@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import { BigMarquee } from "@/components/ui/BigMarquee";
 import { Appear, springFirm, springSlow } from "@/components/ui/Motion";
 import { ProjectCard } from "@/components/work/ProjectCard";

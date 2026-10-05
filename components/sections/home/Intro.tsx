@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import { Appear, springFirm } from "@/components/ui/Motion";
 import { ScrollText } from "@/components/ui/ScrollText";
 import { NewsTicker } from "@/components/ui/NewsTicker";

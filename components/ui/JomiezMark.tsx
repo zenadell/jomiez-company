@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 
 /*
  * The Jomiez "Z", redrawn as a vector from the master logo

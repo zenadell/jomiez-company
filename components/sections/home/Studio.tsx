@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import Link from "next/link";
 import { JomiezMark } from "@/components/ui/JomiezMark";
 import { Appear, springFirm } from "@/components/ui/Motion";

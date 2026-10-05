@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import { Appear, springFirm } from "@/components/ui/Motion";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { ScrollText } from "@/components/ui/ScrollText";

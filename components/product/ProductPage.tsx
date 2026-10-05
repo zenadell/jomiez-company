@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import { Faq } from "@/components/sections/home/Faq";
 import { Icon } from "@/components/ui/Icon";
 import { Appear, springFirm, springSlow, springSoft } from "@/components/ui/Motion";

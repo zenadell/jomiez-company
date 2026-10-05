@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import { RichTextBody } from "@/components/cms/RichTextBody";
 import { Appear, springSlow, springSoft } from "@/components/ui/Motion";
 import { ArticleCard } from "@/components/insights/ArticleCard";
