@@ -88,6 +88,9 @@ export function cloudinaryStorage(): Plugin {
   }
   return cloudStoragePlugin({
     enabled: cloudinaryConfigured,
-    collections: { media: { adapter, disableLocalStorage: true, disablePayloadAccessControl: true } },
+    // The plugin's own fields (the file's folder and key) exist with or without
+    // Cloudinary, so the database is the same here and in production.
+    alwaysInsertFields: true,
+    collections: { media: { adapter: cloudinaryConfigured ? adapter : null, disableLocalStorage: true, disablePayloadAccessControl: true } },
   });
 }
