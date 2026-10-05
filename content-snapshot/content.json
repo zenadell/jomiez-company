@@ -1,0 +1,4136 @@
+{
+ "savedAt": "2026-10-05T13:20:34.253Z",
+ "media": [
+  {
+   "id": 31,
+   "filename": "bookcall-hero.png",
+   "alt": "Book a call hero image"
+  },
+  {
+   "id": 30,
+   "filename": "bookcall-hero.jpg",
+   "alt": "Ancient tree roots and stones in an earthy, natural scene"
+  },
+  {
+   "id": 29,
+   "filename": "bookcall-hero-roots.jpg",
+   "alt": "Ancient tree roots covered in green moss spreading across a forest floor"
+  },
+  {
+   "id": 28,
+   "filename": "5d742106a6199b70777c22538b69d91e.jpg",
+   "alt": "Contact page illustration"
+  },
+  {
+   "id": 27,
+   "filename": "chaka-ai-chat.jpg",
+   "alt": "Chaka AI chat view screenshot"
+  },
+  {
+   "id": 26,
+   "filename": "aethron-studio.png",
+   "alt": "Aethron studio: dark design tool with a webpage layout and editing sidebar"
+  },
+  {
+   "id": 25,
+   "filename": "pricing-swirl.jpg",
+   "alt": ""
+  },
+  {
+   "id": 24,
+   "filename": "process-iso.webp",
+   "alt": ""
+  },
+  {
+   "id": 23,
+   "filename": "process-texture.webp",
+   "alt": ""
+  },
+  {
+   "id": 22,
+   "filename": "showcase-dial.jpg",
+   "alt": ""
+  },
+  {
+   "id": 21,
+   "filename": "services-iso.webp",
+   "alt": ""
+  },
+  {
+   "id": 20,
+   "filename": "services-texture.webp",
+   "alt": ""
+  },
+  {
+   "id": 19,
+   "filename": "hero-card.jpg",
+   "alt": ""
+  },
+  {
+   "id": 18,
+   "filename": "hero-crt.webp",
+   "alt": ""
+  },
+  {
+   "id": 17,
+   "filename": "footer-cube.webp",
+   "alt": ""
+  },
+  {
+   "id": 16,
+   "filename": "og.jpg",
+   "alt": ""
+  },
+  {
+   "id": 15,
+   "filename": "client-3.jpg",
+   "alt": ""
+  },
+  {
+   "id": 14,
+   "filename": "client-4.jpg",
+   "alt": ""
+  },
+  {
+   "id": 13,
+   "filename": "client-1.jpg",
+   "alt": ""
+  },
+  {
+   "id": 12,
+   "filename": "client-2.jpg",
+   "alt": ""
+  },
+  {
+   "id": 11,
+   "filename": "high-performance.jpg",
+   "alt": ""
+  },
+  {
+   "id": 10,
+   "filename": "scalable-systems.jpg",
+   "alt": ""
+  },
+  {
+   "id": 9,
+   "filename": "modern-cloud.jpg",
+   "alt": ""
+  },
+  {
+   "id": 8,
+   "filename": "renok.jpg",
+   "alt": "Renok screenshot"
+  },
+  {
+   "id": 7,
+   "filename": "zyro.jpg",
+   "alt": "Zyro screenshot"
+  },
+  {
+   "id": 6,
+   "filename": "chaka-wap.jpg",
+   "alt": "Chaka WAP screenshot"
+  },
+  {
+   "id": 5,
+   "filename": "card-1.jpg",
+   "alt": ""
+  },
+  {
+   "id": 4,
+   "filename": "card-2.jpg",
+   "alt": ""
+  },
+  {
+   "id": 3,
+   "filename": "panel.jpg",
+   "alt": ""
+  },
+  {
+   "id": 2,
+   "filename": "hero.jpg",
+   "alt": ""
+  },
+  {
+   "id": 1,
+   "filename": "chaka-ai.jpg",
+   "alt": "Chaka AI screenshot"
+  }
+ ],
+ "collections": {
+  "projects": [
+   {
+    "id": 1,
+    "live": {
+     "id": 1,
+     "_order": "a0",
+     "name": "Chaka AI",
+     "category": "AI Platform",
+     "isProduct": true,
+     "summary": "A high-performance humanoid multimodal AI platform with real-time voice interaction, emotional intelligence, advanced research ability and an episodic memory system.",
+     "image": 1,
+     "client": null,
+     "year": null,
+     "link": {
+      "label": null,
+      "href": null
+     },
+     "services": [
+      {
+       "id": "6abc30a3531c3bbf75d4a20a",
+       "text": "AI Development"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a20b",
+       "text": "Full-stack Engineering"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a20c",
+       "text": "UI/UX Design"
+      }
+     ],
+     "stats": [
+      {
+       "id": "6abc30a3531c3bbf75d4a20d",
+       "value": "Real-time",
+       "label": "Voice & vision"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a20e",
+       "value": "60fps",
+       "label": "Neon HUD interface"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a20f",
+       "value": "Tiered",
+       "label": "Memory system"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a210",
+       "value": "Imagen 3",
+       "label": "Image synthesis"
+      }
+     ],
+     "sections": [
+      {
+       "id": "6abc30a3531c3bbf75d4a211",
+       "title": "Executive summary & vision",
+       "body": "Chaka is an autonomous multimodal intelligence designed to serve as the ultimate personal assistant. Built by Emmanuel Ezinna Nweke (Templeton) at Jomiez Innovation, Chaka represents a leap toward emotional intelligence in AI, combining real-time voice interaction with a sophisticated tool-use system. Her personality is expressive and professional, designed to assist, research, and evolve alongside her users.",
+       "points": []
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a212",
+       "title": "Technical infrastructure",
+       "body": "The backend is a Node.js/Express application optimised for “warm performance”: an aggressive warm-up pipeline, including DNS pre-warming and library pre-initialisation, shaves milliseconds off external requests. The stack uses Turso (SQLite) for low-latency storage and Firebase Admin for secure authentication.",
+       "points": []
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a217",
+       "title": "AI orchestration & multimodal capabilities",
+       "body": null,
+       "points": [
+        {
+         "id": "6abc30a3531c3bbf75d4a213",
+         "title": "Real-time interaction",
+         "body": "Gemini 2.5 Flash native audio for low-latency voice and visual streaming over WebSocket proxies."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a214",
+         "title": "Reasoning & vision",
+         "body": "Gemini 2.0 Flash for general chat logic and deep multimodal input analysis."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a215",
+         "title": "Creative tools",
+         "body": "High-fidelity image synthesis through Vertex AI (Imagen 3) and near-perfect transcription with OpenAI Whisper."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a216",
+         "title": "Key management",
+         "body": "A dedicated ApiKeyManager rotates search, text and multimodal keys automatically to prevent interruptions."
+        }
+       ]
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a218",
+       "title": "Frontend & UI/UX",
+       "body": "The “Neon HUD” interface is built on glassmorphism and high-aesthetic performance, with GSAP-driven micro-animations and an interactive face visualiser featuring gaze tracking, randomised blinking and emotional state rendering. Hybrid RAG orchestration offloads vector math to background Web Workers, keeping the UI at a consistent 60fps.",
+       "points": []
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a219",
+       "title": "The memory system",
+       "body": "Chaka builds a cognitive model of her users through a tiered memory system. Episodic memories log individual moments with associated emotions, while semantic memory distils them into a permanent identity profile. A background “Reflection” process consolidates memories to prevent bloat, so the AI can keep long-term goals and unfinished “open loops” for proactive interaction.",
+       "points": []
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a21d",
+       "title": "Research & video analysis",
+       "body": null,
+       "points": [
+        {
+         "id": "6abc30a3531c3bbf75d4a21a",
+         "title": "VideoAgent",
+         "body": "Scene-by-scene visual and audio analysis of video content using yt-dlp and Gemini Flash."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a21b",
+         "title": "Deep research",
+         "body": "A tiered search system using Serper, Tavily and Firecrawl to extract research-ready data from complex or bot-shielded websites."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a21c",
+         "title": "Silent execution",
+         "body": "In Live Mode, Chaka runs tools silently to mimic human thought patterns rather than command-line feedback."
+        }
+       ]
+      }
+     ],
+     "productPage": {
+      "hero": {
+       "title": "Chaka AI: A Mind That Remembers",
+       "lead": "A multimodal AI with real-time voice, emotional intelligence, deep research and a memory that grows with every conversation.",
+       "cta": {
+        "label": "Ask About Chaka",
+        "href": "/contact"
+       },
+       "image": 2,
+       "proof": "From the makers of\n80+ delivered projects"
+      },
+      "stats": [
+       {
+        "id": "6abc30a3531c3bbf75d4a21e",
+        "value": "60fps",
+        "text": "A steady interface: Web Workers carry the vector math, never the main thread."
+       },
+       {
+        "id": "6abc30a3531c3bbf75d4a21f",
+        "value": "4 models",
+        "text": "Gemini 2.5 Flash for live voice, Gemini 2.0 Flash for reasoning, Imagen 3 for images, Whisper for speech."
+       },
+       {
+        "id": "6abc30a3531c3bbf75d4a220",
+        "value": "3 tiers",
+        "text": "Serper, Tavily and Firecrawl search in tiers, even through bot-shielded websites."
+       },
+       {
+        "id": "6abc30a3531c3bbf75d4a221",
+        "value": "2 memories",
+        "text": "Episodic memory keeps each moment; semantic memory distils them into a lasting profile."
+       }
+      ],
+      "showcase": {
+       "title": "The Neon HUD",
+       "lead": "A glassmorphic interface with a living face: gaze tracking, blinking and emotional states, held at a steady 60fps.",
+       "background": 3,
+       "screen": 1,
+       "address": "Chaka AI"
+      },
+      "cards": [
+       {
+        "id": "6abc30a3531c3bbf75d4a222",
+        "title": "Deep Research",
+        "text": "A tiered search across Serper, Tavily and Firecrawl pulls research-ready data from complex, even bot-shielded, websites.",
+        "mock": "research",
+        "mockTitle": "Researching for you",
+        "art": 5
+       },
+       {
+        "id": "6abc30a3531c3bbf75d4a223",
+        "title": "Live Voice & Vision",
+        "text": "Gemini native audio streams voice and vision in real time, and in Live Mode her tools run silently, like thought.",
+        "mock": "prompt",
+        "mockTitle": "Ask Chaka anything…",
+        "art": 4
+       }
+      ],
+      "statement": "Chaka isn't a static assistant; she's a living layer of memory that learns from every conversation, keeps the moments that matter, and returns with them when you need her.",
+      "system": {
+       "label": "System: warm and ready",
+       "text": "Chaka runs on a Node.js core built for warm performance, with Turso for low-latency storage and Firebase Admin for secure sign-in. Hybrid RAG hands the vector math to background workers, so the interface never stutters while she thinks.",
+       "features": [
+        {
+         "id": "6abc30a3531c3bbf75d4a224",
+         "icon": "shieldCheck",
+         "text": "Firebase Admin handles secure authentication; Turso keeps storage close and quick."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a225",
+         "icon": "brain",
+         "text": "A background reflection process consolidates memories, so long-term goals stay and clutter goes."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a226",
+         "icon": "gauge",
+         "text": "A warm-up pipeline pre-warms DNS and libraries, shaving milliseconds off every request."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a227",
+         "icon": "plugsConnected",
+         "text": "An ApiKeyManager rotates search, text and multimodal keys, so she never goes quiet."
+        }
+       ]
+      },
+      "faq": {
+       "sub": "Answers on what Chaka does, the models she runs on and how she remembers.",
+       "title": "Everything you need to know about Chaka.",
+       "items": [
+        {
+         "id": "6abc30a3531c3bbf75d4a228",
+         "q": "What can Chaka do?",
+         "a": "Talk and see in real time, research the web in depth, analyse videos scene by scene, generate images with Imagen 3 and transcribe speech with Whisper, all while remembering the people she works with."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a229",
+         "q": "Which models power Chaka?",
+         "a": "Gemini 2.5 Flash native audio for live voice and vision, Gemini 2.0 Flash for reasoning, Vertex AI Imagen 3 for images and OpenAI Whisper for transcription."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a22a",
+         "q": "How does Chaka remember?",
+         "a": "Through tiered memory. Episodic memories log individual moments with their emotions, semantic memory distils them into a permanent profile, and a background reflection process keeps both lean."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a22b",
+         "q": "How does she research?",
+         "a": "A tiered search across Serper, Tavily and Firecrawl extracts research-ready data, even from complex or bot-shielded websites. Her VideoAgent analyses video scene by scene."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a22c",
+         "q": "Who built Chaka?",
+         "a": "Emmanuel Ezinna Nweke (Templeton) at Jomiez Innovation. The same team builds custom software and AI systems for businesses."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a22d",
+         "q": "Can Jomiez build something like this for us?",
+         "a": "Yes. Our AI Systems work brings the craft behind our products to yours: multimodal assistants, memory and RAG pipelines, agents and model failover. Tell us what you are growing."
+        }
+       ]
+      }
+     },
+     "meta": {
+      "title": null,
+      "description": null,
+      "image": null
+     },
+     "slug": "chaka-ai",
+     "updatedAt": "2026-09-29T21:41:55.229Z",
+     "createdAt": "2026-09-29T21:41:55.228Z",
+     "_status": "published"
+    },
+    "draft": null
+   },
+   {
+    "id": 2,
+    "live": {
+     "id": 2,
+     "_order": "a1",
+     "name": "Chaka WAP",
+     "category": "AI Automation",
+     "isProduct": true,
+     "summary": "A multimodal, local-first AI engine that joins WhatsApp conversations as a human-like participant, with dynamic style learning and a robust failover architecture.",
+     "image": 6,
+     "client": null,
+     "year": null,
+     "link": {
+      "label": null,
+      "href": null
+     },
+     "services": [
+      {
+       "id": "6abc30a3531c3bbf75d4a22e",
+       "text": "AI Development"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a22f",
+       "text": "WhatsApp Automation"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a230",
+       "text": "Backend Engineering"
+      }
+     ],
+     "stats": [
+      {
+       "id": "6abc30a3531c3bbf75d4a231",
+       "value": "10x",
+       "label": "Faster reads"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a232",
+       "value": "384-dim",
+       "label": "Local embeddings"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a233",
+       "value": "Multi-LLM",
+       "label": "Failover routing"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a234",
+       "value": "Node.js",
+       "label": "Core runtime"
+      }
+     ],
+     "sections": [
+      {
+       "id": "6abc30a3531c3bbf75d4a235",
+       "title": "Project overview & architecture",
+       "body": "Chaka WAP is an advanced AI engine designed to operate autonomously on WhatsApp. Unlike traditional bots, it uses a Dynamic Style Learning Engine to mirror the conversational style, slang and brevity of the person it's talking to. The system runs on a decoupled architecture: a WhatsApp Web bridge, a local SQLite memory engine and a multi-LLM orchestrator.",
+       "points": []
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a23b",
+       "title": "The tech stack",
+       "body": null,
+       "points": [
+        {
+         "id": "6abc30a3531c3bbf75d4a236",
+         "title": "Backend",
+         "body": "Node.js with @whiskeysockets/baileys for the WhatsApp socket protocol."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a237",
+         "title": "Database",
+         "body": "Local SQLite for fast, encrypted storage of chat logs and binary vector embeddings."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a238",
+         "title": "AI brain",
+         "body": "Gemini 2.5 Flash for reasoning and Gemini 1.5 Flash for vision."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a239",
+         "title": "Local memory",
+         "body": "@xenova/transformers runs locally to generate 384-dimensional vectors for private, cost-free RAG."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a23a",
+         "title": "Admin UI",
+         "body": "A real-time dashboard in Vanilla JS, Tailwind CSS and Socket.io for live telemetry and log monitoring."
+        }
+       ]
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a23c",
+       "title": "Memory logic & style learning",
+       "body": "Chaka remembers the whole relationship: an ingestion pipeline saves message embeddings as binary BLOBs in SQLite, and every reply runs a cosine-similarity search to pull relevant history into context. The engine also analyses a user's last 5–8 messages to mirror their syntax, capitalisation and use of Nigerian Pidgin.",
+       "points": []
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a23d",
+       "title": "Vision & failover",
+       "body": "The system is fully multimodal, intercepting media to provide “occasion inference”: working out why a photo was sent from the chat so far. To stay online, an Ironclad Routing Orchestrator rotates through model versions and API keys whenever rate limits are hit.",
+       "points": []
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a242",
+       "title": "Evolution & optimisation",
+       "body": null,
+       "points": [
+        {
+         "id": "6abc30a3531c3bbf75d4a23e",
+         "title": "Storage",
+         "body": "Migrated from Firebase to local SQLite to escape document size limits and latency."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a23f",
+         "title": "Embeddings",
+         "body": "Replaced cloud embedding APIs with local transformers to remove API costs and improve privacy."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a240",
+         "title": "Data handling",
+         "body": "Moved from string vectors to binary BLOBs, shrinking the database and speeding up reads 10x."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a241",
+         "title": "UI fluidity",
+         "body": "Flex-based layouts let the admin dashboard scale from 4K monitors down to phones."
+        }
+       ]
+      }
+     ],
+     "productPage": {
+      "hero": {
+       "title": "Chaka WAP: At Home in WhatsApp",
+       "lead": "A local-first AI that joins WhatsApp conversations as a human-like participant, learning the style of every chat it's in.",
+       "cta": {
+        "label": "Ask About Chaka WAP",
+        "href": "/contact"
+       },
+       "image": 2,
+       "proof": "From the makers of\n80+ delivered projects"
+      },
+      "stats": [
+       {
+        "id": "6abc30a3531c3bbf75d4a243",
+        "value": "10x",
+        "text": "Faster reads after moving vectors from strings to binary BLOBs in SQLite."
+       },
+       {
+        "id": "6abc30a3531c3bbf75d4a244",
+        "value": "384-dim",
+        "text": "Embeddings generated locally with transformers, for private, cost-free retrieval."
+       },
+       {
+        "id": "6abc30a3531c3bbf75d4a245",
+        "value": "$0",
+        "text": "Spent on cloud embedding APIs since they were replaced with local transformers."
+       },
+       {
+        "id": "6abc30a3531c3bbf75d4a246",
+        "value": "5–8",
+        "text": "Recent messages read to mirror a person's syntax, capitalisation and slang."
+       }
+      ],
+      "showcase": {
+       "title": "The Live Console",
+       "lead": "A real-time dashboard in Vanilla JS, Tailwind and Socket.io for live telemetry and logs, from 4K monitors down to phones.",
+       "background": 3,
+       "screen": 6,
+       "address": "Chaka WAP"
+      },
+      "cards": [
+       {
+        "id": "6abc30a3531c3bbf75d4a247",
+        "title": "Dynamic Style Learning",
+        "text": "It reads the last 5–8 messages and mirrors syntax, capitalisation and Nigerian Pidgin, so every reply fits the room.",
+        "mock": "research",
+        "mockTitle": "Learning your style",
+        "art": 5
+       },
+       {
+        "id": "6abc30a3531c3bbf75d4a248",
+        "title": "Ironclad Failover",
+        "text": "When a model hits its rate limit, the orchestrator rotates versions and keys, and the conversation carries on.",
+        "mock": "prompt",
+        "mockTitle": "Message Chaka on WhatsApp…",
+        "art": 4
+       }
+      ],
+      "statement": "Chaka WAP isn't a bot waiting for commands; it's a participant that remembers the whole relationship and answers in the voice of the people it talks to.",
+      "system": {
+       "label": "System: local-first",
+       "text": "Chaka WAP runs on a decoupled architecture: a WhatsApp Web bridge, a local SQLite memory engine and a multi-LLM orchestrator. Memory stays close, private and fast.",
+       "features": [
+        {
+         "id": "6abc30a3531c3bbf75d4a249",
+         "icon": "shieldCheck",
+         "text": "Local SQLite keeps chat logs and embeddings fast, encrypted and on its own ground."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a24a",
+         "icon": "brain",
+         "text": "A cosine-similarity search pulls relevant history into every reply, so nothing is forgotten."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a24b",
+         "icon": "gauge",
+         "text": "Binary BLOB vectors shrank the database and made reads ten times faster."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a24c",
+         "icon": "plugsConnected",
+         "text": "The routing orchestrator rotates model versions and API keys whenever limits are hit."
+        }
+       ]
+      },
+      "faq": {
+       "sub": "Answers on how Chaka WAP learns, remembers and stays online.",
+       "title": "Everything you need to know about Chaka WAP.",
+       "items": [
+        {
+         "id": "6abc30a3531c3bbf75d4a24d",
+         "q": "What is Chaka WAP?",
+         "a": "An AI engine that operates autonomously on WhatsApp. Unlike traditional bots, it joins conversations as a human-like participant and mirrors the style of the person it's talking to."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a24e",
+         "q": "How does it learn a person's style?",
+         "a": "It analyses their last 5–8 messages and mirrors their syntax, capitalisation and use of Nigerian Pidgin."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a24f",
+         "q": "Where does its memory live?",
+         "a": "Locally. Embeddings are generated with local transformers and stored as binary BLOBs in SQLite, and every reply runs a cosine-similarity search over that history."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a250",
+         "q": "Can it understand photos?",
+         "a": "Yes. It is fully multimodal and infers the occasion: why a photo was sent, based on the chat so far. Gemini 1.5 Flash handles vision; Gemini 2.5 Flash handles reasoning."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a251",
+         "q": "What happens when a model hits its limit?",
+         "a": "The Ironclad Routing Orchestrator rotates through model versions and API keys, so the conversation keeps going."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a252",
+         "q": "Can Jomiez build something like this for us?",
+         "a": "Yes. Our AI Systems work brings the craft behind our products to yours: multimodal assistants, memory and RAG pipelines, agents and model failover. Tell us what you are growing."
+        }
+       ]
+      }
+     },
+     "meta": {
+      "title": null,
+      "description": null,
+      "image": null
+     },
+     "slug": "chaka-wap",
+     "updatedAt": "2026-09-29T21:41:55.560Z",
+     "createdAt": "2026-09-29T21:41:55.560Z",
+     "_status": "published"
+    },
+    "draft": null
+   },
+   {
+    "id": 3,
+    "live": {
+     "id": 3,
+     "_order": "a2",
+     "name": "Zyro",
+     "category": "SaaS Landing",
+     "isProduct": false,
+     "summary": "A modern, high-performance SaaS landing page system for startups and digital products, built around conversion-led storytelling and pixel-perfect responsiveness.",
+     "image": 7,
+     "client": "NFrame",
+     "year": "2025",
+     "link": {
+      "label": "zyro.framer.media",
+      "href": "https://zyro.framer.media"
+     },
+     "services": [
+      {
+       "id": "6abc30a3531c3bbf75d4a253",
+       "text": "Web Design"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a254",
+       "text": "Framer Development"
+      }
+     ],
+     "stats": [
+      {
+       "id": "6abc30a3531c3bbf75d4a255",
+       "value": "2025",
+       "label": "Launched"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a256",
+       "value": "NFrame",
+       "label": "Client"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a257",
+       "value": "Framer",
+       "label": "Built with"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a258",
+       "value": "3 devices",
+       "label": "Fully responsive"
+      }
+     ],
+     "sections": [
+      {
+       "id": "6abc30a3531c3bbf75d4a259",
+       "title": "Project overview & strategy",
+       "body": "Zyro is a modern, carefully crafted SaaS landing page for startups, digital products and growing tech companies. It centres on a clean visual style and clear content structure, helping brands present their value proposition in a professional, engaging way, with the focus on clarity and conversion.",
+       "points": []
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a25a",
+       "title": "The challenge",
+       "body": "Founders and product teams need to launch a professional, high-converting website at record speed without compromising design quality. The goal was a flexible framework that scales alongside a digital product while keeping visual harmony across complex feature sets.",
+       "points": []
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a25b",
+       "title": "The solution",
+       "body": "A modular landing page structure that balances bold typography with spacious layouts and stays fully responsive on every device. The no-code-ready Framer build allows rapid customisation and adapts to evolving brand identities without heavy developer handoff.",
+       "points": []
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a261",
+       "title": "Key deliverables",
+       "body": null,
+       "points": [
+        {
+         "id": "6abc30a3531c3bbf75d4a25c",
+         "title": "Modern SaaS design",
+         "body": "A clean, professional aesthetic with modern UI elements and balanced typography."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a25d",
+         "title": "Conversion-focused architecture",
+         "body": "A landing flow built to guide visitors toward clear calls to action."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a25e",
+         "title": "Cross-device performance",
+         "body": "Layouts optimised for desktop, tablet and mobile."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a25f",
+         "title": "Product storytelling",
+         "body": "Components that highlight core features, benefits and social proof."
+        },
+        {
+         "id": "6abc30a3531c3bbf75d4a260",
+         "title": "Scalable framework",
+         "body": "Built for fast iteration so teams can ship updates in real time."
+        }
+       ]
+      }
+     ],
+     "productPage": {
+      "hero": {
+       "title": null,
+       "lead": null,
+       "cta": {
+        "label": null,
+        "href": null
+       },
+       "image": null,
+       "proof": null
+      },
+      "stats": [],
+      "showcase": {
+       "title": null,
+       "lead": null,
+       "background": null,
+       "screen": null,
+       "address": null
+      },
+      "cards": [],
+      "statement": null,
+      "system": {
+       "label": null,
+       "text": null,
+       "features": []
+      },
+      "faq": {
+       "sub": null,
+       "title": null,
+       "items": []
+      }
+     },
+     "meta": {
+      "title": null,
+      "description": null,
+      "image": null
+     },
+     "slug": "zyro",
+     "updatedAt": "2026-09-29T21:41:55.882Z",
+     "createdAt": "2026-09-29T21:41:55.882Z",
+     "_status": "published"
+    },
+    "draft": null
+   },
+   {
+    "id": 4,
+    "live": {
+     "id": 4,
+     "_order": "a3",
+     "name": "Renok",
+     "category": "Creative Studio",
+     "isProduct": false,
+     "summary": "A premium digital identity system for a creative agency, with bold brand storytelling, modular grid architecture and high-end motion transitions.",
+     "image": 8,
+     "client": null,
+     "year": null,
+     "link": {
+      "label": null,
+      "href": null
+     },
+     "services": [
+      {
+       "id": "6abc30a3531c3bbf75d4a262",
+       "text": "Web Development"
+      },
+      {
+       "id": "6abc30a3531c3bbf75d4a263",
+       "text": "UI/UX Design"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a264",
+       "text": "Brand Architecture"
+      }
+     ],
+     "stats": [
+      {
+       "id": "6abc30a4531c3bbf75d4a265",
+       "value": "Webflow",
+       "label": "Platform"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a266",
+       "value": "GSAP",
+       "label": "Motion engine"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a267",
+       "value": "Modular",
+       "label": "Grid system"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a268",
+       "value": "CMS",
+       "label": "Content ready"
+      }
+     ],
+     "sections": [
+      {
+       "id": "6abc30a4531c3bbf75d4a269",
+       "title": "Project overview & strategy",
+       "body": "Renok is a modern, high-performance creative studio platform built to turn brand vision into tangible digital results. It centres on an experience-driven brand architecture that balances bold artistic strategy with functional, conversion-driven design.",
+       "points": []
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a26a",
+       "title": "The challenge",
+       "body": "Build a cohesive identity system that supports evolving products and services while keeping a recognisable core, bridging visually intense design with intuitive navigation so deep storytelling never costs usability or performance.",
+       "points": []
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a26b",
+       "title": "The solution",
+       "body": "A comprehensive brand framework with visual language guidelines and modular grids. The site merges simplicity with strategic depth through clean sectioning, purposeful negative space and refined motion, with responsive adaptability and CMS flexibility for future content.",
+       "points": []
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a271",
+       "title": "Key deliverables",
+       "body": null,
+       "points": [
+        {
+         "id": "6abc30a4531c3bbf75d4a26c",
+         "title": "Brand architecture",
+         "body": "Narrative-led identity systems with defined typography and colour logic."
+        },
+        {
+         "id": "6abc30a4531c3bbf75d4a26d",
+         "title": "Modular interface",
+         "body": "Component-based layouts designed for harmony and grid precision."
+        },
+        {
+         "id": "6abc30a4531c3bbf75d4a26e",
+         "title": "Interactive web experience",
+         "body": "High-end motion stories and transitions powered by Webflow and GSAP."
+        },
+        {
+         "id": "6abc30a4531c3bbf75d4a26f",
+         "title": "Strategic UX",
+         "body": "Simplified pathways and engagement flows that reduce friction."
+        },
+        {
+         "id": "6abc30a4531c3bbf75d4a270",
+         "title": "Performance",
+         "body": "Tuned for consistent reliability and fast loading on every device."
+        }
+       ]
+      }
+     ],
+     "productPage": {
+      "hero": {
+       "title": null,
+       "lead": null,
+       "cta": {
+        "label": null,
+        "href": null
+       },
+       "image": null,
+       "proof": null
+      },
+      "stats": [],
+      "showcase": {
+       "title": null,
+       "lead": null,
+       "background": null,
+       "screen": null,
+       "address": null
+      },
+      "cards": [],
+      "statement": null,
+      "system": {
+       "label": null,
+       "text": null,
+       "features": []
+      },
+      "faq": {
+       "sub": null,
+       "title": null,
+       "items": []
+      }
+     },
+     "meta": {
+      "title": null,
+      "description": null,
+      "image": null
+     },
+     "slug": "renok",
+     "updatedAt": "2026-09-29T21:41:56.076Z",
+     "createdAt": "2026-09-29T21:41:56.076Z",
+     "_status": "published"
+    },
+    "draft": null
+   },
+   {
+    "id": 5,
+    "live": {
+     "id": 5,
+     "_order": "a4",
+     "name": "Job Foundry Hub",
+     "category": "Web Platform",
+     "isProduct": false,
+     "summary": "A high-performance career blog and job platform built with Django and PostgreSQL, with an automated SEO auditing system and secure content lifecycle management.",
+     "image": null,
+     "client": null,
+     "year": null,
+     "link": {
+      "label": null,
+      "href": null
+     },
+     "services": [
+      {
+       "id": "6abc30a4531c3bbf75d4a272",
+       "text": "Full-stack Engineering"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a273",
+       "text": "SEO Automation"
+      }
+     ],
+     "stats": [
+      {
+       "id": "6abc30a4531c3bbf75d4a274",
+       "value": "Django",
+       "label": "Framework"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a275",
+       "value": "PostgreSQL",
+       "label": "Database"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a276",
+       "value": "Automated",
+       "label": "SEO auditing"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a277",
+       "value": "Secure",
+       "label": "Content lifecycle"
+      }
+     ],
+     "sections": [
+      {
+       "id": "6abc30a4531c3bbf75d4a278",
+       "title": "Overview",
+       "body": "Job Foundry Hub is a career blog and job platform built for speed and search visibility. It pairs a Django and PostgreSQL backend with an automated SEO auditing system and a secure content lifecycle, so editors can publish confidently and every page stays discoverable.",
+       "points": []
+      }
+     ],
+     "productPage": {
+      "hero": {
+       "title": null,
+       "lead": null,
+       "cta": {
+        "label": null,
+        "href": null
+       },
+       "image": null,
+       "proof": null
+      },
+      "stats": [],
+      "showcase": {
+       "title": null,
+       "lead": null,
+       "background": null,
+       "screen": null,
+       "address": null
+      },
+      "cards": [],
+      "statement": null,
+      "system": {
+       "label": null,
+       "text": null,
+       "features": []
+      },
+      "faq": {
+       "sub": null,
+       "title": null,
+       "items": []
+      }
+     },
+     "meta": {
+      "title": null,
+      "description": null,
+      "image": null
+     },
+     "slug": "job-foundry-hub",
+     "updatedAt": "2026-09-29T21:41:56.214Z",
+     "createdAt": "2026-09-29T21:41:56.213Z",
+     "_status": "published"
+    },
+    "draft": null
+   },
+   {
+    "id": 6,
+    "live": {
+     "id": 6,
+     "_order": "a5",
+     "name": "MORAE",
+     "category": "E-commerce",
+     "isProduct": false,
+     "summary": "A minimalist, high-fidelity e-commerce experience for premium audio hardware, defined by precision, material clarity and intentional design.",
+     "image": null,
+     "client": null,
+     "year": null,
+     "link": {
+      "label": null,
+      "href": null
+     },
+     "services": [
+      {
+       "id": "6abc30a4531c3bbf75d4a279",
+       "text": "E-commerce Design"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a27a",
+       "text": "Web Development"
+      }
+     ],
+     "stats": [
+      {
+       "id": "6abc30a4531c3bbf75d4a27b",
+       "value": "Premium",
+       "label": "Audio hardware"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a27c",
+       "value": "Minimal",
+       "label": "Design language"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a27d",
+       "value": "Hi-fi",
+       "label": "Product storytelling"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a27e",
+       "value": "Mobile",
+       "label": "First checkout"
+      }
+     ],
+     "sections": [
+      {
+       "id": "6abc30a4531c3bbf75d4a27f",
+       "title": "Overview",
+       "body": "MORAE is a minimalist e-commerce experience for premium audio hardware. Every screen is built around precision and material clarity, letting the products speak while the shopping flow stays calm and intentional.",
+       "points": []
+      }
+     ],
+     "productPage": {
+      "hero": {
+       "title": null,
+       "lead": null,
+       "cta": {
+        "label": null,
+        "href": null
+       },
+       "image": null,
+       "proof": null
+      },
+      "stats": [],
+      "showcase": {
+       "title": null,
+       "lead": null,
+       "background": null,
+       "screen": null,
+       "address": null
+      },
+      "cards": [],
+      "statement": null,
+      "system": {
+       "label": null,
+       "text": null,
+       "features": []
+      },
+      "faq": {
+       "sub": null,
+       "title": null,
+       "items": []
+      }
+     },
+     "meta": {
+      "title": null,
+      "description": null,
+      "image": null
+     },
+     "slug": "morae",
+     "updatedAt": "2026-09-29T21:41:56.328Z",
+     "createdAt": "2026-09-29T21:41:56.327Z",
+     "_status": "published"
+    },
+    "draft": null
+   },
+   {
+    "id": 7,
+    "live": {
+     "id": 7,
+     "_order": "a6",
+     "name": "SIATRA",
+     "category": "E-commerce",
+     "isProduct": false,
+     "summary": "A refined e-commerce experience that blends 25 years of Italian craftsmanship with modern technology to design spaces that breathe.",
+     "image": null,
+     "client": null,
+     "year": null,
+     "link": {
+      "label": null,
+      "href": null
+     },
+     "services": [
+      {
+       "id": "6abc30a4531c3bbf75d4a280",
+       "text": "E-commerce Design"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a281",
+       "text": "Web Development"
+      }
+     ],
+     "stats": [
+      {
+       "id": "6abc30a4531c3bbf75d4a282",
+       "value": "25 yrs",
+       "label": "Italian craft"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a283",
+       "value": "Refined",
+       "label": "Storefront"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a284",
+       "value": "Modern",
+       "label": "Tech stack"
+      },
+      {
+       "id": "6abc30a4531c3bbf75d4a285",
+       "value": "Responsive",
+       "label": "All devices"
+      }
+     ],
+     "sections": [
+      {
+       "id": "6abc30a4531c3bbf75d4a286",
+       "title": "Overview",
+       "body": "SIATRA brings 25 years of Italian craftsmanship online. The storefront pairs refined, spacious layouts with modern technology so every collection feels considered and every space can breathe.",
+       "points": []
+      }
+     ],
+     "productPage": {
+      "hero": {
+       "title": null,
+       "lead": null,
+       "cta": {
+        "label": null,
+        "href": null
+       },
+       "image": null,
+       "proof": null
+      },
+      "stats": [],
+      "showcase": {
+       "title": null,
+       "lead": null,
+       "background": null,
+       "screen": null,
+       "address": null
+      },
+      "cards": [],
+      "statement": null,
+      "system": {
+       "label": null,
+       "text": null,
+       "features": []
+      },
+      "faq": {
+       "sub": null,
+       "title": null,
+       "items": []
+      }
+     },
+     "meta": {
+      "title": null,
+      "description": null,
+      "image": null
+     },
+     "slug": "siatra",
+     "updatedAt": "2026-09-29T21:41:56.432Z",
+     "createdAt": "2026-09-29T21:41:56.432Z",
+     "_status": "published"
+    },
+    "draft": null
+   },
+   {
+    "id": 8,
+    "live": {
+     "id": 8,
+     "_order": "a7",
+     "name": "Aethron",
+     "category": "AI Tooling",
+     "isProduct": true,
+     "summary": "A template editor that rebrands any Framer or Webflow template with AI — your copy, your images, your logo — while the design stays pixel-identical.",
+     "image": 26,
+     "client": null,
+     "year": null,
+     "link": {
+      "label": "aethron.jomiez.com",
+      "href": "https://aethron.jomiez.com"
+     },
+     "services": [
+      {
+       "id": "6abcf8fbd925b5db4236c050",
+       "text": "AI Development"
+      },
+      {
+       "id": "6abcf8fbd925b5db4236c051",
+       "text": "Frontend Engineering"
+      },
+      {
+       "id": "6abcf8fbd925b5db4236c052",
+       "text": "Template Migration"
+      }
+     ],
+     "stats": [
+      {
+       "id": "6abcf8fbd925b5db4236c053",
+       "value": "Minutes",
+       "label": "Most migrations"
+      },
+      {
+       "id": "6abcf8fbd925b5db4236c054",
+       "value": "Any AI",
+       "label": "Drives the copy"
+      },
+      {
+       "id": "6abcf8fbd925b5db4236c055",
+       "value": "Pixel-perfect",
+       "label": "Design fidelity"
+      },
+      {
+       "id": "6abcf8fbd925b5db4236c056",
+       "value": "Static",
+       "label": "Deploys anywhere"
+      }
+     ],
+     "sections": [
+      {
+       "id": "6abcf8fbd925b5db4236c057",
+       "title": "Project overview & vision",
+       "body": "Aethron is a template editor built to make a bought template truly yours. Paste a Framer or Webflow template, rebrand it with your copy, images and logo, and ship a fully static site — with the original design and motion intact, driven by any AI.",
+       "points": []
+      },
+      {
+       "id": "6abcf8fbd925b5db4236c05c",
+       "title": "Edit anything, break nothing",
+       "body": null,
+       "points": [
+        {
+         "id": "6abcf8fbd925b5db4236c058",
+         "title": "Click-to-edit anything",
+         "body": "Click any text, image, button or section on the live site and rewrite, restyle or remove it."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c059",
+         "title": "Self-healing edits",
+         "body": "If an edit doesn't land, Aethron fixes it automatically — no change ever silently fails."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c05a",
+         "title": "Driven by any AI",
+         "body": "DeepSeek, Gemini or Claude fill your copy within safe limits, or drive the whole migration through the agent tools."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c05b",
+         "title": "Deploy anywhere",
+         "body": "Every build is fully static — ship to Cloudflare, Netlify, Vercel, GitHub Pages, or any host."
+        }
+       ]
+      },
+      {
+       "id": "6abcf8fbd925b5db4236c060",
+       "title": "Own every template you buy",
+       "body": null,
+       "points": [
+        {
+         "id": "6abcf8fbd925b5db4236c05d",
+         "title": "Pixel-identical",
+         "body": "The design and every animation stay exactly as built — hydration-safe and byte-locked, never broken."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c05e",
+         "title": "Fully yours",
+         "body": "No platform badge, no telemetry, no CDN dependency. Export it and host it anywhere you like."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c05f",
+         "title": "Real migrations",
+         "body": "Real migrations shipped across Framer and Webflow — working sites, not screenshots."
+        }
+       ]
+      },
+      {
+       "id": "6abcf8fbd925b5db4236c064",
+       "title": "How it ships",
+       "body": null,
+       "points": [
+        {
+         "id": "6abcf8fbd925b5db4236c061",
+         "title": "Paste your template URL",
+         "body": "Choose a template that fits the brand, then point Aethron at it."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c062",
+         "title": "Make it yours with AI",
+         "body": "Edit text, images and layout, and tailor the design to the brand."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c063",
+         "title": "Ship it anywhere",
+         "body": "Go live in a few clicks on any static host."
+        }
+       ]
+      }
+     ],
+     "productPage": {
+      "hero": {
+       "title": "Aethron: Own Any Template",
+       "lead": "Rebrand any Framer or Webflow template with AI — your copy, your images, your logo — while the design stays pixel-identical.",
+       "cta": {
+        "label": "Try Aethron",
+        "href": "https://aethron.jomiez.com"
+       },
+       "image": 2,
+       "proof": "From the makers of\n80+ delivered projects"
+      },
+      "stats": [
+       {
+        "id": "6abcf8fbd925b5db4236c065",
+        "value": "Minutes",
+        "text": "Most migrations finish in under ten minutes."
+       },
+       {
+        "id": "6abcf8fbd925b5db4236c066",
+        "value": "3 steps",
+        "text": "Paste, make it yours, ship — no build to configure."
+       },
+       {
+        "id": "6abcf8fbd925b5db4236c067",
+        "value": "Any AI",
+        "text": "DeepSeek, Gemini or Claude drive the copy, within safe limits."
+       },
+       {
+        "id": "6abcf8fbd925b5db4236c068",
+        "value": "Static",
+        "text": "Every build is fully static, so it ships to any host."
+       }
+      ],
+      "showcase": {
+       "title": "The Aethron Studio",
+       "lead": "A dark design tool with layers and alignment controls — click anything on the live page and edit it in place.",
+       "background": 3,
+       "screen": 26,
+       "address": "aethron.jomiez.com"
+      },
+      "cards": [
+       {
+        "id": "6abcf8fbd925b5db4236c069",
+        "title": "Click-to-Edit Anything",
+        "text": "Click any text, image, button or section on the live site and rewrite, restyle or remove it — the design never breaks.",
+        "mock": "prompt",
+        "mockTitle": "Rewrite this section…",
+        "art": 5
+       },
+       {
+        "id": "6abcf8fbd925b5db4236c06a",
+        "title": "Self-Healing Edits",
+        "text": "If an edit doesn't land, Aethron fixes it automatically — no change ever silently fails.",
+        "mock": "prompt",
+        "mockTitle": "Paste your template URL…",
+        "art": 4
+       }
+      ],
+      "statement": "Aethron doesn't copy a template; it hands it over whole — the design, the motion and the code — then makes every word and image yours.",
+      "system": {
+       "label": "System: static and yours",
+       "text": "Aethron rebuilds the template as a fully static site — hydration-safe and byte-locked — with no platform badge, no telemetry and no CDN dependency. Export it and host it anywhere.",
+       "features": [
+        {
+         "id": "6abcf8fbd925b5db4236c06b",
+         "icon": "shieldCheck",
+         "text": "No telemetry and no CDN dependency — the build is fully yours to host."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c06c",
+         "icon": "brain",
+         "text": "Any AI drives the copy — DeepSeek, Gemini or Claude — within guardrails that stop breakage."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c06d",
+         "icon": "gauge",
+         "text": "Hydration-safe and byte-locked, so design and motion stay exactly as built."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c06e",
+         "icon": "plugsConnected",
+         "text": "Static output ships to Cloudflare, Netlify, Vercel, GitHub Pages or any host."
+        }
+       ]
+      },
+      "faq": {
+       "sub": "Answers on what Aethron does, how long a migration takes and where you can ship.",
+       "title": "Everything you need to know about Aethron.",
+       "items": [
+        {
+         "id": "6abcf8fbd925b5db4236c06f",
+         "q": "What is Aethron?",
+         "a": "A template editor that rebrands any Framer or Webflow template. Paste the URL, make it yours with AI, and ship a fully static site with the original design intact."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c070",
+         "q": "How long does a migration take?",
+         "a": "Minutes. Paste a template URL, fill your copy and ship — most migrations finish in under ten minutes."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c071",
+         "q": "Which templates does it work with?",
+         "a": "Framer and Webflow templates. The design and every animation stay exactly as built — pixel-identical, hydration-safe and byte-locked."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c072",
+         "q": "Can I use my own AI?",
+         "a": "Yes. DeepSeek, Gemini or Claude can drive the copy within safe limits, or you can just click on the page and edit by hand."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c073",
+         "q": "Where can I deploy?",
+         "a": "Anywhere that serves static sites — Cloudflare, Netlify, Vercel, GitHub Pages or your own host. No platform badge, no telemetry, no CDN dependency."
+        },
+        {
+         "id": "6abcf8fbd925b5db4236c074",
+         "q": "Can Jomiez build something like this for us?",
+         "a": "Yes. Our product and AI Systems work brings the craft behind our products to yours. Tell us what you are growing."
+        }
+       ]
+      }
+     },
+     "meta": {
+      "title": "Aethron — AI Template Editor | Jomiez Innovation",
+      "description": "Aethron rebrands any Framer or Webflow template with AI — your copy, your images, your brand — while the design stays pixel-identical.",
+      "image": null
+     },
+     "slug": "aethron",
+     "updatedAt": "2026-09-30T12:04:40.773Z",
+     "createdAt": "2026-09-30T11:56:43.393Z",
+     "_status": "published"
+    },
+    "draft": null
+   }
+  ],
+  "articles": [
+   {
+    "id": 3,
+    "live": {
+     "id": 3,
+     "title": "High-Performance Apps: Engineering Software That Empowers Teams",
+     "excerpt": "Why successful software engineering focuses on empowering real users and teams.",
+     "image": 11,
+     "body": {
+      "root": {
+       "format": "",
+       "indent": 0,
+       "version": 1,
+       "direction": "ltr",
+       "type": "root",
+       "children": [
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "Good software and AI act as force multipliers, freeing teams from tedious manual work so they can focus on strategy, creative problem-solving and sustainable growth.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "quote",
+         "children": [
+          {
+           "type": "text",
+           "text": "Technology is at its best when it becomes an intuitive extension of human capability.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h2",
+         "children": [
+          {
+           "type": "text",
+           "text": "Beyond automation",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "We believe human-centred design is the only sustainable way to build digital tools. Instead of black boxes, we design transparent, high-performance interfaces that give teams real leverage and full control.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "list",
+         "listType": "bullet",
+         "start": 1,
+         "tag": "ul",
+         "children": [
+          {
+           "format": "",
+           "indent": 0,
+           "version": 1,
+           "direction": "ltr",
+           "type": "listitem",
+           "value": 1,
+           "children": [
+            {
+             "type": "text",
+             "text": "Intelligent core:",
+             "format": 1,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            },
+            {
+             "type": "text",
+             "text": " Fast querying and cross-referencing that surface the right insight to the right person.",
+             "format": 0,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            }
+           ]
+          },
+          {
+           "format": "",
+           "indent": 0,
+           "version": 1,
+           "direction": "ltr",
+           "type": "listitem",
+           "value": 2,
+           "children": [
+            {
+             "type": "text",
+             "text": "Process automation:",
+             "format": 1,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            },
+            {
+             "type": "text",
+             "text": " Automating syncs, data entry and repetitive workflows.",
+             "format": 0,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            }
+           ]
+          },
+          {
+           "format": "",
+           "indent": 0,
+           "version": 1,
+           "direction": "ltr",
+           "type": "listitem",
+           "value": 3,
+           "children": [
+            {
+             "type": "text",
+             "text": "Design & motion:",
+             "format": 1,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            },
+            {
+             "type": "text",
+             "text": " Modern UI/UX and generative tools that turn concepts into polished products.",
+             "format": 0,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h2",
+         "children": [
+          {
+           "type": "text",
+           "text": "Designing for speed and trust",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "People only rely on systems they trust. We build in clear logging, readable summaries of automated actions and feedback loops so teams can inspect and tune their tools continuously.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h2",
+         "children": [
+          {
+           "type": "text",
+           "text": "The return on performance",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "Remove repetitive busywork and teams move faster and enjoy the work more. Unified interfaces that bring critical data together turn engineering quality into a lasting business advantage.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        }
+       ]
+      }
+     },
+     "slug": "high-performance-apps-empowering-teams",
+     "category": "Product",
+     "author": "Jomiez Team",
+     "date": "2026-03-15T09:00:00.000Z",
+     "meta": {
+      "title": null,
+      "description": null,
+      "image": null
+     },
+     "updatedAt": "2026-09-29T21:41:56.663Z",
+     "createdAt": "2026-09-29T21:41:56.663Z",
+     "_status": "published"
+    },
+    "draft": null
+   },
+   {
+    "id": 1,
+    "live": {
+     "id": 1,
+     "title": "The Modern Cloud: Why Clean Architecture Is the Future of Scale",
+     "excerpt": "How private infrastructure and clean architecture let businesses scale without compromise.",
+     "image": 9,
+     "body": {
+      "root": {
+       "format": "",
+       "indent": 0,
+       "version": 1,
+       "direction": "ltr",
+       "type": "root",
+       "children": [
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "As security demands increase and threats evolve, sending sensitive proprietary data to unvetted cloud systems carries real risk. Forward-thinking companies are adopting dedicated, private infrastructure to protect their digital assets and core business logic.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "quote",
+         "children": [
+          {
+           "type": "text",
+           "text": "Data sovereignty is a strategic fortress protecting the unique intellectual property of your brand.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h2",
+         "children": [
+          {
+           "type": "text",
+           "text": "The shift toward private systems",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "For years, modern software meant compromising on data ownership. We deploy high-performance applications directly into your own cloud environments, so customer data, code and business intelligence stay under your control.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h3",
+         "children": [
+          {
+           "type": "text",
+           "text": "Pillars of robust tech",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "list",
+         "listType": "bullet",
+         "start": 1,
+         "tag": "ul",
+         "children": [
+          {
+           "format": "",
+           "indent": 0,
+           "version": 1,
+           "direction": "ltr",
+           "type": "listitem",
+           "value": 1,
+           "children": [
+            {
+             "type": "text",
+             "text": "Dedicated hosting:",
+             "format": 1,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            },
+            {
+             "type": "text",
+             "text": " Deploying stacks on private VPCs and servers.",
+             "format": 0,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            }
+           ]
+          },
+          {
+           "format": "",
+           "indent": 0,
+           "version": 1,
+           "direction": "ltr",
+           "type": "listitem",
+           "value": 2,
+           "children": [
+            {
+             "type": "text",
+             "text": "High performance:",
+             "format": 1,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            },
+            {
+             "type": "text",
+             "text": " Optimised local pipelines that keep pace with the cloud.",
+             "format": 0,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            }
+           ]
+          },
+          {
+           "format": "",
+           "indent": 0,
+           "version": 1,
+           "direction": "ltr",
+           "type": "listitem",
+           "value": 3,
+           "children": [
+            {
+             "type": "text",
+             "text": "Isolated pipelines:",
+             "format": 1,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            },
+            {
+             "type": "text",
+             "text": " Production databases with no public exposure.",
+             "format": 0,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h2",
+         "children": [
+          {
+           "type": "text",
+           "text": "Distributed architecture",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "Modular services let systems synchronise data across regional servers without creating single points of failure: code runs close to the user, only encrypted payloads move between nodes, and confidential records stay in secure databases.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h2",
+         "children": [
+          {
+           "type": "text",
+           "text": "Security as an advantage",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "Privacy and compliance are foundational. By designing privacy into every architecture, we turn rigorous standards into an advantage and build lasting trust with your users.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h2",
+         "children": [
+          {
+           "type": "text",
+           "text": "Future-proofing your systems",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "The future of software is fast, responsive and intelligent. Jomiez delivers end-to-end engineering and custom AI integrations that help ambitious companies scale with confidence, privacy and full architectural ownership.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        }
+       ]
+      }
+     },
+     "slug": "the-modern-cloud-clean-architecture",
+     "category": "Cloud",
+     "author": "Templeton",
+     "date": "2026-03-04T09:00:00.000Z",
+     "meta": {
+      "title": null,
+      "description": null,
+      "image": null
+     },
+     "updatedAt": "2026-09-29T21:41:56.538Z",
+     "createdAt": "2026-09-29T21:41:56.538Z",
+     "_status": "published"
+    },
+    "draft": null
+   },
+   {
+    "id": 2,
+    "live": {
+     "id": 2,
+     "title": "Scalable Systems: Modernizing Legacy Stacks with Next-Gen Tech",
+     "excerpt": "A practical guide to integrating custom software and AI into existing business environments.",
+     "image": 10,
+     "body": {
+      "root": {
+       "format": "",
+       "indent": 0,
+       "version": 1,
+       "direction": "ltr",
+       "type": "root",
+       "children": [
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "Integrating custom software and modern AI into existing workflows needs a careful approach to infrastructure. The goal is harmony between the systems you already run and the demands of modern web, mobile and cloud products.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "quote",
+         "children": [
+          {
+           "type": "text",
+           "text": "Legacy databases hold key context. Connect them to modern APIs and AI and they become a lasting advantage.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h2",
+         "children": [
+          {
+           "type": "text",
+           "text": "The foundation of modern software",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "Modernisation starts with treating data as your most valuable asset. Our first job is the connective tissue: robust middleware and fast APIs that process and deliver data wherever it's needed.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "list",
+         "listType": "bullet",
+         "start": 1,
+         "tag": "ul",
+         "children": [
+          {
+           "format": "",
+           "indent": 0,
+           "version": 1,
+           "direction": "ltr",
+           "type": "listitem",
+           "value": 1,
+           "children": [
+            {
+             "type": "text",
+             "text": "Clean schemas:",
+             "format": 1,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            },
+            {
+             "type": "text",
+             "text": " Transforming scattered formats into unified, well-typed schemas.",
+             "format": 0,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            }
+           ]
+          },
+          {
+           "format": "",
+           "indent": 0,
+           "version": 1,
+           "direction": "ltr",
+           "type": "listitem",
+           "value": 2,
+           "children": [
+            {
+             "type": "text",
+             "text": "Low latency:",
+             "format": 1,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            },
+            {
+             "type": "text",
+             "text": " Tuning server pipelines for fast data delivery.",
+             "format": 0,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            }
+           ]
+          },
+          {
+           "format": "",
+           "indent": 0,
+           "version": 1,
+           "direction": "ltr",
+           "type": "listitem",
+           "value": 3,
+           "children": [
+            {
+             "type": "text",
+             "text": "Data security:",
+             "format": 1,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            },
+            {
+             "type": "text",
+             "text": " Encrypting sensitive information and enforcing strict access controls.",
+             "format": 0,
+             "style": "",
+             "mode": "normal",
+             "detail": 0,
+             "version": 1
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h2",
+         "children": [
+          {
+           "type": "text",
+           "text": "Custom vs. off-the-shelf",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "Off-the-shelf tools are a fine start, but a platform engineered for your domain will outperform generic SaaS on speed, reliability and long-term cost: leaner code, smaller cloud bills and more predictable behaviour.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h2",
+         "children": [
+          {
+           "type": "text",
+           "text": "Human-in-the-loop by design",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "Automation shouldn't be all-or-nothing. We roll out progressive levels of control: early on, systems make recommendations your team validates; as confidence grows, they take on more of the routine work.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "heading",
+         "tag": "h2",
+         "children": [
+          {
+           "type": "text",
+           "text": "Looking ahead",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        },
+        {
+         "format": "",
+         "indent": 0,
+         "version": 1,
+         "direction": "ltr",
+         "type": "paragraph",
+         "textFormat": 0,
+         "textStyle": "",
+         "children": [
+          {
+           "type": "text",
+           "text": "The final step is moving from reactive maintenance to proactive systems that scale before traffic spikes and catch anomalies before users notice. That's the standard we build to at Jomiez Innovation.",
+           "format": 0,
+           "style": "",
+           "mode": "normal",
+           "detail": 0,
+           "version": 1
+          }
+         ]
+        }
+       ]
+      }
+     },
+     "slug": "scalable-systems-modernizing-legacy-stacks",
+     "category": "Architecture",
+     "author": "Jomiez Team",
+     "date": "2026-02-25T09:00:00.000Z",
+     "meta": {
+      "title": null,
+      "description": null,
+      "image": null
+     },
+     "updatedAt": "2026-09-29T21:41:56.597Z",
+     "createdAt": "2026-09-29T21:41:56.597Z",
+     "_status": "published"
+    },
+    "draft": null
+   }
+  ],
+  "pages": [
+   {
+    "id": 2,
+    "live": {
+     "id": 2,
+     "title": "Book a Call",
+     "layout": [
+      {
+       "id": "6abf85808f899b4e8b32ed80",
+       "image": 31,
+       "lead": "",
+       "pill": "Book a call",
+       "title": "Let's walk through it together.",
+       "blockName": null,
+       "blockType": "imageBand"
+      },
+      {
+       "id": "6abf874c8f899b4e8b32ed81",
+       "title": "A short call, no pressure.",
+       "text": "Tell us what you're growing, and we'll talk through scope, timeline and cost.",
+       "blockName": null,
+       "blockType": "cta",
+       "cta": {
+        "label": "Book a call",
+        "href": "https://wa.me/+2349119404716"
+       }
+      },
+      {
+       "id": "6abd34e9b56c03f24c2f9018",
+       "title": "How it works",
+       "blockName": null,
+       "items": [
+        {
+         "id": "6abd34e9b56c03f24c2f9015",
+         "title": "Offer a quiet moment",
+         "body": "Message us through the forest whispers, or send word through the form below, and cast your gaze upon a few spaces where we may connect."
+        },
+        {
+         "id": "6abd34e9b56c03f24c2f9016",
+         "title": "We settle the dust of our parley",
+         "body": "We send word to settle the dust and clear the air of unknowns, preparing the way for our parley."
+        },
+        {
+         "id": "6abd34e9b56c03f24c2f9017",
+         "title": "A council of creation",
+         "body": "We gather on common ground to breathe life into your vision. Our council will explore the shape of all you are building, the scope, the flow of seasons, and the bounty required."
+        }
+       ],
+       "blockType": "list"
+      },
+      {
+       "id": "6abd34e9b56c03f24c2f901c",
+       "useSiteFaq": false,
+       "blockName": null,
+       "blockType": "faq",
+       "custom": {
+        "label": "Before the call",
+        "sub": "Ancient streams flow here. Drink before we gather.",
+        "title": "What to expect.",
+        "items": [
+         {
+          "id": "6abd34e9b56c03f24c2f9019",
+          "q": "How long is the call?",
+          "a": "Around thirty minutes. Enough to understand your project and answer your first questions."
+         },
+         {
+          "id": "6abd34e9b56c03f24c2f901a",
+          "q": "Do I need to prepare anything?",
+          "a": "Only a clear idea of what you want to grow. If you have notes, links or sketches, bring them along."
+         },
+         {
+          "id": "6abd34e9b56c03f24c2f901b",
+          "q": "What happens after the call?",
+          "a": "We return with a written scope, timeline and cost, so you can decide with everything in hand."
+         }
+        ]
+       }
+      },
+      {
+       "id": "6abd34e9b56c03f24c2f901d",
+       "title": "Prefer to write it down?",
+       "text": "Send your project through the form and we will come back to you with our thoughts.",
+       "blockName": null,
+       "blockType": "cta",
+       "cta": {
+        "label": "Send an enquiry",
+        "href": "/contact"
+       }
+      }
+     ],
+     "placement": {
+      "menu": false,
+      "footer": false,
+      "column": null,
+      "label": null
+     },
+     "slug": "book-a-call",
+     "meta": {
+      "title": "Book a Call | Jomiez",
+      "description": "Book a short call with Jomiez to talk through your project, and receive scope, timeline and cost.",
+      "image": null
+     },
+     "updatedAt": "2026-10-05T09:16:19.700Z",
+     "createdAt": "2026-09-30T16:12:25.605Z",
+     "_status": "published"
+    },
+    "draft": null
+   },
+   {
+    "id": 1,
+    "live": {
+     "id": 1,
+     "title": "test",
+     "layout": [
+      {
+       "id": "6abc31aec53e963d522eed8a",
+       "eyebrow": "this is a test",
+       "title": "from me to you",
+       "lead": "throughout the heavens and the earth, i alone i'm the honored one",
+       "showCta": true,
+       "blockName": null,
+       "blockType": "pageHero",
+       "cta": {
+        "label": "click test",
+        "href": "https://www.jomiez.com/"
+       }
+      },
+      {
+       "id": "6abc324fc53e963d522eed8c",
+       "image": 24,
+       "lead": "bla bla bla",
+       "pill": null,
+       "title": "big tim",
+       "blockName": null,
+       "blockType": "imageBand"
+      }
+     ],
+     "placement": {
+      "menu": false,
+      "footer": false,
+      "column": null,
+      "label": null
+     },
+     "slug": "test",
+     "meta": {
+      "title": null,
+      "description": null,
+      "image": null
+     },
+     "updatedAt": "2026-09-29T21:51:45.606Z",
+     "createdAt": "2026-09-29T21:45:55.621Z",
+     "_status": "published"
+    },
+    "draft": {
+     "id": 1,
+     "title": "test",
+     "layout": [
+      {
+       "id": "6abc31aec53e963d522eed8a",
+       "eyebrow": "this is a test",
+       "title": "from me to you",
+       "lead": "throughout the heavens and the earth, i alone i'm the honored one",
+       "showCta": true,
+       "blockName": null,
+       "blockType": "pageHero",
+       "cta": {
+        "label": "click test",
+        "href": "https://www.jomiez.com/"
+       }
+      },
+      {
+       "id": "6abc324fc53e963d522eed8c",
+       "image": 24,
+       "lead": "bla bla bla",
+       "pill": null,
+       "title": "big tim",
+       "blockName": null,
+       "blockType": "imageBand"
+      },
+      {
+       "id": "6abc411067f3d5288320bc1f",
+       "title": "test002",
+       "blockName": null,
+       "items": [
+        {
+         "id": "6abc413367f3d5288320bc21",
+         "title": "jomiez",
+         "body": "chaka ai"
+        },
+        {
+         "id": "6abc414467f3d5288320bc23",
+         "title": "We confirm a time",
+         "body": "We send word to settle the dust and clear the air of unknowns, preparing the way for our parley."
+        },
+        {
+         "id": "6abc415167f3d5288320bc25",
+         "title": null,
+         "body": null
+        }
+       ],
+       "blockType": "list"
+      }
+     ],
+     "placement": {
+      "menu": false,
+      "footer": false,
+      "column": null,
+      "label": null
+     },
+     "slug": "test",
+     "meta": {
+      "title": "test | Jomiez",
+      "description": "",
+      "image": null
+     },
+     "updatedAt": "2026-10-05T09:15:54.699Z",
+     "createdAt": "2026-09-29T21:45:55.621Z",
+     "_status": "draft"
+    }
+   }
+  ],
+  "redirects": [],
+  "agent-memory": [
+   {
+    "id": 3,
+    "live": {
+     "id": 3,
+     "content": "My name is Groundskeeper, looking after the site with an ancient, natural energy.",
+     "kind": "preference",
+     "source": "agent",
+     "updatedAt": "2026-10-05T09:18:08.659Z",
+     "createdAt": "2026-10-05T09:18:08.659Z"
+    },
+    "draft": null
+   },
+   {
+    "id": 2,
+    "live": {
+     "id": 2,
+     "content": "Declined “Publishing Nav & footer”: if we're adding this book call page, then, remove the whatsapp link from the footer so we only have book call then",
+     "kind": "lesson",
+     "source": "correction",
+     "updatedAt": "2026-09-30T16:19:05.872Z",
+     "createdAt": "2026-09-30T16:19:05.872Z"
+    },
+    "draft": null
+   },
+   {
+    "id": 1,
+    "live": {
+     "id": 1,
+     "content": "Aethron is a Jomiez product (own product): an AI template editor that rebrands any Framer or Webflow template into a pixel-identical static site. Live at aethron.jomiez.com. Tagline \"Own any template\".",
+     "kind": "fact",
+     "source": "agent",
+     "updatedAt": "2026-09-30T11:56:49.739Z",
+     "createdAt": "2026-09-30T11:56:49.739Z"
+    },
+    "draft": null
+   }
+  ],
+  "agent-routines": []
+ },
+ "globals": {
+  "home": {
+   "live": {
+    "id": 1,
+    "hero": {
+     "enabled": true,
+     "titleMuted": "Where intelligence",
+     "titleMain": "takes root.",
+     "lead": "A software company growing its own AI products and custom software for businesses, rooted deep and built to endure.",
+     "cta": {
+      "label": "Start a Project",
+      "href": "/contact"
+     },
+     "background": 18,
+     "card": {
+      "enabled": true,
+      "title": "Chaka AI",
+      "subtitle": "// Our flagship product",
+      "href": "/work/chaka-ai",
+      "image": 27,
+      "frame": 19
+     },
+     "note": "The tools of our craft, chosen as masons choose stone: for strength, and for time.",
+     "showStack": true
+    },
+    "intro": {
+     "enabled": true,
+     "statement": "Trends wither; craft endures. In a world overgrown with noise, we grow software with deep roots, made to outlast the season.",
+     "sub": "A software company of engineers and designers, building our own products and the products of those we believe in.",
+     "projects": {
+      "value": "80+",
+      "text": "Projects grown from first sketch to production, for founders, businesses and our own product line."
+     },
+     "satisfaction": {
+      "value": "100%",
+      "label": "client satisfaction"
+     },
+     "years": {
+      "value": "7+",
+      "text": "Years of craft, and still growing."
+     },
+     "speed": {
+      "title": "Swift by nature",
+      "text": "Steady, reliable delivery from first commit to production."
+     },
+     "quote": {
+      "text": "We don't chase what's fashionable. We plant ideas, tend them with patience, and build software meant to stand for years.",
+      "brand": "Jomiez",
+      "by": "Templeton, Founder & Lead Engineer"
+     },
+     "showTicker": true
+    },
+    "work": {
+     "enabled": true,
+     "marquee": "Creations",
+     "projects": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ]
+    },
+    "services": {
+     "enabled": true,
+     "label": "Services",
+     "intro": "Beyond our own products, we lend our craft to others, shaping raw ideas into software that feels as natural as it looks.",
+     "title": "Custom Software, Grown From Deep Roots.",
+     "cta": {
+      "label": "Start a Project",
+      "href": "/contact"
+     },
+     "items": [
+      {
+       "id": "6abc30a6531c3bbf75d4a2ae",
+       "title": "Custom Software & AI Development",
+       "body": "Cloud platforms and AI systems laid like old stone: precise, secure and made to carry weight for years."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2af",
+       "title": "Web & Mobile Applications",
+       "body": "Websites, web apps and mobile apps that feel as natural as the world around them: fast, responsive and ready for real use."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2b0",
+       "title": "Custom APIs & Integrations",
+       "body": "Roots that reach everything: APIs, automations and integrations that let your tools, data and AI models grow together."
+      }
+     ],
+     "texture": 20,
+     "iso": 21
+    },
+    "mission": {
+     "enabled": true,
+     "label": "Our philosophy",
+     "statement": "We believe technology should grow like nature: patient in its making, quiet in its strength, and in service of the people who use it.",
+     "body": "We build our own products and our clients' with the same hand. Every line is written to last, every interface shaped to feel familiar, as if it had always been there.",
+     "modelsIntro": "We stand on the shoulders of giants, building on the world's leading AI models and shaping them into tools people trust every day.",
+     "cta": {
+      "label": "Meet Chaka AI",
+      "href": "/work/chaka-ai"
+     },
+     "features": [
+      {
+       "id": "6abc30a6531c3bbf75d4a2b1",
+       "text": "Interfaces that feel familiar at first touch, and journeys that flow."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2b2",
+       "text": "Backends with deep roots: scalable, secure and calm under load."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2b3",
+       "text": "Sub-second interactions, tuned like a well-kept instrument."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2b4",
+       "text": "Deployed wherever your people are, ready for every season of scale."
+      }
+     ]
+    },
+    "tenets": {
+     "enabled": true,
+     "marquee": "Our Tenets",
+     "description": "Seven principles carved into everything we make, from our own products to yours.",
+     "cardFooter": "A Jomiez tenet",
+     "items": [
+      {
+       "id": "6abc30a6531c3bbf75d4a2b5",
+       "title": "One hand, first to last",
+       "tag": "Ownership",
+       "body": "From first sketch to launch and the seasons after, one accountable team tends your product."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2b6",
+       "title": "Tools chosen to last",
+       "tag": "Engineering",
+       "body": "React, Next.js, Node.js and Python for the craft; Gemini, OpenAI and Claude for the intelligence."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2b7",
+       "title": "Intelligence that lives",
+       "tag": "AI systems",
+       "body": "Our AI lives in the real world, not in demos: voice assistants, WhatsApp agents and memory that learns."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2b8",
+       "title": "Shaped for every screen",
+       "tag": "Design",
+       "body": "Each interface is shaped for desktop, tablet and phone from the first day, never squeezed in after."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2b9",
+       "title": "Swift and light",
+       "tag": "Speed",
+       "body": "Local-first data, background workers and careful caching keep every product quick and calm."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2ba",
+       "title": "Clarity before craft",
+       "tag": "Process",
+       "body": "Tell us what you are building and receive scope, timeline and cost before a single line is written."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2bb",
+       "title": "Tended after launch",
+       "tag": "Support",
+       "body": "Launch is a beginning. We stay for SEO, maintenance and growth, so your product keeps flourishing."
+      }
+     ],
+     "showTicker": true
+    },
+    "showcase": {
+     "enabled": true,
+     "image": 22,
+     "lead": "Every product begins as a seed: an idea, handled with patience, grown into something that stands.",
+     "pill": "7+ years of craft",
+     "title": "Built to Endure."
+    },
+    "process": {
+     "enabled": true,
+     "label": "The four seasons",
+     "title": "From seed to harvest. The four seasons of every build.",
+     "texture": 23,
+     "iso": 24,
+     "steps": [
+      {
+       "id": "6abc30a6531c3bbf75d4a2bc",
+       "title": "The Seed: Discovery & Scoping",
+       "tag": "Seed",
+       "body": "We study your idea, your stack and your goals until we find what is worth growing, then return with scope, timeline and cost."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2bd",
+       "title": "The Root: Architecture & Design",
+       "tag": "Root",
+       "body": "The interface and the system beneath it are designed together: journeys, UI, data models and integrations, so what grows above ground is held firmly below."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2be",
+       "title": "The Growth: Rapid Development",
+       "tag": "Growth",
+       "body": "Working software appears early and grows in short cycles beside you, into web, mobile and AI features you can touch."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2bf",
+       "title": "The Harvest: Launch & Care",
+       "tag": "Harvest",
+       "body": "We launch on reliable cloud ground, then keep tending: SEO, maintenance and continuous improvement long after release."
+      }
+     ],
+     "closing": "We do not rush what is meant to last. Every product is grown to be fast, resilient and ready for the seasons ahead.",
+     "cta": {
+      "label": "Begin With Us",
+      "href": "/contact"
+     }
+    },
+    "studio": {
+     "enabled": true,
+     "statement": "We are a company of engineers, designers and makers, building our own products and the products of those we believe in.",
+     "intro": "One house, many crafts. Every discipline grows from the same roots and answers to the same tenets.",
+     "cta": {
+      "label": "Our Story",
+      "href": "/about"
+     },
+     "exploreLabel": "Explore →",
+     "disciplines": [
+      {
+       "id": "6abc30a6531c3bbf75d4a2c0",
+       "name": "Engineering",
+       "role": "Web & mobile products",
+       "body": "Websites, web apps, APIs and mobile apps, built to be fast, sturdy and secure.",
+       "image": 7,
+       "href": "/work/zyro"
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2c1",
+       "name": "AI Systems",
+       "role": "Multimodal & voice AI",
+       "body": "Real-time voice, vision, memory and research, grown in-house in our own Chaka AI.",
+       "image": 1,
+       "href": "/work/chaka-ai"
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2c2",
+       "name": "Automation",
+       "role": "Agents & integrations",
+       "body": "AI agents that live inside the tools people already use, WhatsApp included.",
+       "image": 6,
+       "href": "/work/chaka-wap"
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2c3",
+       "name": "Design",
+       "role": "UI/UX, brand & motion",
+       "body": "Interfaces, identities and motion that turn still screens into living experiences.",
+       "image": 8,
+       "href": "/work/renok"
+      }
+     ]
+    },
+    "pricing": {
+     "enabled": true,
+     "marquee": "Pricing",
+     "intro": "Every build is scoped by hand. Tell us what you are growing and we return with scope, timeline and cost. No hidden terms.",
+     "billing": {
+      "left": "Per Sprint",
+      "right": "Milestone",
+      "hint": "(Flexible)",
+      "leftNote": "Quoted per sprint",
+      "rightNote": "Quoted per milestone"
+     },
+     "cardImage": 25,
+     "tiers": [
+      {
+       "id": "6abc30a6531c3bbf75d4a2c8",
+       "name": "MVP",
+       "price": "Custom",
+       "dark": false,
+       "blurb": "Plant a production-ready first version and put your idea to the test.",
+       "features": [
+        {
+         "id": "6abc30a6531c3bbf75d4a2c4",
+         "text": "Discovery & scoping"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2c5",
+         "text": "UI/UX design"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2c6",
+         "text": "Web or mobile build"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2c7",
+         "text": "Launch support"
+        }
+       ],
+       "cta": {
+        "label": "Get a quote",
+        "href": "/contact"
+       }
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2cd",
+       "name": "Growth",
+       "price": "Custom",
+       "dark": false,
+       "blurb": "Custom web and mobile applications, grown to scale.",
+       "features": [
+        {
+         "id": "6abc30a6531c3bbf75d4a2c9",
+         "text": "Multi-page web apps"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2ca",
+         "text": "Scalable cloud database"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2cb",
+         "text": "Admin dashboards"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2cc",
+         "text": "SEO setup"
+        }
+       ],
+       "cta": {
+        "label": "Get a quote",
+        "href": "/contact"
+       }
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2d2",
+       "name": "AI Systems",
+       "price": "Custom",
+       "dark": true,
+       "blurb": "Custom AI products and automation, from the craft behind Chaka AI.",
+       "features": [
+        {
+         "id": "6abc30a6531c3bbf75d4a2ce",
+         "text": "LLM & multimodal integration"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2cf",
+         "text": "RAG & memory pipelines"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2d0",
+         "text": "WhatsApp & chat agents"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2d1",
+         "text": "Model failover"
+        }
+       ],
+       "cta": {
+        "label": "Get a quote",
+        "href": "/contact"
+       }
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2d7",
+       "name": "Partnership",
+       "price": "Custom",
+       "dark": false,
+       "blurb": "An engineering partner for the long seasons after launch.",
+       "features": [
+        {
+         "id": "6abc30a6531c3bbf75d4a2d3",
+         "text": "Maintenance & updates"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2d4",
+         "text": "SEO & performance"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2d5",
+         "text": "New features"
+        },
+        {
+         "id": "6abc30a6531c3bbf75d4a2d6",
+         "text": "Priority support"
+        }
+       ],
+       "cta": {
+        "label": "Get a quote",
+        "href": "/contact"
+       }
+      }
+     ],
+     "showTicker": true
+    },
+    "faq": {
+     "enabled": true,
+     "label": "The inquiry",
+     "sub": "Answers on how we scope, build and care for your product, and on the products we make ourselves.",
+     "title": "Everything you should know before we begin.",
+     "cta": {
+      "label": "Contact Us",
+      "href": "/contact"
+     },
+     "items": [
+      {
+       "id": "6abc30a6531c3bbf75d4a2d8",
+       "q": "What does Jomiez make?",
+       "a": "Two kinds of things. Our own products, like Chaka AI, a multimodal voice assistant, and Chaka WAP, an AI engine that lives inside WhatsApp. And custom software for businesses: websites, web and mobile apps, APIs and AI systems, with the design around them."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2d9",
+       "q": "Are you taking on new projects?",
+       "a": "Yes. The workshop is open to new builds. Tell us what you are growing and we will come back with scope, timeline and cost."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2da",
+       "q": "What tools and technologies do you use?",
+       "a": "Mainly React, Node.js and Python for engineering, with Next.js and Framer on the front end and Figma for design. For AI work we build on Gemini, OpenAI and Claude."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2db",
+       "q": "Can we schedule a call to discuss a project?",
+       "a": "Absolutely. Send us a few times that suit you and we will set up a call to walk through your project in detail."
+      },
+      {
+       "id": "6abc30a6531c3bbf75d4a2dc",
+       "q": "Do you handle a project end to end?",
+       "a": "Yes. From first sketch through design, development and launch, and in the seasons after: SEO, maintenance and continuous improvement."
+      }
+     ]
+    },
+    "journal": {
+     "enabled": true,
+     "marquee": "Journal",
+     "intro": "Field notes from the workshop: architecture, AI and the craft of building software that lasts.",
+     "cta": {
+      "label": "Read the Journal",
+      "href": "/insights"
+     },
+     "count": 3
+    },
+    "meta": {
+     "title": "Jomiez | Software & AI Company",
+     "description": "Jomiez Innovation is a software company. We grow our own AI products, like Chaka AI, and build custom software, web and mobile apps and AI systems for businesses worldwide.",
+     "image": null
+    },
+    "_status": "published",
+    "updatedAt": "2026-09-30T16:05:02.527Z",
+    "createdAt": "2026-09-29T21:41:58.943Z",
+    "globalType": "home"
+   },
+   "draft": null
+  },
+  "about": {
+   "live": {
+    "id": 1,
+    "hero": {
+     "title": "We make software meant to outlive the season.",
+     "lead": "Jomiez Innovation is a software company. We grow our own products, like Chaka AI and Chaka WAP, and craft custom software, web platforms and AI systems for the businesses we work beside.",
+     "cta": {
+      "label": "Start a project",
+      "href": "/contact"
+     }
+    },
+    "mosaic": [
+     {
+      "id": "6abc30a7531c3bbf75d4a2dd",
+      "image": 1
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a2de",
+      "image": 7
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a2df",
+      "image": 6
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a2e0",
+      "image": 8
+     }
+    ],
+    "story": {
+     "enabled": true,
+     "label": "Our story",
+     "title": "From a single seed, a living company",
+     "cta": {
+      "label": "Contact Us",
+      "href": "/contact"
+     },
+     "paragraphs": [
+      {
+       "id": "6abc30a7531c3bbf75d4a2e1",
+       "text": "We are Jomiez Innovation, a software company of engineers, designers and makers. We grow our own products and build for others with the same care: custom software, web and mobile applications and AI systems, from the interface down to the infrastructure beneath it."
+      },
+      {
+       "id": "6abc30a7531c3bbf75d4a2e2",
+       "text": "The company is led by Emmanuel Ezinna Nweke, known as Templeton, our founder and lead engineer. He works in React, Next.js, Node.js and Python and builds AI on Gemini, OpenAI and Claude. That work took root in our own products: Chaka AI, a multimodal voice assistant, and Chaka WAP, a local-first AI engine that lives inside WhatsApp."
+      }
+     ],
+     "showStats": true
+    },
+    "crafts": {
+     "enabled": true,
+     "label": "Our crafts",
+     "statement": "What we learn growing our own products, we bring to yours.",
+     "lead": "Custom software, web and mobile applications and AI integrations: fast, sturdy and secure, from first idea to launch and beyond.",
+     "showStack": true,
+     "cards": [
+      {
+       "id": "6abc30a7531c3bbf75d4a2e3",
+       "title": "Software Strategy",
+       "body": "We define the roadmap for your digital platforms, with modular architecture and long-term scalability in mind.",
+       "shape": "blocks"
+      },
+      {
+       "id": "6abc30a7531c3bbf75d4a2e4",
+       "title": "Full-Stack Development",
+       "body": "Fast, reactive web and mobile applications with low latency and modern frameworks.",
+       "shape": "zline"
+      },
+      {
+       "id": "6abc30a7531c3bbf75d4a2e5",
+       "title": "AI & Automation",
+       "body": "Tailored AI assistants, multimodal agents and automated workflows that lift your operations.",
+       "shape": "rings"
+      },
+      {
+       "id": "6abc30a7531c3bbf75d4a2e6",
+       "title": "Cloud & APIs",
+       "body": "Robust backend services, secure REST APIs and reliable database structures.",
+       "shape": "diamond"
+      }
+     ]
+    },
+    "showTenets": true,
+    "showFaq": true,
+    "meta": {
+     "title": "About | Jomiez",
+     "description": "Jomiez Innovation is a software company founded by Emmanuel Ezinna Nweke (Templeton). We grow our own AI products and build custom software, web and mobile apps and AI systems for businesses.",
+     "image": null
+    },
+    "_status": "published",
+    "updatedAt": "2026-09-29T21:41:59.305Z",
+    "createdAt": "2026-09-29T21:41:59.305Z",
+    "globalType": "about"
+   },
+   "draft": null
+  },
+  "services-page": {
+   "live": {
+    "id": 1,
+    "hero": {
+     "eyebrow": "Services",
+     "title": "The craft behind our products, turned to yours.",
+     "lead": "Custom software, websites, web and mobile applications and AI integrations, with the design around them. And once you are live, we stay to tend it: SEO, maintenance and growth.",
+     "cta": {
+      "label": "Start a project",
+      "href": "/contact"
+     }
+    },
+    "showAccordion": true,
+    "showProcess": true,
+    "list": {
+     "enabled": true,
+     "title": "Every craft we practise",
+     "items": [
+      {
+       "id": "6abc30a7531c3bbf75d4a2e7",
+       "title": "Development",
+       "body": "Websites, web applications, APIs and mobile apps, built to be fast, secure and sturdy, and delivered ready for the real world."
+      },
+      {
+       "id": "6abc30a7531c3bbf75d4a2e8",
+       "title": "AI Development & Automation",
+       "body": "The craft behind Chaka AI, turned to your workflows: multimodal assistants, WhatsApp agents, RAG pipelines and automation that quietly does the work."
+      },
+      {
+       "id": "6abc30a7531c3bbf75d4a2e9",
+       "title": "UI/UX Design",
+       "body": "Interfaces that feel familiar at first touch: clear, calm and shaped around the people who use them."
+      },
+      {
+       "id": "6abc30a7531c3bbf75d4a2ea",
+       "title": "Branding",
+       "body": "Identities with the weight of a seal: simple, memorable marks that carry your essence for years."
+      },
+      {
+       "id": "6abc30a7531c3bbf75d4a2eb",
+       "title": "Motion Design",
+       "body": "Motion that breathes life into still screens, the way wind moves through a field."
+      },
+      {
+       "id": "6abc30a7531c3bbf75d4a2ec",
+       "title": "Marketing Design",
+       "body": "Visual stories that carry your products, services and ideas to the people who need them."
+      }
+     ]
+    },
+    "showFaq": true,
+    "meta": {
+     "title": "Services | Jomiez",
+     "description": "The craft behind Jomiez products, turned to yours: custom software, web and mobile applications, AI development and automation, UI/UX, branding and motion design.",
+     "image": null
+    },
+    "_status": "published",
+    "updatedAt": "2026-09-29T21:41:59.395Z",
+    "createdAt": "2026-09-29T21:41:59.395Z",
+    "globalType": "services-page"
+   },
+   "draft": null
+  },
+  "work-page": {
+   "live": {
+    "id": 1,
+    "image": 25,
+    "marquee": "Creations",
+    "note": "{products} products of our own and {builds} builds grown for businesses, across AI, automation, web platforms and e-commerce.",
+    "productsLabel": "Our products",
+    "clientsLabel": "Built for businesses",
+    "caseStudy": {
+     "productKicker": "Our product",
+     "caseKicker": "Case study",
+     "nextProduct": "Next product",
+     "nextCase": "Next creation",
+     "ctaTitle": "Have something like this ready to grow?",
+     "cta": {
+      "label": "Start a project",
+      "href": "/contact"
+     }
+    },
+    "showFaq": true,
+    "meta": {
+     "title": "Products & Work | Jomiez",
+     "description": "Jomiez products, like Chaka AI and Chaka WAP, and the software we have grown for businesses: SaaS, creative platforms and e-commerce.",
+     "image": null
+    },
+    "_status": "published",
+    "updatedAt": "2026-09-29T21:41:59.449Z",
+    "createdAt": "2026-09-29T21:41:59.449Z",
+    "globalType": "work-page"
+   },
+   "draft": null
+  },
+  "journal-page": {
+   "live": {
+    "id": 1,
+    "marquee": "Journal",
+    "intro": "Field notes from the workshop: on architecture, AI and the craft of building software that lasts.",
+    "post": {
+     "authorLabel": "Author",
+     "dateLabel": "Published",
+     "byLabel": "Written by",
+     "moreTitle": "More insights",
+     "cta": {
+      "label": "Work with Jomiez",
+      "href": "/contact"
+     }
+    },
+    "meta": {
+     "title": "Journal | Jomiez",
+     "description": "Field notes from the Jomiez workshop on software architecture, AI systems and product design.",
+     "image": null
+    },
+    "_status": "published",
+    "updatedAt": "2026-09-29T21:41:59.498Z",
+    "createdAt": "2026-09-29T21:41:59.498Z",
+    "globalType": "journal-page"
+   },
+   "draft": null
+  },
+  "contact-page": {
+   "live": {
+    "id": 1,
+    "split": {
+     "title": "Plant your idea with Jomiez.",
+     "lead": "Every lasting product began as a seed. Tell us what you want to grow and we will come back with scope, timeline and cost.",
+     "image": 28,
+     "visualTitle": "Let's grow something that lasts.",
+     "form": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Alex Johnson",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@company.com",
+      "budgetLabel": "Budget",
+      "budgets": [
+       {
+        "id": "6abc30a7531c3bbf75d4a2ed",
+        "text": "Not sure yet"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2ee",
+        "text": "Under $2,000"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2ef",
+        "text": "$2,000 – $5,000"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2f0",
+        "text": "$5,000 – $15,000"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2f1",
+        "text": "$15,000+"
+       }
+      ],
+      "messageLabel": "Message",
+      "messagePlaceholder": "Tell us about your project…",
+      "submitLabel": "Send enquiry",
+      "successMessage": "Thank you. Your message has reached us, and we'll be in touch soon.",
+      "errorMessage": "Something went wrong sending your message. Please try again, or write to hello@jomiez.com."
+     }
+    },
+    "call": {
+     "enabled": true,
+     "image": 27,
+     "label": "Speak with us",
+     "title": "Rooted in craft, growing software that businesses and people rely on.",
+     "body": "Prefer to talk it through? Send us a few times that suit you and we will set up a call to walk through your project in detail.",
+     "showSocials": true,
+     "cta": {
+      "label": "Book a call",
+      "href": "https://wa.me/+2349119404716"
+     }
+    },
+    "showFaq": true,
+    "meta": {
+     "title": "Contact | Jomiez",
+     "description": "Plant your idea with Jomiez Innovation: custom software, web and mobile apps, and AI systems from the makers of Chaka AI.",
+     "image": null
+    },
+    "_status": "published",
+    "updatedAt": "2026-09-30T17:27:59.089Z",
+    "createdAt": "2026-09-29T21:41:59.572Z",
+    "globalType": "contact-page"
+   },
+   "draft": null
+  },
+  "navigation": {
+   "live": {
+    "id": 1,
+    "header": {
+     "links": [
+      {
+       "id": "6abc30a5531c3bbf75d4a29c",
+       "label": "Products",
+       "href": "/work"
+      },
+      {
+       "id": "6abc30a5531c3bbf75d4a29d",
+       "label": "Services",
+       "href": "/#capabilities"
+      },
+      {
+       "id": "6abc30a5531c3bbf75d4a29e",
+       "label": "Journal",
+       "href": "/insights"
+      },
+      {
+       "id": "6abc30a5531c3bbf75d4a29f",
+       "label": "Pricing",
+       "href": "/#pricing"
+      },
+      {
+       "id": "6abc30a5531c3bbf75d4a2a0",
+       "label": "Company",
+       "href": "/about"
+      }
+     ],
+     "showHire": true,
+     "hire": {
+      "label": "Hire Us",
+      "href": "/contact"
+     }
+    },
+    "footer": {
+     "background": 17,
+     "blurb": "Software with deep roots. Talk to {legalName} about the product you want to grow.",
+     "cta": {
+      "label": "Start a project",
+      "href": "/contact"
+     },
+     "followLabel": "Follow us:",
+     "columns": [
+      {
+       "id": "6abc30a5531c3bbf75d4a2a5",
+       "title": "Quick Links",
+       "links": [
+        {
+         "id": "6abc30a5531c3bbf75d4a2a1",
+         "label": "Home",
+         "href": "/"
+        },
+        {
+         "id": "6abc30a5531c3bbf75d4a2a2",
+         "label": "Chaka AI",
+         "href": "/work/chaka-ai"
+        },
+        {
+         "id": "6abc30a5531c3bbf75d4a2a3",
+         "label": "Products & Work",
+         "href": "/work"
+        },
+        {
+         "id": "6abc30a5531c3bbf75d4a2a4",
+         "label": "Journal",
+         "href": "/insights"
+        }
+       ]
+      },
+      {
+       "id": "6abc30a5531c3bbf75d4a2aa",
+       "title": "Company",
+       "links": [
+        {
+         "id": "6abc30a5531c3bbf75d4a2a6",
+         "label": "About Us",
+         "href": "/about"
+        },
+        {
+         "id": "6abc30a5531c3bbf75d4a2a7",
+         "label": "Contact Us",
+         "href": "/contact"
+        },
+        {
+         "id": "6abc30a5531c3bbf75d4a2a8",
+         "label": "Book A Call",
+         "href": "/book-a-call"
+        }
+       ]
+      },
+      {
+       "id": "6abc30a5531c3bbf75d4a2ad",
+       "title": "Policies",
+       "links": [
+        {
+         "id": "6abc30a5531c3bbf75d4a2ab",
+         "label": "Terms & Conditions",
+         "href": "/terms-conditions"
+        },
+        {
+         "id": "6abc30a5531c3bbf75d4a2ac",
+         "label": "Privacy Policy",
+         "href": "/privacy-policy"
+        }
+       ]
+      }
+     ],
+     "copyright": "© {year} {legalName}. All rights reserved.",
+     "showWordmark": true
+    },
+    "_status": "published",
+    "updatedAt": "2026-09-30T16:20:20.464Z",
+    "createdAt": "2026-09-29T21:41:57.221Z",
+    "globalType": "navigation"
+   },
+   "draft": null
+  },
+  "site": {
+   "live": {
+    "id": 1,
+    "name": "Jomiez",
+    "legalName": "Jomiez Innovation",
+    "url": "https://jomiez.com",
+    "founder": {
+     "name": "Emmanuel Ezinna Nweke",
+     "alias": "Templeton",
+     "role": "Founder & Lead Engineer",
+     "photo": null,
+     "monogram": "N"
+    },
+    "stats": [
+     {
+      "id": "6abc30a4531c3bbf75d4a287",
+      "value": "7+",
+      "label": "Years of craft"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a288",
+      "value": "80+",
+      "label": "Projects delivered"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a289",
+      "value": "100%",
+      "label": "Client satisfaction"
+     }
+    ],
+    "avatars": [
+     13,
+     12,
+     15,
+     14
+    ],
+    "stack": [
+     {
+      "id": "6abc30a4531c3bbf75d4a28a",
+      "text": "React"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a28b",
+      "text": "Next.js"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a28c",
+      "text": "Node.js"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a28d",
+      "text": "Python"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a28e",
+      "text": "TypeScript"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a28f",
+      "text": "Django"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a290",
+      "text": "PostgreSQL"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a291",
+      "text": "Gemini"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a292",
+      "text": "OpenAI"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a293",
+      "text": "Claude"
+     },
+     {
+      "id": "6abcd0b2f7a48bf25f203179",
+      "text": "Aethron"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a294",
+      "text": "Framer"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a295",
+      "text": "Figma"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a296",
+      "text": "Tailwind"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a297",
+      "text": "SQLite"
+     }
+    ],
+    "email": "hello@jomiez.com",
+    "location": "Enugu, Nigeria & working worldwide",
+    "phone": "+1 (425) 263-7569",
+    "phoneHref": "tel:+14252637569",
+    "socials": [
+     {
+      "id": "6abc30a4531c3bbf75d4a298",
+      "label": "WhatsApp",
+      "icon": "whatsapp",
+      "href": "https://wa.me/+2349119404716"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a299",
+      "label": "LinkedIn",
+      "icon": "linkedin",
+      "href": "https://www.linkedin.com/in/emmanuel-nweke-38a271292"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a29a",
+      "label": "GitHub",
+      "icon": "github",
+      "href": "https://github.com/zenadell"
+     },
+     {
+      "id": "6abc30a4531c3bbf75d4a29b",
+      "label": "Instagram",
+      "icon": "instagram",
+      "href": "https://www.instagram.com/chaka_ai_"
+     }
+    ],
+    "ticker": {
+     "enabled": true,
+     "tag": "//JOMIEZ",
+     "message": "Now growing: Chaka AI, our multimodal voice assistant, alongside new builds for founders and businesses around the world."
+    },
+    "title": "Jomiez | Software & AI Company",
+    "titleTemplate": "%s | Jomiez",
+    "description": "Jomiez Innovation is a software company. We grow our own AI products, like Chaka AI, and build custom software, web and mobile apps and AI systems for businesses worldwide.",
+    "ogImage": 16,
+    "notifications": {
+     "to": null,
+     "autoReply": true,
+     "autoReplySubject": "We received your message: Jomiez",
+     "autoReplyBody": "Hi {name},\n\nThank you for reaching out to Jomiez. Your message has arrived and a real person will read it. We'll come back to you with our thoughts, and if it's a project, with scope, timeline and cost.\n\nUntil then,\nThe Jomiez team"
+    },
+    "updatedAt": "2026-09-30T09:25:32.769Z",
+    "createdAt": "2026-09-29T21:41:56.858Z",
+    "globalType": "site"
+   },
+   "draft": null
+  },
+  "effects": {
+   "live": {
+    "id": 1,
+    "cursorLens": true,
+    "lensSize": 150,
+    "navGlass": true,
+    "footerGlass": true,
+    "heroDew": true,
+    "pageTransitions": true,
+    "smoothScroll": true,
+    "updatedAt": "2026-09-30T14:58:45.491Z",
+    "createdAt": "2026-09-29T21:41:57.283Z",
+    "globalType": "effects"
+   },
+   "draft": null
+  },
+  "not-found": {
+   "live": {
+    "id": 1,
+    "title": "This path has grown over.",
+    "body": "The link may be broken or the page may have moved. Let's lead you back.",
+    "cta": {
+     "label": "Back to home",
+     "href": "/"
+    },
+    "_status": "published",
+    "updatedAt": "2026-09-29T21:41:59.895Z",
+    "createdAt": "2026-09-29T21:41:59.895Z",
+    "globalType": "not-found"
+   },
+   "draft": null
+  },
+  "privacy": {
+   "live": {
+    "id": 1,
+    "title": "Privacy Policy",
+    "intro": "This policy explains what information Jomiez Innovation collects when you use our website and services, and how we use and protect it.",
+    "sections": [
+     {
+      "id": "6abc30a7531c3bbf75d4a2f8",
+      "title": "Personal information we collect",
+      "body": null,
+      "intro": null,
+      "items": [
+       {
+        "id": "6abc30a7531c3bbf75d4a2f2",
+        "text": "Name"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2f3",
+        "text": "Email address"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2f4",
+        "text": "Phone number"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2f5",
+        "text": "Company name"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2f6",
+        "text": "Billing information"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2f7",
+        "text": "Any other information you provide via contact forms or project inquiries"
+       }
+      ]
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a2fd",
+      "title": "Non-personal information we collect",
+      "body": null,
+      "intro": null,
+      "items": [
+       {
+        "id": "6abc30a7531c3bbf75d4a2f9",
+        "text": "Browser type"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2fa",
+        "text": "IP address"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2fb",
+        "text": "Device information"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2fc",
+        "text": "Website usage data (via cookies and analytics tools)"
+       }
+      ]
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a304",
+      "title": "How we use your information",
+      "body": null,
+      "intro": "We use the information we collect to:",
+      "items": [
+       {
+        "id": "6abc30a7531c3bbf75d4a2fe",
+        "text": "Respond to inquiries or project requests"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a2ff",
+        "text": "Deliver design services and manage client accounts"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a300",
+        "text": "Send invoices and process payments"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a301",
+        "text": "Improve website functionality and user experience"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a302",
+        "text": "Communicate updates, newsletters, or promotions (with consent)"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a303",
+        "text": "Comply with legal obligations"
+       }
+      ]
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a308",
+      "title": "Sharing your information",
+      "body": null,
+      "intro": "We do not sell your personal information. We may share your data with:",
+      "items": [
+       {
+        "id": "6abc30a7531c3bbf75d4a305",
+        "text": "Trusted third-party service providers (e.g., payment processors, email platforms)"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a306",
+        "text": "Law enforcement or regulatory bodies when required by law"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a307",
+        "text": "Our professional advisors (e.g., accountants, legal counsel)"
+       }
+      ]
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a30c",
+      "title": "Cookies and tracking technologies",
+      "body": null,
+      "intro": "We use cookies and similar technologies to:",
+      "items": [
+       {
+        "id": "6abc30a7531c3bbf75d4a309",
+        "text": "Understand how you use our website"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a30a",
+        "text": "Improve functionality and performance"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a30b",
+        "text": "Provide personalized content and ads (if applicable)"
+       }
+      ]
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a30d",
+      "title": "Data retention",
+      "body": "We retain your information only as long as necessary for the purposes outlined in this policy or as required by law.",
+      "intro": null,
+      "items": []
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a312",
+      "title": "Your rights",
+      "body": null,
+      "intro": "Depending on your location, you may have the right to:",
+      "items": [
+       {
+        "id": "6abc30a7531c3bbf75d4a30e",
+        "text": "Access the personal data we hold about you"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a30f",
+        "text": "Request correction or deletion"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a310",
+        "text": "Object to or restrict processing"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a311",
+        "text": "Withdraw consent (where applicable)"
+       }
+      ]
+     }
+    ],
+    "contactNote": true,
+    "meta": {
+     "title": "Privacy Policy | Jomiez",
+     "description": "How Jomiez Innovation collects, uses and protects your information.",
+     "image": null
+    },
+    "_status": "published",
+    "updatedAt": "2026-09-29T21:41:59.724Z",
+    "createdAt": "2026-09-29T21:41:59.725Z",
+    "globalType": "privacy"
+   },
+   "draft": null
+  },
+  "terms": {
+   "live": {
+    "id": 1,
+    "title": "Terms & Conditions",
+    "intro": "Please read these terms carefully before using the Jomiez Innovation website or engaging us for a project.",
+    "sections": [
+     {
+      "id": "6abc30a7531c3bbf75d4a313",
+      "title": "Acceptance of terms",
+      "body": "By accessing and using the Jomiez Innovation website and services, you agree to be bound by these Terms & Conditions. If you do not agree with any part of these terms, please do not use our services.",
+      "intro": null,
+      "items": []
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a319",
+      "title": "Services provided",
+      "body": null,
+      "intro": "Jomiez Innovation provides the following services:",
+      "items": [
+       {
+        "id": "6abc30a7531c3bbf75d4a314",
+        "text": "Custom software development (web, mobile, and desktop applications)"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a315",
+        "text": "AI integration and machine learning solutions"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a316",
+        "text": "UI/UX design and brand identity"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a317",
+        "text": "Digital transformation and consulting"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a318",
+        "text": "Website maintenance and support"
+       }
+      ]
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a31a",
+      "title": "Intellectual property",
+      "body": "All content on this website — including but not limited to text, graphics, logos, images, code, and design — is the intellectual property of Jomiez Innovation unless otherwise stated. You may not reproduce, distribute, or create derivative works from any content without prior written consent.",
+      "intro": null,
+      "items": []
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a31e",
+      "title": "Project agreements",
+      "body": null,
+      "intro": "When engaging Jomiez Innovation for a project:",
+      "items": [
+       {
+        "id": "6abc30a7531c3bbf75d4a31b",
+        "text": "A separate project agreement or contract will be provided outlining scope, deliverables, timeline, and payment terms"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a31c",
+        "text": "All project-specific terms in the agreement take precedence over these general terms"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a31d",
+        "text": "Changes to project scope may require additional costs and revised timelines"
+       }
+      ]
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a322",
+      "title": "Payment terms",
+      "body": null,
+      "intro": null,
+      "items": [
+       {
+        "id": "6abc30a7531c3bbf75d4a31f",
+        "text": "Payment schedules will be outlined in individual project contracts"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a320",
+        "text": "Late payments may incur additional fees as specified in the project agreement"
+       },
+       {
+        "id": "6abc30a7531c3bbf75d4a321",
+        "text": "Refunds are handled on a case-by-case basis and subject to the terms of the project agreement"
+       }
+      ]
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a323",
+      "title": "Limitation of liability",
+      "body": "Jomiez Innovation shall not be held liable for any indirect, incidental, or consequential damages arising from the use of our services or website. Our total liability shall not exceed the amount paid by the client for the specific service in question.",
+      "intro": null,
+      "items": []
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a324",
+      "title": "Confidentiality",
+      "body": "Both parties agree to maintain confidentiality of any proprietary information shared during the course of a project. This obligation survives the termination of any agreement between the parties.",
+      "intro": null,
+      "items": []
+     },
+     {
+      "id": "6abc30a7531c3bbf75d4a325",
+      "title": "Termination",
+      "body": "Either party may terminate an engagement with written notice as outlined in the project agreement. Upon termination, all outstanding payments for work completed shall become due immediately.",
+      "intro": null,
+      "items": []
+     }
+    ],
+    "contactNote": true,
+    "meta": {
+     "title": "Terms & Conditions | Jomiez",
+     "description": "The terms that apply when you use the Jomiez Innovation website and services.",
+     "image": null
+    },
+    "_status": "published",
+    "updatedAt": "2026-09-29T21:41:59.843Z",
+    "createdAt": "2026-09-29T21:41:59.843Z",
+    "globalType": "terms"
+   },
+   "draft": null
+  },
+  "agent": {
+   "live": {
+    "id": 1,
+    "enabled": true,
+    "name": "Keeper",
+    "provider": "deepseek",
+    "model": "deepseek-v4.1-flash",
+    "baseURL": "https://api.deepseek.com",
+    "fastModel": "claude-haiku-4-5-20251001",
+    "thinking": "provider-default",
+    "voiceEnabled": true,
+    "voiceModel": "gemini-3.1-flash-live-preview",
+    "voiceName": "Kore",
+    "voiceLanguage": "ezinnanweke@gmail.com",
+    "visionModel": null,
+    "imageModel": null,
+    "mode": "trusted",
+    "deletes": "ask",
+    "email": "ask",
+    "web": true,
+    "persona": "Write like jomiez.com: an ancient, natural voice (roots, seasons, gardens, craft), calm and certain, never hype. Short sentences. Plain words. No exclamation marks.\nJomiez Innovation is a software company that grows its own AI products (Chaka AI, Chaka WAP) and builds custom software for businesses.\nNever invent facts, numbers, clients or testimonials. If something isn't known, ask or leave it out.",
+    "triage": true,
+    "triageDraft": true,
+    "notifyAuto": true,
+    "notifyEmail": null,
+    "maxSteps": 40,
+    "dailyRuns": 300,
+    "dailyTokens": 5000000,
+    "updatedAt": "2026-10-05T08:29:28.090Z",
+    "createdAt": "2026-09-30T10:40:29.306Z",
+    "globalType": "agent"
+   },
+   "draft": null
+  }
+ }
+}
