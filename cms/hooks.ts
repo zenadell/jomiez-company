@@ -18,6 +18,10 @@ function affectsLiveSite(doc: Doc, previousDoc: Doc) {
 async function revalidateEverything(context: Record<string, unknown>) {
   // Scripts (the seed) run outside Next.js, where there is no cache to clear.
   if (context.skipRevalidate) return;
+  // Every saved page is out of date from now (lib/page-cache.mjs reads this). It works
+  // wherever the change is made, the agent's streamed answers and routines included,
+  // where revalidatePath on its own is lost.
+  (globalThis as Record<symbol, unknown>)[Symbol.for("jomiez.pages.publishedAt")] = Date.now();
   try {
     const { revalidatePath } = await import("next/cache");
     revalidatePath("/", "layout");
