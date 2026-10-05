@@ -47,19 +47,29 @@ function memoryMB() {
   return Math.round(limit / 2 ** 20);
 }
 
+const localBrowser = () => process.env.BROWSER_EXECUTABLE_PATH || [...MAC_BROWSERS, ...WINDOWS_BROWSERS].find((p) => fs.existsSync(p));
+
+/** Whether this server can open a real browser, and if not, why. */
+export function browserAvailable(): { ok: true } | { ok: false; why: string } {
+  if (process.env.BROWSER_WS_ENDPOINT || localBrowser()) return { ok: true };
+  if (process.platform !== "linux") return { ok: false, why: "No browser found. Install Google Chrome, or set BROWSER_EXECUTABLE_PATH." };
+  if (memoryMB() < BROWSER_NEEDS_MB) {
+    return {
+      ok: false,
+      why: `This server has ${memoryMB()} MB of memory, and a browser needs about 300 MB more than the site uses. Set BROWSER_WS_ENDPOINT to a browser service (Browserless has a free plan), or move to a plan with 2 GB.`,
+    };
+  }
+  return { ok: true };
+}
+
 async function launch(): Promise<Browser> {
   const { chromium } = await import("playwright-core");
   // A browser service (e.g. Browserless), when the server is too small to run one.
   if (process.env.BROWSER_WS_ENDPOINT) return chromium.connectOverCDP(process.env.BROWSER_WS_ENDPOINT);
-  const local = process.env.BROWSER_EXECUTABLE_PATH || [...MAC_BROWSERS, ...WINDOWS_BROWSERS].find((p) => fs.existsSync(p));
+  const local = localBrowser();
   if (local) return chromium.launch({ executablePath: local, headless: true });
-  if (process.platform !== "linux") throw new Error("No browser found. Install Google Chrome, or set BROWSER_EXECUTABLE_PATH.");
-  if (memoryMB() < BROWSER_NEEDS_MB) {
-    throw new Error(
-      `Screenshots and reading pages in a browser aren't available on this server: it has ${memoryMB()} MB of memory, and the browser needs about 300 MB more than the site uses. ` +
-        "Set BROWSER_WS_ENDPOINT to a browser service (Browserless has a free plan), or move to a plan with 2 GB. Seeing images, finding free photos and making images still work.",
-    );
-  }
+  const can = browserAvailable();
+  if (!can.ok) throw new Error(`A browser isn't available on this server. ${can.why}`);
   // On Linux servers (Render): a self-contained Chromium, fetched the first time it's
   // needed and kept in /tmp (so computers that never take screenshots never download it).
   const { default: bundled } = await import("@sparticuz/chromium-min");
@@ -114,6 +124,52 @@ export async function withPage<T>(
   } finally {
     await browser.close().catch(() => {});
   }
+}
+
+/* ---------- Screenshots without a browser here ---------- */
+
+/**
+ * A screenshot from a screenshot service (Microlink), for servers with no room
+ * for a browser (Render's free plan). Free without an account, with a small
+ * daily allowance per server address; MICROLINK_API_KEY lifts it. This site's
+ * pages get a throwaway query, so the service never answers with an old copy.
+ */
+export async function serviceShot(
+  address: string,
+  opts: { device?: keyof typeof DEVICES; ownOrigin: string; fullPage?: boolean; selector?: string },
+): Promise<Buffer> {
+  const url = new URL(address);
+  await assertPublic(url);
+  if (url.origin === new URL(opts.ownOrigin).origin) url.searchParams.set("jzshot", Date.now().toString(36));
+  const d = DEVICES[opts.device ?? "desktop"];
+  const key = process.env.MICROLINK_API_KEY;
+  const api = new URL(key ? "https://pro.microlink.io" : "https://api.microlink.io");
+  const q = api.searchParams;
+  q.set("url", url.toString());
+  q.set("screenshot", "true");
+  q.set("meta", "false");
+  q.set("screenshot.type", "jpeg");
+  q.set("viewport.width", String(d.width));
+  q.set("viewport.height", String(d.height));
+  q.set("viewport.deviceScaleFactor", String(d.deviceScaleFactor));
+  q.set("viewport.isMobile", String(d.isMobile));
+  q.set("waitForTimeout", "1500");
+  if (opts.fullPage) q.set("screenshot.fullPage", "true");
+  if (opts.selector) q.set("screenshot.element", opts.selector);
+  const res = await fetch(api, { headers: key ? { "x-api-key": key } : {}, signal: AbortSignal.timeout(60_000) });
+  const out = (await res.json().catch(() => null)) as { status?: string; message?: string; data?: { screenshot?: { url?: string } } } | null;
+  if (res.status === 429) {
+    throw new Error(
+      "The screenshot service has used today's free allowance (it's shared per server and resets daily). For dependable screenshots, set BROWSER_WS_ENDPOINT to a browser service (Browserless has a free plan).",
+    );
+  }
+  const shotUrl = out?.data?.screenshot?.url;
+  if (!res.ok || out?.status !== "success" || !shotUrl) {
+    throw new Error(`The screenshot service couldn't take it (${res.status}${out?.message ? `: ${out.message.slice(0, 160)}` : ""}).`);
+  }
+  const got = await safeFetch(shotUrl, { maxBytes: 20_000_000, timeoutMs: 30_000 });
+  if (got.status >= 400 || !got.type.startsWith("image/")) throw new Error(`The screenshot service's image didn't load (${got.status}).`);
+  return got.body;
 }
 
 /** Scrolls through the page so lazy images load and scroll animations play, then back to the top. */
@@ -189,13 +245,27 @@ export type Sight = {
   geminiKey?: string;
   visionModel?: string;
   imageModel?: string;
-  /** The main model, used when there's no Gemini key and it can see (Claude, GPT, Gemini). */
+  /** The main model: used when there's no Gemini key, or Gemini fails. Most current models can see (Claude, GPT, Gemini, DeepSeek…). */
   main?: { provider: ProviderId; model: string; apiKey: string; baseURL?: string | null };
 };
 
-const SEEING_PROVIDERS: ProviderId[] = ["anthropic", "openai", "google"];
+export const canSee = (s: Sight) => Boolean(s.geminiKey || s.main);
 
-export const canSee = (s: Sight) => Boolean(s.geminiKey || (s.main && SEEING_PROVIDERS.includes(s.main.provider)));
+/** What went wrong with a model provider, in plain words, naming the cause (not just "it failed"). */
+export function providerProblem(err: unknown): string {
+  // After retries, the AI SDK wraps the last answer: that's the one with the reason.
+  const last = (err as { lastError?: unknown } | null)?.lastError;
+  if (last) return providerProblem(last);
+  const e = err as { message?: string; status?: number; statusCode?: number; responseBody?: string; code?: number | string };
+  const status = e?.statusCode ?? e?.status ?? (typeof e?.code === "number" ? e.code : undefined);
+  const text = `${e?.message ?? String(err)} ${e?.responseBody ?? ""}`;
+  if (status === 402 || /\b402\b|prepay|credit|balance|billing|payment required|insufficient.?(funds|quota)/i.test(text)) return "the account is out of credit (402). Top it up, or remove that key";
+  if (status === 429 || /\b429\b|rate.?limit|resource.?exhausted|too many requests/i.test(text)) return "too many requests right now (429); try again in a minute";
+  if (status === 401 || status === 403 || /\b40[13]\b|api.?key|unauthori[sz]ed|permission/i.test(text)) return "it refused the key (check it in Agent settings → Your providers)";
+  if (/image|vision|multimodal|unsupported (content|media)|does not support/i.test(text)) return "this model doesn't accept images";
+  if (/model/i.test(text) && /not.?found|does not exist|unknown|not exist/i.test(text)) return "it doesn't know that model name";
+  return (e?.message ?? String(err)).replace(/\s+/g, " ").slice(0, 200);
+}
 
 /** Fetches an image to look at: a screenshot id, a site path or any public address. */
 export async function loadImage(ref: string, ownOrigin: string): Promise<{ data: Buffer; type: string }> {
@@ -220,25 +290,38 @@ export async function loadImage(ref: string, ownOrigin: string): Promise<{ data:
 /** Looks at one or more images and answers a question about them, in words. */
 export async function see(sight: Sight, images: { data: Buffer; type: string }[], question: string): Promise<string> {
   const prompt = `${question}\n\nAnswer plainly and specifically: what you actually see (layout, text, colours, people, objects, mood), anything that looks broken, cut off, overlapping or out of place, and where it is. Don't guess at what isn't visible.`;
+  // Gemini first (cheap and good at it), then the main model: one failing doesn't stop the other.
+  const failed: string[] = [];
   if (sight.geminiKey) {
-    const model = sight.visionModel || (await pickVisionModel(sight.geminiKey));
-    if (!model) throw new Error("This Gemini key has no model that can look at images.");
-    const base = process.env.GEMINI_API_BASE_URL?.replace(/\/$/, "");
-    const ai = new GoogleGenAI({ apiKey: sight.geminiKey, ...(base ? { httpOptions: { baseUrl: base } } : {}) });
-    const res = await ai.models.generateContent({
-      model,
-      contents: [{ role: "user", parts: [...images.map((i) => ({ inlineData: { mimeType: i.type, data: i.data.toString("base64") } })), { text: prompt }] }],
-    });
-    return (res.text ?? "").trim() || "(It saw nothing it could describe.)";
+    let model = sight.visionModel || "";
+    try {
+      model ||= (await pickVisionModel(sight.geminiKey)) ?? "";
+      if (!model) throw new Error("This Gemini key has no model that can look at images.");
+      const base = process.env.GEMINI_API_BASE_URL?.replace(/\/$/, "");
+      const ai = new GoogleGenAI({ apiKey: sight.geminiKey, ...(base ? { httpOptions: { baseUrl: base } } : {}) });
+      const res = await ai.models.generateContent({
+        model,
+        contents: [{ role: "user", parts: [...images.map((i) => ({ inlineData: { mimeType: i.type, data: i.data.toString("base64") } })), { text: prompt }] }],
+      });
+      return (res.text ?? "").trim() || "(It saw nothing it could describe.)";
+    } catch (err) {
+      failed.push(`Gemini${model ? ` (${model})` : ""}: ${providerProblem(err)}.`);
+    }
   }
-  if (sight.main && SEEING_PROVIDERS.includes(sight.main.provider)) {
-    const { text } = await generateText({
-      model: buildModel(sight.main),
-      messages: [{ role: "user", content: [...images.map((i) => ({ type: "image" as const, image: i.data, mediaType: i.type })), { type: "text" as const, text: prompt }] }],
-    });
-    return text.trim();
+  if (sight.main) {
+    try {
+      const { text } = await generateText({
+        model: buildModel(sight.main),
+        messages: [{ role: "user", content: [...images.map((i) => ({ type: "file" as const, data: i.data, mediaType: i.type })), { type: "text" as const, text: prompt }] }],
+      });
+      if (failed.length) return `${text.trim()}\n\n(Seen with the main model, ${sight.main.model}. ${failed[0]})`;
+      return text.trim();
+    } catch (err) {
+      failed.push(`The main model (${sight.main.model}): ${providerProblem(err)}.`);
+    }
   }
-  throw new Error("Seeing needs a Gemini key (Agent settings → Voice, or GEMINI_API_KEY), or a main model that can see images (Claude, GPT or Gemini).");
+  if (!failed.length) throw new Error("Seeing needs a model that can look at images: add one in Agent settings → Your providers (or set GEMINI_API_KEY).");
+  throw new Error(`Couldn't look at the image. ${failed.join(" ")}`);
 }
 
 /* ---------- Finding the images on a page ---------- */
@@ -283,7 +366,11 @@ export async function imagesOn(page: Page): Promise<FoundImage[]> {
     if (og) out.push({ src: og, alt: "Share image (og:image)", width: 1200, height: 630, near: document.title });
     return out;
   });
-  const base = page.url();
+  return tidy(found, page.url());
+}
+
+/** Original files (not resized copies), no tiny icons or repeats, largest first. Sizes of 0 are unknown. */
+function tidy(found: FoundImage[], base: string): FoundImage[] {
   const seen = new Set<string>();
   // Resized copies (Next.js /_next/image) point back at the original file: list the original.
   const original = (src: string) => {
@@ -297,14 +384,49 @@ export async function imagesOn(page: Page): Promise<FoundImage[]> {
   };
   return found
     .map((f) => ({ ...f, src: original(f.src) }))
-    .filter((f) => f.src && !f.src.startsWith("data:") && f.width * f.height >= 120 * 120 && !seen.has(f.src) && seen.add(f.src))
+    .filter((f) => f.src && !f.src.startsWith("data:") && (!f.width || f.width * f.height >= 120 * 120) && !seen.has(f.src) && seen.add(f.src))
     .sort((a, b) => b.width * b.height - a.width * a.height);
+}
+
+/** The images in a page's HTML, for servers without a browser: images added later by JavaScript are missed. */
+export async function imagesInHtml(address: string, ownOrigin: string): Promise<FoundImage[]> {
+  const url = new URL(address);
+  const html =
+    url.origin === new URL(ownOrigin).origin
+      ? await (await fetch(url, { signal: AbortSignal.timeout(20_000) })).text()
+      : (await safeFetch(url.toString(), { maxBytes: 5_000_000, timeoutMs: 30_000 })).body.toString("utf8");
+  const unescape = (v: string) => v.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  const attr = (tag: string, name: string) => {
+    const m = new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, "i").exec(tag);
+    return unescape(m?.[1] ?? m?.[2] ?? "");
+  };
+  const found: FoundImage[] = [];
+  for (const m of html.matchAll(/<img\b[^>]*>/gi)) {
+    const tag = m[0];
+    const set = attr(tag, "srcset") || attr(tag, "data-srcset");
+    const widest = set
+      .split(/,\s+/)
+      .map((p) => p.trim().split(/\s+/))
+      .filter((p) => p[0])
+      .sort((a, b) => parseFloat(b[1] || "0") - parseFloat(a[1] || "0"))[0]?.[0];
+    const heading = [...html.slice(Math.max(0, (m.index ?? 0) - 4000), m.index).matchAll(/<(h[1-4]|figcaption)[^>]*>([\s\S]*?)<\/\1>/gi)].pop()?.[2] ?? "";
+    found.push({
+      src: widest || attr(tag, "src") || attr(tag, "data-src"),
+      alt: attr(tag, "alt"),
+      width: Number(attr(tag, "width")) || 0,
+      height: Number(attr(tag, "height")) || 0,
+      near: heading.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 120),
+    });
+  }
+  const og = /<meta[^>]+property=["']og:image["'][^>]*>/i.exec(html)?.[0];
+  if (og) found.push({ src: attr(og, "content"), alt: "Share image (og:image)", width: 1200, height: 630, near: "" });
+  return tidy(found, url.toString());
 }
 
 /* ---------- Making images ---------- */
 
 export async function makeImage(sight: Sight, prompt: string, aspect: string): Promise<{ data: Buffer; type: string; model: string }> {
-  if (!sight.geminiKey) throw new Error("Making images needs a Gemini key (Agent settings → Voice, or GEMINI_API_KEY).");
+  if (!sight.geminiKey) throw new Error("Making images needs a Gemini key (Agent settings → Your providers, or GEMINI_API_KEY).");
   const model = sight.imageModel || (await pickImageModel(sight.geminiKey));
   if (!model) throw new Error("This Gemini key has no image model.");
   const base = process.env.GEMINI_API_BASE_URL?.replace(/\/$/, "");

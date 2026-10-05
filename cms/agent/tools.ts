@@ -7,7 +7,7 @@ import { Engine, readLatest, readPublished, resolveId, titleOf, type Actor } fro
 import type { AgentEvent, ChangeRow, PlanStep } from "./events";
 import type { Permissions, Risk } from "./policy";
 import { adminUrl, describeFields, siteUrl, targetsOf, toModel, walk, type Target } from "./schema";
-import { canSee, findPhotos, imagesOn, keepShot, loadImage, makeImage, see, wake, withPage, DEVICES, type Sight } from "./eyes";
+import { browserAvailable, canSee, findPhotos, imagesInHtml, imagesOn, keepShot, loadImage, makeImage, see, serviceShot, wake, withPage, DEVICES, type Sight } from "./eyes";
 import { outline, safeFetch } from "./web";
 
 /*
@@ -51,6 +51,9 @@ const UNTRUSTED =
 
 const idSchema = z.union([z.string(), z.number()]).optional().describe("The document's id, or its address (slug). Not needed for single pages (globals).");
 const reason = z.string().describe("One short sentence, shown to the owner, on why this change is being made.");
+
+/** Words too common to require when searching by words. */
+const SMALL_WORDS = new Set(["a", "an", "the", "of", "to", "in", "on", "and", "or", "for", "with", "at", "by", "is", "it"]);
 
 export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, ToolMeta> } {
   const { actor, engine } = env;
@@ -316,14 +319,16 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
     "search",
     {
       description:
-        "Find where any words appear anywhere on the site (every page, section, product, post, the nav and footer, settings), including unpublished drafts. Returns each place with its field path, ready to edit.",
+        "Find where any words appear anywhere on the site (every page, section, product, post, the nav and footer, settings), including unpublished drafts. Exact phrases come first, then places that contain all the words (\"book call\" finds \"Book a Call\"). Returns each place with its field path, ready to edit.",
       input: z.object({ query: z.string().min(2), limit: z.number().int().min(1).max(80).optional() }),
       risk: () => "read",
       title: (i) => `Searching the site for “${i.query}”`,
     },
     async ({ query, limit }) => {
-      const q = query.toLowerCase();
-      const hits: { area: string; id?: unknown; title: string; path: string; where: string; text: string }[] = [];
+      const q = query.toLowerCase().trim();
+      // Also every word, in any order, for when the phrase isn't written exactly that way.
+      const words = q.split(/\s+/).filter((w) => w.length > 1 && !SMALL_WORDS.has(w));
+      const hits: { area: string; id?: unknown; title: string; path: string; where: string; text: string; allWords?: true }[] = [];
       for (const t of targets) {
         if (["media", "inquiries", "agent-routines", "agent-memory"].includes(t.slug) || env.scope !== "full") continue;
         let docs: Record<string, unknown>[] = [];
@@ -350,9 +355,15 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
             if (typeof value === "string") strings.push(value);
             if (f.type === "richText" && value) JSON.stringify(value).replace(/"text":"((?:[^"\\]|\\.)*)"/g, (_, s: string) => (strings.push(s), ""));
             for (const s of strings) {
-              const at = s.toLowerCase().indexOf(q);
-              if (at === -1) continue;
+              const low = s.toLowerCase();
+              let at = low.indexOf(q);
+              const exact = at !== -1;
+              if (!exact) {
+                if (words.length < 2 || !words.every((w) => low.includes(w))) continue;
+                at = low.indexOf(words[0]);
+              }
               hits.push({
+                ...(exact ? {} : { allWords: true as const }),
                 area: t.slug,
                 id: t.kind === "collection" ? doc.id : undefined,
                 title: titleOf(t, doc),
@@ -364,6 +375,7 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
           });
         }
       }
+      hits.sort((a, b) => Number(Boolean(a.allWords)) - Number(Boolean(b.allWords)));
       // Everything found is on one document: that's the one being worked on now.
       const docsHit = new Set(hits.map((h) => `${h.area}:${h.id ?? ""}`));
       if (docsHit.size === 1 && hits[0].id != null) {
@@ -836,7 +848,7 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
     "screenshot",
     {
       description:
-        "Open a page in a real browser and take a screenshot (this site or any public website), then look at it and describe what's there. Use it to check how a page really looks after a change (layout, spacing, overlaps, images), to see a design you're asked about, or to see a site built with JavaScript. Ask a specific question for a useful answer.",
+        "Take a screenshot of a page (this site or any public website) as a visitor sees it, then look at it and describe what's there. It uses a real browser, or a screenshot service when this server has no room for one. The owner sees the screenshot in the conversation. Use it to check how a page really looks after a change (layout, spacing, overlaps, images), to see a design you're asked about, or to see a site built with JavaScript. Drafts don't show: it's the live site. Ask a specific question for a useful answer.",
       input: z.object({
         url: z.string().describe("A path on this site (/about) or a full address (https://…)."),
         question: z.string().optional().describe("What to look for, e.g. 'Is anything overlapping or cut off in the footer?'"),
@@ -849,11 +861,20 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
     },
     async ({ url, question, device, part, fullPage }) => {
       const address = addressOf(url);
-      const shot = await withPage(address, { device, ownOrigin: env.origin }, async (page) => {
+      // "#pricing", ".hero", "footer", "section h2" are selectors; anything else is words on the page.
+      const css = Boolean(part) && (/^[#.[]/.test(part!) || /^(footer|header|nav|main|section|article|aside|form|h[1-6]|img)\b/i.test(part!));
+      let via: string | undefined;
+      let shot: Buffer;
+      if (!browserAvailable().ok) {
+        // No room for a browser on this server: a screenshot service takes it instead.
+        shot = await serviceShot(address, { device, ownOrigin: env.origin, fullPage: Boolean(fullPage) || (Boolean(part) && !css), selector: css ? part : undefined });
+        via =
+          part && !css
+            ? `Taken by a screenshot service (no browser on this server), which can't search for words: this is the whole page, with "${part}" somewhere in it.`
+            : "Taken by a screenshot service (no browser on this server).";
+      } else shot = await withPage(address, { device, ownOrigin: env.origin }, async (page) => {
         await wake(page);
         if (part) {
-          // "#pricing", ".hero", "footer", "section h2" are selectors; anything else is words on the page.
-          const css = /^[#.[]/.test(part) || /^(footer|header|nav|main|section|article|aside|form|h[1-6]|img)\b/i.test(part);
           const target = (css ? page.locator(part) : page.getByText(part, { exact: false })).filter({ visible: true }).first();
           if (part === "footer") {
             // The site's footer is revealed behind the page at the very end.
@@ -874,13 +895,14 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
       let note: string | undefined;
       if (canSee(sight)) {
         seen = await see(sight, [{ data: shot, type: "image/jpeg" }], question || `Describe this ${device ?? "desktop"} screenshot of ${address}.`).catch((err) => {
-          note = `Couldn't look at it: ${(err as Error).message}`;
+          note = `The screenshot was taken (the owner can see it in the conversation), but you couldn't look at it yourself: ${(err as Error).message}`;
           return undefined;
         });
-      } else note = "Took the screenshot but can't look at it: seeing needs a Gemini key (Agent settings → Voice, or GEMINI_API_KEY).";
+      } else note = "The screenshot was taken (the owner can see it in the conversation), but you can't look at it: no model that sees images is set up.";
       return {
         ok: true,
         page: address,
+        ...(via ? { via } : {}),
         device: device ?? "desktop",
         size: `${DEVICES[device ?? "desktop"].width}px wide`,
         shot: kept.url,
@@ -930,14 +952,17 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
     },
     async ({ url, near, limit }) => {
       const address = addressOf(url);
-      const all = await withPage(address, { ownOrigin: env.origin }, (page) => imagesOn(page));
+      // Without a browser on this server, the page's HTML is read instead.
+      const browser = browserAvailable().ok;
+      const all = browser ? await withPage(address, { ownOrigin: env.origin }, (page) => imagesOn(page)) : await imagesInHtml(address, env.origin);
       const q = near?.toLowerCase().trim();
       const words = q ? q.split(/\s+/).filter((w) => w.length > 2) : [];
       const picked = q ? all.filter((i) => words.some((w) => `${i.alt} ${i.near} ${i.src}`.toLowerCase().includes(w))) : all;
       return {
         page: address,
         total: all.length,
-        images: picked.slice(0, limit ?? 20).map((i) => ({ src: i.src, size: `${i.width}×${i.height}`, alt: i.alt, near: i.near })),
+        images: picked.slice(0, limit ?? 20).map((i) => ({ src: i.src, size: i.width ? `${i.width}×${i.height}` : "unknown", alt: i.alt, near: i.near })),
+        ...(browser ? {} : { via: "Read from the page's HTML (no browser on this server): images a page adds later with JavaScript are missing." }),
         tip: "Look at a candidate with look before adding it with upload_image. Prefer the largest version.",
         ...(isOwn(url) ? {} : { warning: UNTRUSTED }),
       };

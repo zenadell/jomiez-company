@@ -20,6 +20,13 @@ const RISK: Record<string, string> = {
   web: "Reads the web",
 };
 
+/* What a picture under a step is, so an image it added isn't mistaken for something it saw. */
+const PICTURE: Record<string, string> = {
+  screenshot: "Screenshot it took",
+  upload_image: "The image it added to the media library",
+  make_image: "The image it made (added to the media library)",
+};
+
 function Step({ item }: { item: Extract<TranscriptItem, { kind: "tool" }> }) {
   const [open, setOpen] = useState(false);
   const state = item.waiting ? "waiting" : item.ok === undefined ? "working" : item.ok ? "ok" : "failed";
@@ -36,6 +43,7 @@ function Step({ item }: { item: Extract<TranscriptItem, { kind: "tool" }> }) {
         <a className="jz-step__image" href={item.image} target="_blank" rel="noopener" title="Open full size">
           {/* eslint-disable-next-line @next/next/no-img-element -- a screenshot or upload, any size */}
           <img src={item.image} alt={item.title} loading="lazy" />
+          <span className="jz-step__caption">{PICTURE[item.name] ?? "Image"}</span>
         </a>
       )}
       {open && (
