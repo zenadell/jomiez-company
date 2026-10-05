@@ -85,6 +85,15 @@ export async function saveSnapshot(payload: Payload) {
     const strip = (doc: Doc | null) => {
       if (!doc) return null;
       for (const k of SECRET_FIELDS[g.slug] ?? []) delete doc[k];
+      // Each provider's key in Agent settings → Your providers stays behind too.
+      if (g.slug === "agent" && Array.isArray(doc.providers)) {
+        doc.providers = (doc.providers as Doc[]).map((row) => {
+          const out = { ...row };
+          delete out.apiKey;
+          delete out.apiKeyHint;
+          return out;
+        });
+      }
       return doc;
     };
     const live = (await payload.findGlobal({ slug: g.slug as GlobalSlug, draft: false, depth: 0, overrideAccess: true })) as unknown as Doc;

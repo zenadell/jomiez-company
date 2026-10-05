@@ -31,8 +31,10 @@ import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c08
 import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
+import { BackToConsole as BackToConsole_1291aa50a4d012d2e064662caffe67df } from '../../../cms/admin/agent/BackToConsole'
 import { ModelPicker as ModelPicker_7152deb8cfaaa59d25f940799308116f } from '../../../cms/admin/agent/ModelPicker'
 import { SecretField as SecretField_68ba7bcb8c607790274b0bc4919b9738 } from '../../../cms/admin/agent/SecretField'
+import { ProviderRowLabel as ProviderRowLabel_d145fc135ac95d9e261c61119d896d96 } from '../../../cms/admin/agent/ProviderRowLabel'
 import { VoicePicker as VoicePicker_ee1d30fe681e43b1c0a84567235e83e1 } from '../../../cms/admin/agent/VoicePicker'
 import { PermissionsNote as PermissionsNote_26c03031cad2ac0ce11b33a1667590d4 } from '../../../cms/admin/agent/PermissionsNote'
 import { Icon as Icon_4c7444b93dbccf84094c9864fd2f1234 } from '../../../cms/admin/Icon'
@@ -80,8 +82,10 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaDescriptionComponent": MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
+  "/cms/admin/agent/BackToConsole#BackToConsole": BackToConsole_1291aa50a4d012d2e064662caffe67df,
   "/cms/admin/agent/ModelPicker#ModelPicker": ModelPicker_7152deb8cfaaa59d25f940799308116f,
   "/cms/admin/agent/SecretField#SecretField": SecretField_68ba7bcb8c607790274b0bc4919b9738,
+  "/cms/admin/agent/ProviderRowLabel#ProviderRowLabel": ProviderRowLabel_d145fc135ac95d9e261c61119d896d96,
   "/cms/admin/agent/VoicePicker#VoicePicker": VoicePicker_ee1d30fe681e43b1c0a84567235e83e1,
   "/cms/admin/agent/PermissionsNote#PermissionsNote": PermissionsNote_26c03031cad2ac0ce11b33a1667590d4,
   "/cms/admin/Icon#Icon": Icon_4c7444b93dbccf84094c9864fd2f1234,

@@ -27,18 +27,71 @@ export const DEFAULT_VOICE_MODEL = "gemini-3.1-flash-live-preview";
  * server-side read asks for it with the revealAgentKey context flag), with a
  * hidden "last four characters" hint for the settings screen.
  */
-function secret(name: string, label: string, description: string): Field[] {
+function secret(name: string, label: string, description: string, hidden = false): Field[] {
   return [
     {
       name,
       label,
       type: "text",
       hooks: { afterRead: [({ value, context }) => (context?.revealAgentKey ? value : null)] },
-      admin: { components: { Field: "/cms/admin/agent/SecretField#SecretField" }, description },
+      admin: { hidden, components: { Field: "/cms/admin/agent/SecretField#SecretField" }, description },
     },
     { name: `${name}Hint`, type: "text", admin: { hidden: true, readOnly: true } },
   ];
 }
+
+const PROVIDER_OPTIONS = Object.entries(PROVIDERS).map(([value, p]) => ({ value, label: p.label }));
+const NATIVE = ["anthropic", "openai", "google"];
+
+/* One provider's key (and address, and quick model). Each provider is added once. */
+const providerRows: Field = {
+  name: "providers",
+  label: "Your providers",
+  labels: { singular: "Provider", plural: "Providers" },
+  type: "array",
+  admin: {
+    description:
+      "Add a key for each provider you use (OpenAI, DeepSeek, Gemini, Claude…). Then switch between their models from the console, or with the Provider and Model boxes above, without entering keys again.",
+    components: { RowLabel: "/cms/admin/agent/ProviderRowLabel#ProviderRowLabel" },
+  },
+  validate: (rows: unknown) => {
+    const seen = new Set<string>();
+    for (const row of (rows as { provider?: string }[] | null) ?? []) {
+      if (!row?.provider) continue;
+      if (seen.has(row.provider)) return `${PROVIDERS[row.provider as keyof typeof PROVIDERS]?.label ?? row.provider} is listed twice. Keep one.`;
+      seen.add(row.provider);
+    }
+    return true;
+  },
+  fields: [
+    {
+      type: "row",
+      fields: [
+        { name: "provider", label: "Provider", type: "select", required: true, options: PROVIDER_OPTIONS, admin: { width: "50%" } },
+        {
+          name: "fastModel",
+          label: "Quick model (optional)",
+          type: "text",
+          admin: {
+            width: "50%",
+            components: { afterInput: [MODEL_PICKER] },
+            description: "A cheaper model from this provider for background work (sorting messages, helper tasks). Empty: the main model does everything.",
+          },
+        },
+      ],
+    },
+    ...secret("apiKey", "API key", "Stored encrypted and never shown again, not even to the agent. Empty: the provider's key from the environment, if set."),
+    {
+      name: "baseURL",
+      label: "Service address (base URL)",
+      type: "text",
+      admin: {
+        condition: (_data, sibling) => !NATIVE.includes(sibling?.provider),
+        description: "Only needed for your own server or a service not in the list, e.g. http://localhost:11434/v1 for Ollama.",
+      },
+    },
+  ],
+};
 
 const PERSONA = `Write like jomiez.com: an ancient, natural voice (roots, seasons, gardens, craft), calm and certain, never hype. Short sentences. Plain words. No exclamation marks.
 Jomiez Innovation is a software company that grows its own AI products (Chaka AI, Chaka WAP) and builds custom software for businesses.
@@ -53,6 +106,7 @@ export const AgentSettings: GlobalConfig = {
   },
   access: { read: adminsOnly, update: adminsOnly },
   fields: [
+    { name: "back", type: "ui", admin: { components: { Field: "/cms/admin/agent/BackToConsole#BackToConsole" } } },
     {
       type: "row",
       fields: [
@@ -85,8 +139,8 @@ export const AgentSettings: GlobalConfig = {
                   type: "select",
                   required: true,
                   defaultValue: DEFAULT_PROVIDER,
-                  options: Object.entries(PROVIDERS).map(([value, p]) => ({ value, label: p.label })),
-                  admin: { width: "50%" },
+                  options: PROVIDER_OPTIONS,
+                  admin: { width: "50%", description: "The one it uses now. Its key comes from Your providers below." },
                 },
                 {
                   name: "model",
@@ -102,47 +156,26 @@ export const AgentSettings: GlobalConfig = {
                 },
               ],
             },
-            ...secret("apiKey", "API key", "Stored encrypted and never shown again, not even to the agent."),
             {
-              name: "baseURL",
-              label: "Service address (base URL)",
-              type: "text",
-              admin: {
-                condition: (data) => !["anthropic", "openai", "google"].includes(data?.provider),
-                description: "Only needed for your own server or a service not in the list, e.g. http://localhost:11434/v1 for Ollama.",
-              },
-            },
-            {
-              type: "row",
-              fields: [
-                {
-                  name: "fastModel",
-                  label: "Quick model (optional)",
-                  type: "text",
-                  defaultValue: DEFAULT_FAST_MODEL,
-                  admin: {
-                    width: "50%",
-                    components: { afterInput: [MODEL_PICKER] },
-                    description: "A cheaper model, same provider, for background work: sorting messages and helper tasks. Empty: the main model does everything.",
-                  },
-                },
-                {
-                  name: "thinking",
-                  label: "Thinking effort",
-                  type: "select",
-                  defaultValue: "provider-default",
-                  options: [
-                    { value: "provider-default", label: "Model's default" },
-                    { value: "none", label: "Off (fastest)" },
-                    { value: "low", label: "Low" },
-                    { value: "medium", label: "Medium" },
-                    { value: "high", label: "High" },
-                    { value: "xhigh", label: "Maximum" },
-                  ],
-                  admin: { width: "50%", description: "How hard it thinks before acting, on models that support it." },
-                },
+              name: "thinking",
+              label: "Thinking effort",
+              type: "select",
+              defaultValue: "provider-default",
+              options: [
+                { value: "provider-default", label: "Model's default" },
+                { value: "none", label: "Off (fastest)" },
+                { value: "low", label: "Low" },
+                { value: "medium", label: "Medium" },
+                { value: "high", label: "High" },
+                { value: "xhigh", label: "Maximum" },
               ],
+              admin: { width: "50%", description: "How hard it thinks before acting, on models that support it." },
             },
+            providerRows,
+            // The single key from before Your providers: moved into the list by a migration, still read as a fallback.
+            ...secret("apiKey", "API key", "", true),
+            { name: "baseURL", type: "text", admin: { hidden: true } },
+            { name: "fastModel", type: "text", defaultValue: DEFAULT_FAST_MODEL, admin: { hidden: true } },
           ],
         },
         {
@@ -187,7 +220,7 @@ export const AgentSettings: GlobalConfig = {
             ...secret(
               "voiceApiKey",
               "Gemini key for voice (optional)",
-              "Empty: the main key when the main provider is Google, else GEMINI_API_KEY from the environment.",
+              "Empty: the Google (Gemini) key from Model → Your providers, else GEMINI_API_KEY from the environment.",
             ),
           ],
         },
@@ -360,22 +393,32 @@ export const AgentSettings: GlobalConfig = {
     beforeChange: [
       async ({ data, req }) => {
         const next = { ...data } as Record<string, unknown>;
+        // The browser never has saved keys, so an untouched key box comes back empty: keep
+        // what's stored. Read it from the database itself, since every normal read leaves keys out.
         let stored: Record<string, unknown> | null | undefined;
-        for (const name of SECRET_FIELDS) {
-          const incoming = next[name] as string | null | undefined;
+        const fromDb = async () => (stored ??= (await req.payload.db.findGlobal({ slug: "agent", req })) as Record<string, unknown> | null);
+        const settle = (target: Record<string, unknown>, name: string, prev: Record<string, unknown> | null | undefined) => {
+          const incoming = target[name] as string | null | undefined;
           if (incoming === CLEAR_KEY) {
-            next[name] = null;
-            next[`${name}Hint`] = null;
+            target[name] = null;
+            target[`${name}Hint`] = null;
           } else if (typeof incoming === "string" && incoming.trim() && !isEncrypted(incoming)) {
-            next[name] = encrypt(incoming.trim());
-            next[`${name}Hint`] = hint(incoming.trim());
+            target[name] = encrypt(incoming.trim());
+            target[`${name}Hint`] = hint(incoming.trim());
           } else {
-            // Untouched (the browser never has the saved key): keep what's stored. Read
-            // it from the database itself, since every normal read leaves keys out.
-            stored ??= (await req.payload.db.findGlobal({ slug: "agent", req })) as Record<string, unknown> | null;
-            next[name] = stored?.[name] ?? null;
-            next[`${name}Hint`] = stored?.[`${name}Hint`] ?? null;
+            target[name] = prev?.[name] ?? null;
+            target[`${name}Hint`] = prev?.[`${name}Hint`] ?? null;
           }
+        };
+        for (const name of SECRET_FIELDS) settle(next, name, await fromDb());
+        if (Array.isArray(next.providers)) {
+          const before = ((await fromDb())?.providers as Record<string, unknown>[] | undefined) ?? [];
+          next.providers = (next.providers as Record<string, unknown>[]).map((row) => {
+            const out = { ...row };
+            // The same row, or (for a row re-added) the stored row for the same provider.
+            settle(out, "apiKey", before.find((b) => row.id && b.id === row.id) ?? before.find((b) => b.provider === row.provider));
+            return out;
+          });
         }
         return next;
       },
@@ -430,6 +473,7 @@ export const AgentThreads: CollectionConfig = {
     },
     { name: "context", type: "json" },
     { name: "messages", type: "json" },
+    { name: "provider", type: "text", admin: { hidden: true } },
     { name: "events", type: "json" },
     { name: "plan", type: "json" },
     { name: "pending", type: "json" },

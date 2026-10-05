@@ -1539,3 +1539,76 @@
   object-fit: cover;
   object-position: top;
 }
+
+/* ---------- Model switcher (console header) and Your providers ---------- */
+
+.jz-switch {
+  position: relative;
+  display: inline-block;
+}
+
+.jz-switch__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.jz-switch__button:hover,
+.jz-switch__button[aria-expanded="true"] {
+  border-color: var(--jz-accent);
+}
+
+.jz-switch__panel {
+  width: min(520px, 92vw);
+  max-height: 420px;
+}
+
+.jz-switch__providers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 2px 8px;
+}
+
+.jz-switch__providers button,
+.jz-switch__add {
+  padding: 4px 10px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.jz-switch__providers button.is-on {
+  border-color: var(--jz-accent);
+  background: var(--theme-elevation-100);
+}
+
+.jz-switch__add {
+  border-style: dashed;
+  color: var(--theme-elevation-600);
+}
+
+.jz-switch__error {
+  color: var(--theme-error-500, #d33);
+}
+
+.jz-back {
+  margin-bottom: 18px;
+}
+
+.jz-rowhint {
+  color: var(--theme-elevation-500);
+  font-weight: 400;
+}

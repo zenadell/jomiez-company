@@ -16,6 +16,8 @@ export type AgentStatus = {
   setup: string | null;
   model: string;
   provider: string;
+  /** Providers with a key, for the model switcher (admins only). */
+  providers?: { id: string; label: string }[];
   mode: string;
   waiting: number;
   working: number;

@@ -12,12 +12,24 @@ type Model = { id: string; label?: string };
  */
 export function ModelPicker({ path, purpose = "text" }: { path?: string; purpose?: "text" | "voice" | "vision" | "image" }) {
   const { value, setValue } = useField<string>({ path });
-  const form = useFormFields(([fields]) => ({
-    provider: fields.provider?.value as string | undefined,
-    baseURL: fields.baseURL?.value as string | undefined,
-    apiKey: fields.apiKey?.value as string | undefined,
-    voiceApiKey: fields.voiceApiKey?.value as string | undefined,
-  }));
+  // In a Your providers row, the row's own provider, key and address; for the main Model
+  // box, the row for the provider chosen above (the saved key is looked up on the server).
+  const prefix = path?.includes(".") ? path.slice(0, path.lastIndexOf(".") + 1) : "";
+  const form = useFormFields(([fields]) => {
+    const str = (key: string) => fields[key]?.value as string | undefined;
+    let row = prefix;
+    if (!row) {
+      const provider = str("provider");
+      const match = Object.keys(fields).find((k) => /^providers\.\d+\.provider$/.test(k) && fields[k]?.value === provider);
+      row = match ? match.slice(0, -"provider".length) : "";
+    }
+    return {
+      provider: str(`${prefix}provider`),
+      baseURL: row ? str(`${row}baseURL`) : undefined,
+      apiKey: row ? str(`${row}apiKey`) : undefined,
+      voiceApiKey: str("voiceApiKey"),
+    };
+  });
   const [open, setOpen] = useState(false);
   const [models, setModels] = useState<Model[] | null>(null);
   const [error, setError] = useState<string | null>(null);
