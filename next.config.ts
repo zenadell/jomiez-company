@@ -1,8 +1,11 @@
 import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   agentRules: false,
+  // Pages published since the last deploy stay live after a restart (see the file).
+  cacheHandler: path.resolve("lib/page-cache.mjs"),
   // The agent's browser (screenshots): loaded at run time, never bundled.
   serverExternalPackages: ["playwright-core", "@sparticuz/chromium-min"],
   images: {
