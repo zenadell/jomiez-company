@@ -8,6 +8,8 @@ services:
     runtime: node
     # Always on: the agent's routines run on the server's own clock, and the
     # free plan sleeps when idle. Pick the region nearest the Supabase project.
+    # The agent's screenshots run a browser (about 300 MB): choose Standard for
+    # them, or keep Starter and set BROWSER_WS_ENDPOINT to a browser service.
     plan: starter
     buildCommand: npm ci && npm run build
     startCommand: npm start
@@ -46,6 +48,9 @@ services:
         sync: false
       # Optional: the agent on DeepSeek (or save the key in Agent settings).
       - key: DEEPSEEK_API_KEY
+        sync: false
+      # Optional: free photos from Pexels for the agent (public-domain images work without it).
+      - key: PEXELS_API_KEY
         sync: false
       # For an outside scheduler calling /api/agent/tick, if you ever use one.
       - key: CRON_SECRET

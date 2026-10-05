@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   agentRules: false,
+  // The agent's browser (screenshots): loaded at run time, never bundled.
+  serverExternalPackages: ["playwright-core", "@sparticuz/chromium"],
   images: {
     formats: ["image/avif", "image/webp"],
     // Images uploaded through the admin: served by the app itself locally, and

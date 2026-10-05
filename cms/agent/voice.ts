@@ -8,7 +8,7 @@ import { decide, type Risk } from "./policy";
 import { buildInstructions } from "./prompt";
 import { situation } from "./situation";
 import { buildModel, missingSetup } from "./providers";
-import { loadConfig, rememberLesson, usageToday, voiceKey, type AgentConfig } from "./run";
+import { imageOf, loadConfig, rememberLesson, sightOf, usageToday, voiceKey, type AgentConfig } from "./run";
 import { targetsOf } from "./schema";
 import { makeTools, type ToolMeta } from "./tools";
 
@@ -104,6 +104,7 @@ async function toolkit(payload: Payload, user: TypedUser, cfg: AgentConfig, orig
     setPlan: () => {},
     helperModel,
     threadId: String(threadId),
+    sight: sightOf(cfg),
   });
   // Long read-only jobs need the text model; without it, voice does them itself.
   if (!textReady) delete tools.delegate;
@@ -290,7 +291,8 @@ function cleanError(err: unknown) {
 const summaryOf = (output: unknown) => {
   const o = output as Record<string, unknown> | null;
   if (!o || typeof o !== "object") return String(output ?? "Done").slice(0, 200);
-  return String(o.changed ?? o.published ?? o.summary ?? o.status ?? o.title ?? "Done").split("\n").slice(0, 3).join(" ").slice(0, 240);
+  const what = o.changed ?? o.published ?? o.summary ?? o.seen ?? (Array.isArray(o.images) ? `${o.images.length} images` : null) ?? (Array.isArray(o.photos) ? `${o.photos.length} photos` : null) ?? o.status ?? o.title ?? o.note ?? "Done";
+  return String(what).split("\n").slice(0, 3).join(" ").slice(0, 240);
 };
 
 export async function runVoiceCalls(opts: {
@@ -372,7 +374,7 @@ export async function runVoiceCalls(opts: {
       }
       try {
         const output = await t.execute(args, { toolCallId: call.id, messages: [] });
-        emit({ t: "tool-result", id: call.id, ok: true, summary: summaryOf(output) });
+        emit({ t: "tool-result", id: call.id, ok: true, summary: summaryOf(output), ...imageOf(output) });
         responses.push({ id: call.id, name: call.name, response: { output: output as Record<string, unknown> } });
       } catch (err) {
         emit({ t: "tool-result", id: call.id, ok: false, summary: (err as Error).message.slice(0, 300) });
@@ -430,7 +432,7 @@ export async function answerVoiceApproval(opts: {
       const t = tools[item.name] as { execute?: (i: unknown, o: unknown) => Promise<unknown> } | undefined;
       try {
         const output = await t!.execute!(item.args ?? {}, { toolCallId: item.toolCallId, messages: [] });
-        events.push({ t: "tool-result", id: item.toolCallId, ok: true, summary: summaryOf(output) });
+        events.push({ t: "tool-result", id: item.toolCallId, ok: true, summary: summaryOf(output), ...imageOf(output) });
         text = `[The owner approved “${item.title}”. It's done: ${summaryOf(output)}. Tell them in one short sentence.]`;
       } catch (err) {
         events.push({ t: "tool-result", id: item.toolCallId, ok: false, summary: (err as Error).message.slice(0, 300) });

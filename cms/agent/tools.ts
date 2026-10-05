@@ -7,6 +7,7 @@ import { Engine, readLatest, readPublished, resolveId, titleOf, type Actor } fro
 import type { AgentEvent, ChangeRow, PlanStep } from "./events";
 import type { Permissions, Risk } from "./policy";
 import { adminUrl, describeFields, siteUrl, targetsOf, toModel, walk, type Target } from "./schema";
+import { canSee, findPhotos, imagesOn, keepShot, loadImage, makeImage, see, wake, withPage, DEVICES, type Sight } from "./eyes";
 import { outline, safeFetch } from "./web";
 
 /*
@@ -30,6 +31,8 @@ export type ToolEnv = {
   helperModel: LanguageModel;
   threadId: string;
   ownerEmail?: string | null;
+  /** How it can see images and make them (a Gemini key, and/or a main model that sees). */
+  sight?: Sight;
 };
 
 export type ToolMeta = {
@@ -805,6 +808,182 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
       });
       env.emit({ t: "change", title: input.name, action: "set up the routine", admin: `/admin/collections/agent-routines/${doc.id}`, site: null });
       return { ok: true, id: doc.id, nextRunAt: (doc as { nextRunAt?: string }).nextRunAt };
+    },
+  );
+
+  /* ---------- Eyes: screenshots, looking at images, finding and making them ---------- */
+
+  const sight = env.sight ?? {};
+  /** An address on this site ("/about") or anywhere ("https://…"). */
+  const addressOf = (where: string) => new URL(where.startsWith("/") ? where : where, env.origin).toString();
+  const isOwn = (where: unknown) => {
+    try {
+      return new URL(String(where ?? "/"), env.origin).origin === new URL(env.origin).origin;
+    } catch {
+      return false;
+    }
+  };
+  const hostOf = (where: unknown) => {
+    try {
+      const u = new URL(String(where ?? "/"), env.origin);
+      return isOwn(where) ? u.pathname : u.host;
+    } catch {
+      return String(where ?? "");
+    }
+  };
+
+  add(
+    "screenshot",
+    {
+      description:
+        "Open a page in a real browser and take a screenshot (this site or any public website), then look at it and describe what's there. Use it to check how a page really looks after a change (layout, spacing, overlaps, images), to see a design you're asked about, or to see a site built with JavaScript. Ask a specific question for a useful answer.",
+      input: z.object({
+        url: z.string().describe("A path on this site (/about) or a full address (https://…)."),
+        question: z.string().optional().describe("What to look for, e.g. 'Is anything overlapping or cut off in the footer?'"),
+        device: z.enum(["desktop", "phone"]).optional(),
+        part: z.string().optional().describe("Scroll to and capture just this part: a CSS selector (footer, #pricing) or words that appear in it."),
+        fullPage: z.boolean().optional().describe("The whole page top to bottom instead of one screen."),
+      }),
+      risk: (i) => (isOwn(i.url) ? "read" : "web"),
+      title: (i) => `Taking a screenshot of ${hostOf(i.url)}${i.part ? ` (${i.part})` : ""}${i.device === "phone" ? " on a phone" : ""}`,
+    },
+    async ({ url, question, device, part, fullPage }) => {
+      const address = addressOf(url);
+      const shot = await withPage(address, { device, ownOrigin: env.origin }, async (page) => {
+        await wake(page);
+        if (part) {
+          // "#pricing", ".hero", "footer", "section h2" are selectors; anything else is words on the page.
+          const css = /^[#.[]/.test(part) || /^(footer|header|nav|main|section|article|aside|form|h[1-6]|img)\b/i.test(part);
+          const target = (css ? page.locator(part) : page.getByText(part, { exact: false })).filter({ visible: true }).first();
+          if (part === "footer") {
+            // The site's footer is revealed behind the page at the very end.
+            await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+            await page.waitForTimeout(1200);
+            return page.screenshot({ type: "jpeg", quality: 72 });
+          }
+          if (!(await target.count())) throw new Error(`Couldn't find "${part}" on that page.`);
+          // A plain scroll: moving things (marquees, carousels) never hold still for a stricter one.
+          await target.evaluate((el) => el.scrollIntoView({ block: "center" }));
+          await page.waitForTimeout(900);
+          return page.screenshot({ type: "jpeg", quality: 72 });
+        }
+        return page.screenshot({ type: "jpeg", quality: 72, fullPage: Boolean(fullPage) });
+      });
+      const kept = keepShot(shot);
+      let seen: string | undefined;
+      let note: string | undefined;
+      if (canSee(sight)) {
+        seen = await see(sight, [{ data: shot, type: "image/jpeg" }], question || `Describe this ${device ?? "desktop"} screenshot of ${address}.`).catch((err) => {
+          note = `Couldn't look at it: ${(err as Error).message}`;
+          return undefined;
+        });
+      } else note = "Took the screenshot but can't look at it: seeing needs a Gemini key (Agent settings → Voice, or GEMINI_API_KEY).";
+      return {
+        ok: true,
+        page: address,
+        device: device ?? "desktop",
+        size: `${DEVICES[device ?? "desktop"].width}px wide`,
+        shot: kept.url,
+        ...(seen ? { seen } : {}),
+        ...(note ? { note } : {}),
+        ...(isOwn(url) ? {} : { warning: UNTRUSTED }),
+      };
+    },
+  );
+
+  add(
+    "look",
+    {
+      description:
+        "Look at an image and say what's in it: a media library image (its id), a screenshot you took (its shot address), or an image address on this site or the web. Use it to pick the right image, check one matches what was asked, or write a good description.",
+      input: z.object({
+        image: z.union([z.string(), z.number()]).describe("A media id, a shot address (/api/agent/shot?id=…), or an image address."),
+        question: z.string().optional(),
+      }),
+      risk: (i) => (typeof i.image === "number" || /^\d+$/.test(String(i.image)) || isOwn(i.image) ? "read" : "web"),
+      title: () => "Looking at an image",
+    },
+    async ({ image, question }) => {
+      let ref = String(image);
+      if (/^\d+$/.test(ref)) {
+        const m = await payload.findByID({ collection: "media", id: Number(ref), depth: 0, overrideAccess: true });
+        ref = String(m.url);
+      }
+      const img = await loadImage(ref, env.origin);
+      const seen = await see(sight, [img], question || "Describe this image: what it shows, its mood, colours and composition, and whether it would suit a website with a natural, ancient feel.");
+      return { seen, ...(isOwn(ref) || /shot/.test(ref) ? {} : { warning: UNTRUSTED }) };
+    },
+  );
+
+  add(
+    "find_images",
+    {
+      description:
+        "List the images on any web page (this site or another, e.g. the owner's old site), largest first, with their addresses, sizes, descriptions and the heading nearest each, so you can pick one and add it with upload_image. Opens the page in a real browser, so images loaded by JavaScript are found too.",
+      input: z.object({
+        url: z.string().describe("A path on this site or a full address."),
+        near: z.string().optional().describe("Only images whose description or nearby heading mentions this, e.g. a project name."),
+        limit: z.number().int().min(1).max(40).optional(),
+      }),
+      risk: (i) => (isOwn(i.url) ? "read" : "web"),
+      title: (i) => `Finding the images on ${hostOf(i.url)}${i.near ? ` (${i.near})` : ""}`,
+    },
+    async ({ url, near, limit }) => {
+      const address = addressOf(url);
+      const all = await withPage(address, { ownOrigin: env.origin }, (page) => imagesOn(page));
+      const q = near?.toLowerCase().trim();
+      const words = q ? q.split(/\s+/).filter((w) => w.length > 2) : [];
+      const picked = q ? all.filter((i) => words.some((w) => `${i.alt} ${i.near} ${i.src}`.toLowerCase().includes(w))) : all;
+      return {
+        page: address,
+        total: all.length,
+        images: picked.slice(0, limit ?? 20).map((i) => ({ src: i.src, size: `${i.width}×${i.height}`, alt: i.alt, near: i.near })),
+        tip: "Look at a candidate with look before adding it with upload_image. Prefer the largest version.",
+        ...(isOwn(url) ? {} : { warning: UNTRUSTED }),
+      };
+    },
+  );
+
+  add(
+    "find_photos",
+    {
+      description:
+        "Search free photos that may be used on a business site without asking (Pexels, or public-domain images). For new imagery when nothing on the owner's own sites fits. Look at the best few, then add one with upload_image. Never take images from Pinterest, Google Images or other people's sites for the public site: they belong to their creators.",
+      input: z.object({ query: z.string().min(2), orientation: z.enum(["landscape", "portrait", "square"]).optional() }),
+      risk: () => "web",
+      title: (i) => `Searching free photos for “${i.query}”`,
+    },
+    async ({ query, orientation }) => {
+      const photos = await findPhotos(query, orientation);
+      return { photos: photos.slice(0, 12), note: photos.length ? "Free to use commercially." : "Nothing found; try other words, or make_image." };
+    },
+  );
+
+  add(
+    "make_image",
+    {
+      description:
+        "Create an original image with Gemini and add it to the media library (it belongs to Jomiez, no licence worries). Describe the subject, setting, light, mood and style in detail; the site's look is natural and ancient: moss, stone, roots, mist, warm low light, calm and premium. Returns its media id; nothing on the site changes until you use it.",
+      input: z.object({
+        prompt: z.string().min(12),
+        aspect: z.enum(["16:9", "4:3", "3:2", "1:1", "3:4", "2:3", "9:16"]).optional(),
+        alt: z.string().min(3).describe("The image description (alt text)."),
+      }),
+      risk: () => "draft",
+      title: (i) => `Creating an image: ${String(i.alt).slice(0, 80)}`,
+    },
+    async ({ prompt, aspect, alt }) => {
+      const made = await makeImage(sight, prompt, aspect ?? "16:9");
+      const ext = made.type.includes("png") ? "png" : made.type.includes("webp") ? "webp" : "jpg";
+      const name = alt.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50) || "image";
+      const doc = await payload.create({
+        collection: "media",
+        data: { alt },
+        file: { data: made.data, mimetype: made.type, name: `${name}.${ext}`, size: made.data.byteLength },
+        ...(actor.system ? { overrideAccess: true } : { user: actor.user ?? undefined, overrideAccess: false }),
+      });
+      env.emit({ t: "change", title: alt, action: "created an image", admin: `/admin/collections/media/${doc.id}`, site: null });
+      return { ok: true, mediaId: doc.id, url: doc.url, model: made.model, note: "Look at it before using it, and say so if it isn't right." };
     },
   );
 

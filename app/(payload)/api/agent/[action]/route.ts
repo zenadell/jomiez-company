@@ -5,10 +5,11 @@ import { getPayload, type TypedUser, type Where } from "payload";
 import { originOf } from "@/cms/preview";
 import type { AgentEvent } from "@/cms/agent/events";
 import { listNotices, markNoticesRead } from "@/cms/agent/notify";
-import { buildModel, listModels, missingSetup, PROVIDERS, type ModelInfo, type ProviderId } from "@/cms/agent/providers";
+import { buildModel, listModels, missingSetup, PROVIDERS, type ModelInfo, type ModelPurpose, type ProviderId } from "@/cms/agent/providers";
 import { tickRoutines } from "@/cms/agent/routines";
 import { loadConfig, requestStop, runAgent, undoThread, usageToday, voiceKey, type Decision } from "@/cms/agent/run";
 import { answerVoiceApproval, logVoice, runVoiceCalls, startVoice } from "@/cms/agent/voice";
+import { getShot } from "@/cms/agent/eyes";
 
 /*
  * The agent's endpoints, used by the admin console and drawer. All need a
@@ -29,6 +30,7 @@ import { answerVoiceApproval, logVoice, runVoiceCalls, startVoice } from "@/cms/
  *   GET  thread    one conversation's transcript
  *   GET  threads   the conversation list
  *   GET  notices   what it did on its own
+ *   GET  shot      a screenshot it took
  *   GET  tick      run due routines
  */
 
@@ -191,17 +193,18 @@ export async function POST(req: Request, { params }: Params) {
     case "models": {
       if (!isAdmin(user)) return json({ error: "Admins only." }, 403);
       const cfg = await loadConfig(payload);
-      const purpose = body.purpose === "voice" ? "voice" : "text";
-      const provider = (purpose === "voice" ? "google" : String(body.provider || cfg.provider)) as ProviderId;
+      const purpose = (["voice", "vision", "image"].includes(String(body.purpose)) ? body.purpose : "text") as ModelPurpose;
+      const onGemini = purpose !== "text";
+      const provider = (onGemini ? "google" : String(body.provider || cfg.provider)) as ProviderId;
       if (!PROVIDERS[provider]) return json({ error: "Choose a provider first." }, 400);
       const typedKey = typeof body.apiKey === "string" ? body.apiKey.trim() : "";
-      const typedBase = purpose === "voice" || typeof body.baseURL !== "string" ? "" : body.baseURL.trim().replace(/\/$/, "");
+      const typedBase = onGemini || typeof body.baseURL !== "string" ? "" : body.baseURL.trim().replace(/\/$/, "");
       const savedBase = provider === cfg.provider ? (cfg.baseURL ?? "").trim().replace(/\/$/, "") : "";
       let apiKey = typedKey;
       if (!apiKey) {
         // A saved key only ever goes to the address it was saved with.
         if (typedBase && typedBase !== savedBase) return json({ error: "Type the key for this address in the key box first (or save the address)." });
-        apiKey = purpose === "voice" ? voiceKey(cfg) : provider === cfg.provider ? cfg.apiKey : "";
+        apiKey = onGemini ? voiceKey(cfg) : provider === cfg.provider ? cfg.apiKey : "";
       }
       try {
         const models = await listModels({ provider, apiKey, baseURL: typedBase || savedBase || null }, purpose);
@@ -340,6 +343,13 @@ export async function GET(req: Request, { params }: Params) {
   }
 
   if (action === "notices") return json({ notices: await listNotices(payload) });
+
+  // A screenshot the agent took, for the conversation (kept briefly, team only).
+  if (action === "shot") {
+    const shot = getShot(new URL(req.url).searchParams.get("id") ?? "");
+    if (!shot) return json({ error: "That screenshot has expired." }, 404);
+    return new Response(new Uint8Array(shot.data), { headers: { "content-type": shot.type, "cache-control": "private, max-age=3600" } });
+  }
 
   if (action === "thread") {
     const id = new URL(req.url).searchParams.get("id");

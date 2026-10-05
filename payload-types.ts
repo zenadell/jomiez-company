@@ -2277,6 +2277,14 @@ export interface Agent {
    */
   voiceApiKey?: string | null;
   voiceApiKeyHint?: string | null;
+  /**
+   * Empty: the newest everyday Gemini model on the key.
+   */
+  visionModel?: string | null;
+  /**
+   * Empty: the newest Gemini image model on the key.
+   */
+  imageModel?: string | null;
   mode?: ('ask' | 'drafts' | 'trusted' | 'full') | null;
   deletes?: ('never' | 'ask' | 'auto') | null;
   email?: ('never' | 'ask' | 'auto') | null;
@@ -3086,6 +3094,8 @@ export interface AgentSelect<T extends boolean = true> {
   voiceLanguage?: T;
   voiceApiKey?: T;
   voiceApiKeyHint?: T;
+  visionModel?: T;
+  imageModel?: T;
   mode?: T;
   deletes?: T;
   email?: T;

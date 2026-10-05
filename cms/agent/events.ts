@@ -13,7 +13,7 @@ export type AgentEvent =
   | { t: "text"; id: string; delta: string }
   | { t: "reasoning"; id: string; delta: string }
   | { t: "tool"; id: string; name: string; title: string; input: unknown }
-  | { t: "tool-result"; id: string; ok: boolean; summary: string }
+  | { t: "tool-result"; id: string; ok: boolean; summary: string; image?: string }
   | {
       t: "approval";
       approvalId: string;
@@ -38,7 +38,7 @@ export type TranscriptItem =
   | { kind: "user"; text: string; at: string }
   | { kind: "text"; id: string; text: string }
   | { kind: "reasoning"; id: string; text: string }
-  | { kind: "tool"; id: string; name: string; title: string; input: unknown; ok?: boolean; summary?: string; waiting?: boolean }
+  | { kind: "tool"; id: string; name: string; title: string; input: unknown; ok?: boolean; summary?: string; waiting?: boolean; image?: string }
   | Extract<AgentEvent, { t: "approval" }> & { kind: "approval"; decided?: boolean; approved?: boolean; note?: string }
   | { kind: "change"; title: string; action: string; admin: string; site: string | null; changes?: ChangeRow[] }
   | { kind: "notice"; text: string }
@@ -61,7 +61,7 @@ export function fold(items: TranscriptItem[], e: AgentEvent): TranscriptItem[] {
     case "tool":
       return [...items, { kind: "tool", id: e.id, name: e.name, title: e.title, input: e.input }];
     case "tool-result":
-      return items.map((it) => (it.kind === "tool" && it.id === e.id ? { ...it, ok: e.ok, summary: e.summary, waiting: false } : it));
+      return items.map((it) => (it.kind === "tool" && it.id === e.id ? { ...it, ok: e.ok, summary: e.summary, waiting: false, ...(e.image ? { image: e.image } : {}) } : it));
     case "approval":
       return [
         ...items.map((it) => (it.kind === "tool" && it.id === e.toolCallId ? { ...it, waiting: true, summary: "Waiting for your approval" } : it)),

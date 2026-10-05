@@ -31,7 +31,7 @@ function privateIp(ip: string) {
   return mapped ? privateV4(mapped[1]) : false;
 }
 
-async function assertPublic(url: URL) {
+export async function assertPublic(url: URL) {
   if (!["http:", "https:"].includes(url.protocol)) throw new Error("Only http and https addresses can be read.");
   const host = url.hostname.replace(/^\[|\]$/g, "");
   if (host === "localhost" || host.endsWith(".local") || host.endsWith(".internal")) throw new Error("That address is private.");

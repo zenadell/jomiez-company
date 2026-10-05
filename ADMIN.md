@@ -61,6 +61,20 @@ The admin has its own operator: an AI agent (called **Keeper** until you rename 
 
 **What it can do.** Read and change every page, section, product, journal post, image, link, the nav and footer, search listings, redirects, effects and settings; create pages and posts; publish; bring back earlier versions; add images from the web; read the inbox and write replies; view any page as a visitor sees it; audit the whole site (search listings, image descriptions, broken links, leftover placeholder text); research other websites; hand big reading jobs to a helper; keep a memory; and set up routines. It plans multi-step work in the open and checks its own work.
 
+**Sight and images.** It can see, not just read:
+
+- **Screenshots** of any page, on this site or another, desktop or phone size, then it looks at them. It checks its own work visually ("is anything overlapping in the footer?") and can show you a design it's asked about. Screenshots appear in the conversation.
+- **Look** at any image (one in the media library, a screenshot, or any image address) to pick the right one or describe it properly.
+- **Find the images** on any web page, e.g. "use the Checkers image from my old site": it opens the page, lists the pictures by the nearest heading, looks at the likely one and adds the original file to the media library.
+- **Free photos** that are safe for a business site: public-domain images, or Pexels with `PEXELS_API_KEY`.
+- **Make images** with Gemini, in the site's natural, ancient style. They belong to Jomiez, so there's no licence question.
+
+It won't put images from Pinterest, Google Images or other people's sites on the public site: they belong to their creators.
+
+Seeing and making images use the Gemini key from the Voice tab (or `GEMINI_API_KEY`). It picks the newest suitable Gemini models on your key; *Agent settings → Sight & images* can pin others. The browser is a fresh, empty one each time (never signed in), and it refuses private and internal addresses.
+
+On the server the browser needs about 300 MB of memory on top of the site. Render's Standard plan (2 GB) is comfortable; on Starter, point `BROWSER_WS_ENDPOINT` at a browser service (e.g. Browserless) instead. On your Mac it uses Google Chrome (or set `BROWSER_EXECUTABLE_PATH`).
+
 **Any model.** In *Agent settings → Model*, pick a provider and model: Anthropic (Claude), OpenAI, Google (Gemini), OpenRouter (hundreds of models), Groq, DeepSeek, xAI, Mistral, Together, Ollama on your own machine, or any OpenAI-compatible service.
 
 - Paste the key there (it's stored encrypted and never shown again, not even to the agent) or set it as an environment variable (`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, …).
@@ -199,6 +213,7 @@ SUPABASE_DATABASE_URL=postgres://… npm run payload -- migrate:create <name>   
 | `cms/db.ts` | Postgres (Supabase) in production, SQLite locally, each with its own migrations |
 | `cms/snapshot.ts` | Saving the admin's content to `content-snapshot/` and loading it into another database |
 | `cms/setup.ts` | The dashboard's Going live checks |
+| `cms/agent/eyes.ts` | The agent's browser (screenshots, finding images), seeing images, making them, and free photos |
 | `cms/storage/cloudinary.ts` | Images in Cloudinary |
 | `render.yaml` | The Render service and its settings |
 | `lib/cms.ts` | How the site reads content (published, or drafts in preview) |

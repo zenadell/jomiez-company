@@ -32,6 +32,12 @@ function Step({ item }: { item: Extract<TranscriptItem, { kind: "tool" }> }) {
         <span className="jz-step__title">{item.title}</span>
         {item.summary && <span className="jz-step__summary">{item.summary}</span>}
       </button>
+      {item.image && (
+        <a className="jz-step__image" href={item.image} target="_blank" rel="noopener" title="Open full size">
+          {/* eslint-disable-next-line @next/next/no-img-element -- a screenshot or upload, any size */}
+          <img src={item.image} alt={item.title} loading="lazy" />
+        </a>
+      )}
       {open && (
         <pre className="jz-step__detail">{JSON.stringify(item.input, null, 2)}</pre>
       )}

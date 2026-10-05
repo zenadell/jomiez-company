@@ -192,6 +192,38 @@ export const AgentSettings: GlobalConfig = {
           ],
         },
         {
+          label: "Sight & images",
+          description:
+            "It can take screenshots of any page and look at them, look at images, find the pictures on any website, and make original images. Seeing and making images use the Gemini key from the Voice tab (or GEMINI_API_KEY); without one it sees through the main model if that model can (Claude, GPT or Gemini).",
+          fields: [
+            {
+              type: "row",
+              fields: [
+                {
+                  name: "visionModel",
+                  label: "Model for seeing (optional)",
+                  type: "text",
+                  admin: {
+                    width: "50%",
+                    description: "Empty: the newest everyday Gemini model on the key.",
+                    components: { afterInput: [{ path: "/cms/admin/agent/ModelPicker#ModelPicker", clientProps: { purpose: "vision" } }] },
+                  },
+                },
+                {
+                  name: "imageModel",
+                  label: "Model for making images (optional)",
+                  type: "text",
+                  admin: {
+                    width: "50%",
+                    description: "Empty: the newest Gemini image model on the key.",
+                    components: { afterInput: [{ path: "/cms/admin/agent/ModelPicker#ModelPicker", clientProps: { purpose: "image" } }] },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
           label: "Permissions",
           description: "What it may do without asking. Whatever it asks about waits for your approval, with the exact change shown. Everything it does is recorded and can be undone.",
           fields: [

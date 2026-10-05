@@ -100,7 +100,9 @@ export type ModelInfo = { id: string; label?: string };
  * new models appear without an update here). `purpose: "voice"` keeps only
  * Gemini models that can hold a live voice conversation.
  */
-export async function listModels(s: { provider: ProviderId; apiKey: string; baseURL?: string | null }, purpose: "text" | "voice" = "text"): Promise<ModelInfo[]> {
+export type ModelPurpose = "text" | "voice" | "vision" | "image";
+
+export async function listModels(s: { provider: ProviderId; apiKey: string; baseURL?: string | null }, purpose: ModelPurpose = "text"): Promise<ModelInfo[]> {
   const key = resolveKey(s.provider, s.apiKey);
   const timeout = AbortSignal.timeout(15_000);
   const fail = async (res: Response) => {
@@ -141,7 +143,15 @@ export async function listModels(s: { provider: ProviderId; apiKey: string; base
       };
       for (const m of j.models ?? []) {
         const methods = m.supportedGenerationMethods ?? [];
-        const ok = purpose === "voice" ? methods.includes("bidiGenerateContent") : methods.includes("generateContent");
+        const id = m.name.replace(/^models\//, "");
+        const ok =
+          purpose === "voice"
+            ? methods.includes("bidiGenerateContent")
+            : purpose === "image"
+              ? (/image/.test(id) && methods.includes("generateContent")) || (/^imagen-/.test(id) && methods.includes("predict"))
+              : purpose === "vision"
+                ? methods.includes("generateContent") && /^gemini-/.test(id) && !/(tts|live|audio|image|embedding)/.test(id)
+                : methods.includes("generateContent");
         if (ok) out.push({ id: m.name.replace(/^models\//, ""), label: m.displayName });
       }
       if (!j.nextPageToken) break;

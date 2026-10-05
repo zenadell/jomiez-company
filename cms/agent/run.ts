@@ -9,6 +9,7 @@ import { buildModel, missingSetup, type ProviderId } from "./providers";
 import { targetsOf } from "./schema";
 import { decrypt } from "./secrets";
 import { notifyAddress, reportAutomaticRun } from "./notify";
+import type { Sight } from "./eyes";
 import { makeTools } from "./tools";
 
 /*
@@ -70,6 +71,8 @@ export type AgentConfig = {
   notifyAuto: boolean;
   notifyEmail: string | null;
   voice: { enabled: boolean; model: string; voiceName: string; language: string; apiKey: string };
+  /** Models for looking at and making images (empty: the newest suitable one on the Gemini key). */
+  sight: { visionModel: string; imageModel: string };
   maxSteps: number;
   dailyRuns: number;
   dailyTokens: number;
@@ -112,6 +115,7 @@ export async function loadConfig(payload: Payload): Promise<AgentConfig> {
       language: String(g.voiceLanguage || ""),
       apiKey: decrypt(typeof g.voiceApiKey === "string" ? g.voiceApiKey : ""),
     },
+    sight: { visionModel: String(g.visionModel || ""), imageModel: String(g.imageModel || "") },
     maxSteps: num(g.maxSteps, 40),
     dailyRuns: num(g.dailyRuns, 300),
     dailyTokens: num(g.dailyTokens, 5_000_000),
@@ -127,6 +131,15 @@ function fastFor(provider: ProviderId, fast: string) {
   if (provider !== "anthropic" && /^claude-/i.test(id)) return "";
   if (provider === "anthropic" && !/^claude-/i.test(id)) return "";
   return id;
+}
+
+/** A picture to show with a step's result: a screenshot taken, or an image made or added. */
+export function imageOf(output: unknown): { image?: string } {
+  const o = output as { shot?: unknown; url?: unknown; mediaId?: unknown } | null;
+  if (!o || typeof o !== "object") return {};
+  if (typeof o.shot === "string") return { image: o.shot };
+  if (o.mediaId != null && typeof o.url === "string") return { image: o.url };
+  return {};
 }
 
 export async function usageToday(payload: Payload) {
@@ -165,6 +178,10 @@ function summarize(output: unknown): string {
   if (Array.isArray(o.matches)) parts.push(`${o.matches.length} places`);
   if (typeof o.title === "string" && !parts.length) parts.push(o.title);
   if (typeof o.report === "string") parts.push(o.report.slice(0, 160));
+  if (typeof o.seen === "string") parts.push(o.seen.replace(/\s+/g, " ").slice(0, 220));
+  if (Array.isArray(o.images)) parts.push(`${o.images.length} images`);
+  if (Array.isArray(o.photos)) parts.push(`${o.photos.length} photos`);
+  if (typeof o.note === "string" && !parts.length) parts.push(o.note);
   return (parts.join(" · ") || "Done").slice(0, 300);
 }
 
@@ -340,6 +357,7 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
     setPlan: (s) => (plan = s),
     helperModel,
     threadId: String(threadId),
+    sight: scope === "full" ? sightOf(cfg) : undefined,
   });
 
   const { docs: memory } = await payload.find({ collection: "agent-memory", sort: "-updatedAt", limit: 60, depth: 0, overrideAccess: true });
@@ -438,7 +456,7 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
           break;
         }
         case "tool-result":
-          emit({ t: "tool-result", id: part.toolCallId, ok: true, summary: summarize(part.output) });
+          emit({ t: "tool-result", id: part.toolCallId, ok: true, summary: summarize(part.output), ...imageOf(part.output) });
           break;
         case "tool-error":
           emit({ t: "tool-result", id: part.toolCallId, ok: false, summary: errorText(part.error) });
@@ -573,6 +591,16 @@ export async function rememberLesson(payload: Payload, content: string) {
   const { totalDocs } = await payload.count({ collection: "agent-memory", where: { content: { equals: content } }, overrideAccess: true });
   if (totalDocs) return;
   await payload.create({ collection: "agent-memory", data: { content, kind: "lesson", source: "correction" } as never, overrideAccess: true });
+}
+
+/** How the agent sees and makes images: the Gemini key when there is one, and the main model as a fallback for seeing. */
+export function sightOf(cfg: AgentConfig): Sight {
+  return {
+    geminiKey: voiceKey(cfg) || undefined,
+    visionModel: cfg.sight.visionModel || undefined,
+    imageModel: cfg.sight.imageModel || undefined,
+    main: { provider: cfg.provider, model: cfg.model, apiKey: cfg.apiKey, baseURL: cfg.baseURL },
+  };
 }
 
 /** The Gemini key for voice: its own, else the main key when the main provider is Google, else the environment. */

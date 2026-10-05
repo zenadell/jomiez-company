@@ -10,7 +10,7 @@ type Model = { id: string; label?: string };
  * this key can use right now and lets you pick one, so names are never guessed
  * or out of date. Uses the key typed on this screen, or the saved one.
  */
-export function ModelPicker({ path, purpose = "text" }: { path?: string; purpose?: "text" | "voice" }) {
+export function ModelPicker({ path, purpose = "text" }: { path?: string; purpose?: "text" | "voice" | "vision" | "image" }) {
   const { value, setValue } = useField<string>({ path });
   const form = useFormFields(([fields]) => ({
     provider: fields.provider?.value as string | undefined,
@@ -24,7 +24,8 @@ export function ModelPicker({ path, purpose = "text" }: { path?: string; purpose
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const typedKey = purpose === "voice" ? form.voiceApiKey : form.apiKey;
+  const onGemini = purpose !== "text";
+  const typedKey = onGemini ? form.voiceApiKey : form.apiKey;
 
   const load = async () => {
     setOpen(true);
@@ -37,7 +38,7 @@ export function ModelPicker({ path, purpose = "text" }: { path?: string; purpose
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           purpose,
-          provider: purpose === "voice" ? "google" : form.provider,
+          provider: onGemini ? "google" : form.provider,
           baseURL: form.baseURL,
           apiKey: typeof typedKey === "string" && typedKey !== "__clear__" ? typedKey : undefined,
         }),
