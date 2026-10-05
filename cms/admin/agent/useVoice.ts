@@ -431,6 +431,8 @@ class VoiceEngine {
     this.commit("agent");
     const list = calls.map((c, i) => ({ id: c.id || `call-${Date.now()}-${i}`, name: c.name ?? "", args: c.args ?? {} }));
     this.set({ phase: "working", doing: null });
+    // Save the words that led here first, so the saved conversation reads in order.
+    await this.sendLog(false);
     let responses: { id: string; name: string; response: Record<string, unknown> }[];
     try {
       const out = await post<{ responses: typeof responses; events: AgentEvent[] }>("voice-tool", { threadId: this.state.threadId, calls: list });
@@ -602,6 +604,7 @@ class VoiceEngine {
 
   answer = async (decisions: Decision[]) => {
     this.set({ busy: true });
+    await this.sendLog(false);
     for (const d of decisions) {
       try {
         const out = await post<{ text: string; events: AgentEvent[] }>("voice-approve", { threadId: this.state.threadId, ...d });
