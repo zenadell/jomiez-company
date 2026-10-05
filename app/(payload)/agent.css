@@ -1540,6 +1540,14 @@
   object-position: top;
 }
 
+.jz-step__caption {
+  display: block;
+  padding: 6px 10px;
+  border-top: 1px solid var(--theme-elevation-150);
+  color: var(--theme-elevation-600);
+  font-size: 12px;
+}
+
 /* ---------- Model switcher (console header) and Your providers ---------- */
 
 .jz-switch {

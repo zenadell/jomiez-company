@@ -9,7 +9,7 @@ import { buildModel, missingSetup, PROVIDERS, resolveKey, type ProviderId } from
 import { targetsOf } from "./schema";
 import { decrypt } from "./secrets";
 import { notifyAddress, reportAutomaticRun } from "./notify";
-import type { Sight } from "./eyes";
+import { providerProblem, type Sight } from "./eyes";
 import { makeTools } from "./tools";
 
 /*
@@ -234,15 +234,23 @@ function summarize(output: unknown): string {
   return (parts.join(" · ") || "Done").slice(0, 300);
 }
 
-const errorText = (err: unknown): string => {
-  const e = err as { message?: string; data?: { errors?: { message?: string; path?: string }[] }; statusCode?: number; responseBody?: string };
+/**
+ * An error in plain words. A tool's own error is passed on as it is: it already
+ * says what failed (a tool can fail because of another service, like Gemini
+ * looking at an image, and that must not be blamed on the agent's own model).
+ * When the agent's model itself fails, the provider's reason is named.
+ */
+const errorText = (err: unknown, model?: string): string => {
+  const e = err as { message?: string; data?: { errors?: { message?: string; path?: string }[] } };
   const details = e?.data?.errors?.map((x) => `${x.path ? `${x.path}: ` : ""}${x.message}`).join("; ");
-  let msg = details || e?.message || String(err);
-  if (/401|invalid.*api.?key|authentication/i.test(msg + (e?.responseBody ?? ""))) msg = "The model provider rejected the API key. Check it in Agent → Settings.";
-  else if (/429|rate.?limit|quota|credit/i.test(msg + (e?.responseBody ?? ""))) msg = `The model provider is limiting requests (${msg.slice(0, 160)}). Try again shortly, or check the account's credit.`;
-  else if (/not.?found|does not exist|unknown model|model_not_found/i.test(msg + (e?.responseBody ?? "")) && /model/i.test(msg + (e?.responseBody ?? "")))
-    msg = `The provider doesn't recognise the model name. Check it in Agent → Settings. (${msg.slice(0, 160)})`;
-  return msg.slice(0, 600);
+  if (!model || !fromProvider(err)) return (details || e?.message || String(err)).slice(0, 600);
+  return `The model (${model}) stopped: ${providerProblem(err)}.`.slice(0, 600);
+};
+
+/** An error from calling the model provider (as opposed to the site's own work). */
+const fromProvider = (err: unknown): boolean => {
+  const e = err as { name?: string; statusCode?: number; lastError?: unknown } | null;
+  return Boolean(e && (e.statusCode || /APICall|Retry|LoadAPIKey|NoSuchModel|InvalidResponseData/i.test(e.name ?? "") || (e.lastError && fromProvider(e.lastError))));
 };
 
 export async function runAgent(input: RunInput): Promise<{ threadId: number; status: string }> {
@@ -577,7 +585,7 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
     if (controller.signal.aborted) status = "stopped";
     else {
       status = "error";
-      emit({ t: "error", message: errorText(err) });
+      emit({ t: "error", message: errorText(err, cfg.model) });
     }
   } finally {
     running.delete(String(threadId));
