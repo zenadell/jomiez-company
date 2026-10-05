@@ -36,7 +36,8 @@ services:
       # Where the agent's "what I did on my own" emails go (can also be set in Agent settings).
       - key: ADMIN_NOTIFY_EMAIL
         sync: false
-      # Lets the agent run on Gemini straight away (choose any model later in Agent settings).
+      # Lets the agent run on Gemini straight away, and powers its live voice conversations
+      # (choose any model later in Agent settings).
       - key: GEMINI_API_KEY
         sync: false
       # For an outside scheduler calling /api/agent/tick, if you ever use one.

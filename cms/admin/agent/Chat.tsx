@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { TranscriptItem } from "@/cms/agent/events";
 import { Markdown } from "./Markdown";
 import type { ThreadApi } from "./useAgent";
+import { MicIcon } from "./Voice";
 
 /*
  * A conversation with the agent: what was asked, what it said, every step it
@@ -38,7 +39,7 @@ function Step({ item }: { item: Extract<TranscriptItem, { kind: "tool" }> }) {
   );
 }
 
-function Approval({
+export function Approval({
   item,
   onAnswer,
   disabled,
@@ -105,7 +106,22 @@ function Approval({
   );
 }
 
-export function Transcript({ api, empty }: { api: ThreadApi; empty?: ReactNode }) {
+/** What a transcript needs: a typed conversation, or a voice one. */
+export type TranscriptApi = Pick<ThreadApi, "items" | "busy" | "answer">;
+
+export function Transcript({
+  api,
+  empty,
+  tail,
+  follow = 0,
+}: {
+  api: TranscriptApi;
+  empty?: ReactNode;
+  /** Shown after the items (e.g. words being spoken right now). */
+  tail?: ReactNode;
+  /** Changes whenever the tail grows, to keep it in view. */
+  follow?: number;
+}) {
   const end = useRef<HTMLDivElement>(null);
   const [showThinking, setShowThinking] = useState(false);
   const count = api.items.length;
@@ -113,9 +129,9 @@ export function Transcript({ api, empty }: { api: ThreadApi; empty?: ReactNode }
   const lastLen = last && "text" in last ? last.text.length : 0;
   useEffect(() => {
     end.current?.scrollIntoView({ block: "end", behavior: "smooth" });
-  }, [count, lastLen]);
+  }, [count, lastLen, follow]);
 
-  if (!count && !api.busy) return <div className="jz-transcript jz-transcript--empty">{empty}</div>;
+  if (!count && !api.busy && !tail) return <div className="jz-transcript jz-transcript--empty">{empty}</div>;
 
   const openApprovals = api.items.filter((i) => i.kind === "approval" && !i.decided) as Extract<TranscriptItem, { kind: "approval" }>[];
 
@@ -183,6 +199,7 @@ export function Transcript({ api, empty }: { api: ThreadApi; empty?: ReactNode }
             return null;
         }
       })}
+      {tail}
       {api.busy && (
         <div className="jz-working">
           <span className="jz-spin" /> Working…
@@ -214,11 +231,17 @@ export function Composer({
   placeholder,
   context,
   disabledReason,
+  talk,
+  notice,
 }: {
   api: ThreadApi;
   placeholder?: string;
   context?: { path?: string; title?: string } | null;
   disabledReason?: string | null;
+  /** The microphone button, when voice is available (or why it isn't). */
+  talk?: { start: () => void; unavailable?: string | null } | null;
+  /** An extra line above the box (e.g. why a voice conversation ended). */
+  notice?: string | null;
 }) {
   const [text, setText] = useState("");
   const box = useRef<HTMLTextAreaElement>(null);
@@ -240,6 +263,7 @@ export function Composer({
     <div className="jz-composer">
       {api.error && <p className="jz-composer__error">{api.error}</p>}
       {disabledReason && <p className="jz-composer__error">{disabledReason}</p>}
+      {notice && <p className="jz-composer__error">{notice}</p>}
       <div className="jz-composer__box">
         <textarea
           ref={box}
@@ -254,6 +278,18 @@ export function Composer({
             }
           }}
         />
+        {talk && !api.busy && (
+          <button
+            type="button"
+            className="jz-talk"
+            disabled={Boolean(talk.unavailable)}
+            title={talk.unavailable || "Talk to it (live voice)"}
+            aria-label="Talk to it"
+            onClick={talk.start}
+          >
+            <MicIcon />
+          </button>
+        )}
         {api.busy ? (
           <button type="button" className="jz-btn jz-btn--stop" onClick={() => void api.stop()}>
             Stop

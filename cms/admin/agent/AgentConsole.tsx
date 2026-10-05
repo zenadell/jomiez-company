@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Composer, Transcript } from "./Chat";
 import { Markdown } from "./Markdown";
 import { useAgentStatus, useThread } from "./useAgent";
+import { MicIcon, VoiceBar, VoiceCaptions, VoiceHello } from "./Voice";
+import { useVoice } from "./useVoice";
 
 /*
  * The agent console (/admin/agent): every conversation on the left, the work in
@@ -32,7 +34,7 @@ const STATUS_TEXT: Record<string, string> = {
   error: "Error",
 };
 
-const SOURCE_ICON: Record<string, string> = { console: "◆", page: "✎", routine: "↻", inbox: "✉" };
+const SOURCE_ICON: Record<string, string> = { console: "◆", page: "✎", routine: "↻", inbox: "✉", voice: "◉" };
 
 const ago = (iso: string) => {
   const s = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -49,6 +51,24 @@ export function AgentConsole() {
   const [filter, setFilter] = useState<"all" | "waiting" | "routine" | "inbox">("all");
   const [notices, setNotices] = useState<Notice[] | null>(null);
   const [undoResult, setUndoResult] = useState<string[] | null>(null);
+  const voice = useVoice();
+  const talking = voice.active;
+
+  // When a voice conversation ends (or drops), open its saved transcript so it can be continued by typing or undone.
+  const wasTalking = useRef(false);
+  useEffect(() => {
+    if (talking) {
+      wasTalking.current = true;
+      return;
+    }
+    const id = voice.state.threadId;
+    if (wasTalking.current && id) {
+      wasTalking.current = false;
+      void api.load(id);
+      window.history.replaceState(null, "", `/admin/agent?thread=${id}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [talking, voice.state.threadId]);
 
   const loadThreads = useCallback(async () => {
     const res = await fetch("/api/agent/threads", { credentials: "include", cache: "no-store" });
@@ -96,12 +116,43 @@ export function AgentConsole() {
   const live = api.changes.filter((c) => !c.undone);
   const name = status?.name ?? "Agent";
   const disabledReason = status && !status.ready ? status.setup || "The agent is switched off." : null;
+  const voiceUnavailable = !status ? "…" : !status.enabled ? "The agent is switched off." : status.voice?.ready ? null : status.voice?.setup || "Voice isn't set up.";
+  const startTalk = () => {
+    setUndoResult(null);
+    voice.clearError();
+    void voice.start(null);
+  };
+  const voiceChanges = talking ? voice.state.items.filter((i) => i.kind === "change") : [];
+
+  const hello = (
+    <div className="jz-hello">
+      <span className="jz-orb jz-orb--big" aria-hidden="true" />
+      <h2>What shall we grow today?</h2>
+      <p>
+        {name} can read and change anything on jomiez.com, look after the inbox, research, audit and work on a schedule. It asks
+        before anything you haven&apos;t allowed, and every change can be undone.
+      </p>
+      {!voiceUnavailable && (
+        <button type="button" className="jz-btn jz-btn--talk" onClick={startTalk}>
+          <MicIcon /> Talk to {name}
+        </button>
+      )}
+      <div className="jz-suggest">
+        {SUGGESTIONS.map((s) => (
+          <button key={s.title} type="button" disabled={Boolean(disabledReason)} onClick={() => void api.send(s.text)}>
+            <strong>{s.title}</strong>
+            <span>{s.text}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="jz-console">
       <header className="jz-console__head">
         <div className="jz-console__who">
-          <span className={`jz-orb${status?.working ? " is-working" : ""}`} aria-hidden="true" />
+          <span className={`jz-orb${status?.working || voice.state.phase === "working" ? " is-working" : ""}`} aria-hidden="true" />
           <div>
             <h1>{name}</h1>
             <p>
@@ -148,7 +199,7 @@ export function AgentConsole() {
 
       <div className="jz-console__body">
         <aside className="jz-console__list">
-          <button type="button" className="jz-btn jz-btn--new" onClick={fresh}>
+          <button type="button" className="jz-btn jz-btn--new" onClick={fresh} disabled={talking}>
             + New task
           </button>
           <div className="jz-filters">
@@ -164,7 +215,9 @@ export function AgentConsole() {
               <button
                 key={t.id}
                 type="button"
-                className={`jz-thread${api.threadId === String(t.id) ? " is-open" : ""}`}
+                className={`jz-thread${(talking ? voice.state.threadId : api.threadId) === String(t.id) ? " is-open" : ""}`}
+                disabled={talking}
+                title={talking ? "End the voice conversation first" : undefined}
                 onClick={() => open(t.id)}
               >
                 <span className="jz-thread__title">
@@ -179,29 +232,33 @@ export function AgentConsole() {
         </aside>
 
         <main className="jz-console__chat">
-          {api.title && <h2 className="jz-console__title">{api.title}</h2>}
-          <Transcript
-            api={api}
-            empty={
-              <div className="jz-hello">
-                <span className="jz-orb jz-orb--big" aria-hidden="true" />
-                <h2>What shall we grow today?</h2>
-                <p>
-                  {name} can read and change anything on jomiez.com, look after the inbox, research, audit and work on a schedule. It asks
-                  before anything you haven&apos;t allowed, and every change can be undone.
-                </p>
-                <div className="jz-suggest">
-                  {SUGGESTIONS.map((s) => (
-                    <button key={s.title} type="button" disabled={Boolean(disabledReason)} onClick={() => void api.send(s.text)}>
-                      <strong>{s.title}</strong>
-                      <span>{s.text}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            }
-          />
-          <Composer api={api} disabledReason={disabledReason} />
+          {talking ? (
+            <h2 className="jz-console__title">
+              <span className="jz-live-dot" aria-hidden="true" /> Talking with {name}
+            </h2>
+          ) : (
+            api.title && <h2 className="jz-console__title">{api.title}</h2>
+          )}
+          {talking ? (
+            <Transcript
+              api={voice.api}
+              empty={<VoiceHello voice={voice} name={name} />}
+              tail={voice.state.you || voice.state.agent ? <VoiceCaptions voice={voice} /> : null}
+              follow={voice.state.you.length + voice.state.agent.length}
+            />
+          ) : (
+          <Transcript api={api} empty={hello} />
+          )}
+          {talking ? (
+            <VoiceBar voice={voice} name={name} />
+          ) : (
+            <Composer
+              api={api}
+              disabledReason={disabledReason}
+              notice={voice.state.error}
+              talk={status?.voice ? { start: startTalk, unavailable: voiceUnavailable } : null}
+            />
+          )}
         </main>
 
         <aside className="jz-console__side">
@@ -217,31 +274,48 @@ export function AgentConsole() {
               </ol>
             </section>
           )}
-          <section>
-            <p className="jz-side__head">Changes in this conversation</p>
-            {api.changes.length === 0 && <p className="jz-muted">None yet.</p>}
-            <ul className="jz-changes">
-              {api.changes.map((c, i) => (
-                <li key={i} className={c.undone ? "is-undone" : ""}>
-                  <span>{c.action === "update" ? "changed" : c.action}</span> {c.title}
-                </li>
-              ))}
-            </ul>
-            {live.length > 0 && (
-              <button
-                type="button"
-                className="jz-btn jz-btn--ghost"
-                disabled={api.busy}
-                onClick={async () => {
-                  if (!window.confirm(`Undo all ${live.length} changes from this conversation?`)) return;
-                  setUndoResult(await api.undo());
-                }}
-              >
-                Undo all {live.length}
-              </button>
-            )}
-            {undoResult && <p className="jz-muted">{undoResult.join(" · ")}</p>}
-          </section>
+          {talking ? (
+            <section>
+              <p className="jz-side__head">Changes while talking</p>
+              {voiceChanges.length === 0 && <p className="jz-muted">None yet.</p>}
+              <ul className="jz-changes">
+                {voiceChanges.map((c, i) =>
+                  c.kind === "change" ? (
+                    <li key={i}>
+                      <span>{c.action}</span> {c.title}
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+              {voiceChanges.length > 0 && <p className="jz-muted">Each can be undone when the conversation ends.</p>}
+            </section>
+          ) : (
+            <section>
+              <p className="jz-side__head">Changes in this conversation</p>
+              {api.changes.length === 0 && <p className="jz-muted">None yet.</p>}
+              <ul className="jz-changes">
+                {api.changes.map((c, i) => (
+                  <li key={i} className={c.undone ? "is-undone" : ""}>
+                    <span>{c.action === "update" ? "changed" : c.action}</span> {c.title}
+                  </li>
+                ))}
+              </ul>
+              {live.length > 0 && (
+                <button
+                  type="button"
+                  className="jz-btn jz-btn--ghost"
+                  disabled={api.busy}
+                  onClick={async () => {
+                    if (!window.confirm(`Undo all ${live.length} changes from this conversation?`)) return;
+                    setUndoResult(await api.undo());
+                  }}
+                >
+                  Undo all {live.length}
+                </button>
+              )}
+              {undoResult && <p className="jz-muted">{undoResult.join(" · ")}</p>}
+            </section>
+          )}
           {status?.briefing && (
             <section>
               <p className="jz-side__head">Latest briefing</p>

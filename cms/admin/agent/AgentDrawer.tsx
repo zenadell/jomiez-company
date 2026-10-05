@@ -5,11 +5,15 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Composer, Transcript } from "./Chat";
 import { useAgentStatus, useThread } from "./useAgent";
+import { VoiceBar, VoiceCaptions, VoiceHello } from "./Voice";
+import { useVoice } from "./useVoice";
 
 /*
  * The agent on every admin screen: a button in the corner opens a panel that
  * knows which page you're editing ("tighten this headline" means this one).
- * When it changes the page you're looking at, the page reloads to show it.
+ * When it changes the page you're looking at, the page reloads to show it
+ * (during a voice conversation, a button offers the reload instead, so the
+ * conversation isn't cut off).
  */
 
 const HIDDEN = /^\/admin\/(agent|login|logout|create-first-user|forgot|reset|verify)(\/|$)/;
@@ -42,6 +46,25 @@ function Panel({ onClose }: { onClose: () => void }) {
     },
   });
   const [context, setContext] = useState<{ path: string; title?: string } | null>(null);
+  const [voiceTouched, setVoiceTouched] = useState<string[]>([]);
+  const voice = useVoice({ onChange: (e) => setVoiceTouched((t) => (t.includes(e.admin) ? t : [...t, e.admin])) });
+  const talking = voice.active;
+
+  // When the voice conversation ends, keep its transcript here (and show any change it made to this page).
+  const wasTalking = useRef(false);
+  useEffect(() => {
+    if (talking) {
+      wasTalking.current = true;
+      return;
+    }
+    const id = voice.state.threadId;
+    if (wasTalking.current && id) {
+      wasTalking.current = false;
+      void api.load(id);
+      if (voiceTouched.includes(window.location.pathname)) window.setTimeout(() => window.location.reload(), 900);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [talking, voice.state.threadId]);
 
   useEffect(() => {
     const t = window.setTimeout(() => setContext(pageContext(pathname)), 300);
@@ -67,19 +90,23 @@ function Panel({ onClose }: { onClose: () => void }) {
   }, [api.threadId]);
 
   const disabledReason = status && !status.ready ? status.setup || "The agent is switched off." : null;
+  const voiceUnavailable = !status ? "…" : !status.enabled ? "The agent is switched off." : status.voice?.ready ? null : status.voice?.setup || "Voice isn't set up.";
+  const name = status?.name ?? "Agent";
+  const changedHere = talking && voiceTouched.includes(pathname);
 
   return (
     <aside className="jz-drawer" aria-label={`${status?.name ?? "Agent"}`}>
       <header className="jz-drawer__head">
-        <span className={`jz-orb${api.busy ? " is-working" : ""}`} aria-hidden="true" />
+        <span className={`jz-orb${api.busy || voice.state.phase === "working" ? " is-working" : ""}`} aria-hidden="true" />
         <div className="jz-drawer__who">
           <strong>{status?.name ?? "Agent"}</strong>
-          <span>{context?.title ? `Here: ${context.title}` : "Ask for anything on the site"}</span>
+          <span>{talking ? "Live voice conversation" : context?.title ? `Here: ${context.title}` : "Ask for anything on the site"}</span>
         </div>
         <button
           type="button"
           className="jz-icon-btn"
           title="New conversation"
+          disabled={talking}
           onClick={() => {
             api.reset();
             try {
@@ -98,28 +125,64 @@ function Panel({ onClose }: { onClose: () => void }) {
           ×
         </button>
       </header>
-      <Transcript
-        api={api}
-        empty={
-          <div className="jz-drawer__hello">
-            <p>
-              {context?.title
-                ? `Ask about “${context.title}”: rewrite a section, add something, check it, publish it.`
-                : "Ask it to change anything on the site, write something, check the site or sort the inbox."}
-            </p>
-            {context?.title && (
-              <div className="jz-suggest jz-suggest--small">
-                {["Tighten the wording on this page", "Check this page for problems", "What would make this page better?"].map((s) => (
-                  <button key={s} type="button" disabled={Boolean(disabledReason)} onClick={() => void api.send(s, context)}>
-                    <span>{s}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        }
-      />
-      <Composer api={api} context={context} disabledReason={disabledReason} placeholder="What should it do?" />
+      {changedHere && (
+        <button type="button" className="jz-reload" onClick={() => window.location.reload()}>
+          {name} changed this page. Reload to see it (ends the conversation).
+        </button>
+      )}
+      {talking ? (
+        <Transcript
+          api={voice.api}
+          empty={<VoiceHello voice={voice} name={name} />}
+          tail={voice.state.you || voice.state.agent ? <VoiceCaptions voice={voice} /> : null}
+          follow={voice.state.you.length + voice.state.agent.length}
+        />
+      ) : (
+        <Transcript
+          api={api}
+          empty={
+            <div className="jz-drawer__hello">
+              <p>
+                {context?.title
+                  ? `Ask about “${context.title}”: rewrite a section, add something, check it, publish it.`
+                  : "Ask it to change anything on the site, write something, check the site or sort the inbox."}
+              </p>
+              {context?.title && (
+                <div className="jz-suggest jz-suggest--small">
+                  {["Tighten the wording on this page", "Check this page for problems", "What would make this page better?"].map((s) => (
+                    <button key={s} type="button" disabled={Boolean(disabledReason)} onClick={() => void api.send(s, context)}>
+                      <span>{s}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          }
+        />
+      )}
+      {talking ? (
+        <VoiceBar voice={voice} name={name} />
+      ) : (
+        <Composer
+          api={api}
+          context={context}
+          disabledReason={disabledReason}
+          placeholder="What should it do?"
+          notice={voice.state.error}
+          talk={
+            status?.voice
+              ? {
+                  start: () => {
+                    setVoiceTouched([]);
+                    voice.clearError();
+                    void voice.start(context);
+                  },
+                  unavailable: voiceUnavailable,
+                }
+              : null
+          }
+        />
+      )}
     </aside>
   );
 }

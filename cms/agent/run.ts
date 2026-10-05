@@ -68,6 +68,7 @@ export type AgentConfig = {
   triageDraft: boolean;
   notifyAuto: boolean;
   notifyEmail: string | null;
+  voice: { enabled: boolean; model: string; voiceName: string; language: string; apiKey: string };
   maxSteps: number;
   dailyRuns: number;
   dailyTokens: number;
@@ -88,7 +89,7 @@ export async function loadConfig(payload: Payload): Promise<AgentConfig> {
     name: String(g.name || "Keeper"),
     provider: (g.provider as ProviderId) || "anthropic",
     model: String(g.model || ""),
-    fastModel: String(g.fastModel || ""),
+    fastModel: fastFor((g.provider as ProviderId) || "anthropic", String(g.fastModel || "")),
     apiKey: decrypt(stored),
     baseURL: (g.baseURL as string) || null,
     thinking: String(g.thinking || "provider-default"),
@@ -103,6 +104,13 @@ export async function loadConfig(payload: Payload): Promise<AgentConfig> {
     triageDraft: g.triageDraft !== false,
     notifyAuto: g.notifyAuto !== false,
     notifyEmail: (g.notifyEmail as string) || null,
+    voice: {
+      enabled: g.voiceEnabled !== false,
+      model: String(g.voiceModel || "gemini-3.1-flash-live-preview"),
+      voiceName: String(g.voiceName || "Kore"),
+      language: String(g.voiceLanguage || ""),
+      apiKey: decrypt(typeof g.voiceApiKey === "string" ? g.voiceApiKey : ""),
+    },
     maxSteps: num(g.maxSteps, 40),
     dailyRuns: num(g.dailyRuns, 300),
     dailyTokens: num(g.dailyTokens, 5_000_000),
@@ -110,6 +118,15 @@ export async function loadConfig(payload: Payload): Promise<AgentConfig> {
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
+
+/* The quick model must belong to the main provider: a Claude ID left over after switching to, say, DeepSeek is ignored. */
+function fastFor(provider: ProviderId, fast: string) {
+  const id = fast.trim();
+  if (!id) return "";
+  if (provider !== "anthropic" && /^claude-/i.test(id)) return "";
+  if (provider === "anthropic" && !/^claude-/i.test(id)) return "";
+  return id;
+}
 
 export async function usageToday(payload: Payload) {
   return (await payload.kv.get<{ runs: number; tokens: number }>(`agent:usage:${today()}`)) ?? { runs: 0, tokens: 0 };
@@ -275,12 +292,14 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
     const where = input.context?.path ? `\n\n[Open in the admin: ${input.context.title ?? ""} ${input.context.path}]` : "";
     messages = [...messages, { role: "user", content: input.message + where }];
     // Unanswered approvals from before are dropped once the person moves on.
-    if (pending.length) {
+    // (Approvals asked for in a voice conversation aren't part of the model's history, so they're just skipped.)
+    const answerable = pending.filter((p) => !p.approvalId.startsWith("va_"));
+    if (answerable.length) {
       messages = [
         ...messages.slice(0, -1),
         {
           role: "tool",
-          content: pending.map((p) => ({
+          content: answerable.map((p) => ({
             type: "tool-approval-response" as const,
             approvalId: p.approvalId,
             approved: false,
@@ -289,9 +308,9 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
         } as ModelMessage,
         messages[messages.length - 1],
       ];
-      for (const p of pending) emit({ t: "decision", approvalId: p.approvalId, approved: false, note: "Skipped" });
-      pending = [];
     }
+    for (const p of pending) emit({ t: "decision", approvalId: p.approvalId, approved: false, note: "Skipped" });
+    pending = [];
   }
 
   emit({ t: "status", status: "running" });
@@ -547,4 +566,16 @@ export async function undoThread(payload: Payload, user: TypedUser | null, threa
   events = fold(events, { t: "notice", text: `Undone: ${results.join("; ")}` });
   await payload.update({ collection: "agent-threads", id: thread.id, data: { changes: all, events } as never, overrideAccess: true });
   return { results };
+}
+
+/** The Gemini key for voice: its own, else the main key when the main provider is Google, else the environment. */
+export function voiceKey(cfg: AgentConfig): string {
+  return (
+    cfg.voice.apiKey ||
+    (cfg.provider === "google" ? cfg.apiKey : "") ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    ""
+  );
 }

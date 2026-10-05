@@ -23,6 +23,7 @@ export type AgentStatus = {
   usage: { runs: number; tokens: number };
   limits: { runs: number; tokens: number };
   briefing: { title: string; body: string; at: string; thread?: string } | null;
+  voice?: { ready: boolean; setup: string | null; model: string };
   canConfigure: boolean;
 };
 

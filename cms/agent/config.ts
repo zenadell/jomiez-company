@@ -1,6 +1,6 @@
-import type { Access, CollectionConfig, GlobalConfig } from "payload";
+import type { Access, CollectionConfig, Field, GlobalConfig } from "payload";
 import { adminsOnly, hasRole, signedIn } from "../access";
-import { CLAUDE_MODELS, DEFAULT_FAST_MODEL, DEFAULT_MODEL, DEFAULT_PROVIDER, PROVIDERS } from "./providers";
+import { DEFAULT_FAST_MODEL, DEFAULT_MODEL, DEFAULT_PROVIDER, PROVIDERS } from "./providers";
 import { nextRunAt } from "./schedule";
 import { encrypt, hint, isEncrypted } from "./secrets";
 
@@ -14,6 +14,32 @@ export const AGENT_GROUP = "Agent";
 
 /** The value the key field sends to remove a saved key. */
 export const CLEAR_KEY = "__clear__";
+
+const SECRET_FIELDS = ["apiKey", "voiceApiKey"] as const;
+const MODEL_PICKER = { path: "/cms/admin/agent/ModelPicker#ModelPicker", clientProps: { purpose: "text" } };
+const VOICE_MODEL_PICKER = { path: "/cms/admin/agent/ModelPicker#ModelPicker", clientProps: { purpose: "voice" } };
+
+/** The voice the old site's Chaka used, and the model it runs on. */
+export const DEFAULT_VOICE_MODEL = "gemini-3.1-flash-live-preview";
+export const VOICES = ["Kore", "Puck", "Charon", "Fenrir", "Aoede", "Leda", "Orus", "Zephyr"];
+
+/*
+ * A key field: stored encrypted, stripped from every read (the agent's own
+ * server-side read asks for it with the revealAgentKey context flag), with a
+ * hidden "last four characters" hint for the settings screen.
+ */
+function secret(name: string, label: string, description: string): Field[] {
+  return [
+    {
+      name,
+      label,
+      type: "text",
+      hooks: { afterRead: [({ value, context }) => (context?.revealAgentKey ? value : null)] },
+      admin: { components: { Field: "/cms/admin/agent/SecretField#SecretField" }, description },
+    },
+    { name: `${name}Hint`, type: "text", admin: { hidden: true, readOnly: true } },
+  ];
+}
 
 const PERSONA = `Write like jomiez.com: an ancient, natural voice (roots, seasons, gardens, craft), calm and certain, never hype. Short sentences. Plain words. No exclamation marks.
 Jomiez Innovation is a software company that grows its own AI products (Chaka AI, Chaka WAP) and builds custom software for businesses.
@@ -71,24 +97,13 @@ export const AgentSettings: GlobalConfig = {
                   defaultValue: DEFAULT_MODEL,
                   admin: {
                     width: "50%",
-                    description: `The model's ID. Claude: ${CLAUDE_MODELS.join(", ")}. Others: see the provider's model list.`,
+                    description: "The model's ID, exactly as the provider writes it (e.g. deepseek-v4-flash). Choose from your account to see every model your key can use, new ones included.",
+                    components: { afterInput: [MODEL_PICKER] },
                   },
                 },
               ],
             },
-            {
-              name: "apiKey",
-              label: "API key",
-              type: "text",
-              // The saved key never leaves the server: every read drops it, except
-              // the agent's own (loadConfig asks for it with this context flag).
-              hooks: { afterRead: [({ value, context }) => (context?.revealAgentKey ? value : null)] },
-              admin: {
-                components: { Field: "/cms/admin/agent/SecretField#SecretField" },
-                description: "Stored encrypted and never shown again, not even to the agent.",
-              },
-            },
-            { name: "apiKeyHint", type: "text", admin: { hidden: true, readOnly: true } },
+            ...secret("apiKey", "API key", "Stored encrypted and never shown again, not even to the agent."),
             {
               name: "baseURL",
               label: "Service address (base URL)",
@@ -108,6 +123,7 @@ export const AgentSettings: GlobalConfig = {
                   defaultValue: DEFAULT_FAST_MODEL,
                   admin: {
                     width: "50%",
+                    components: { afterInput: [MODEL_PICKER] },
                     description: "A cheaper model, same provider, for background work: sorting messages and helper tasks. Empty: the main model does everything.",
                   },
                 },
@@ -128,6 +144,51 @@ export const AgentSettings: GlobalConfig = {
                 },
               ],
             },
+          ],
+        },
+        {
+          label: "Voice",
+          description:
+            "Talk with the agent out loud, in real time, and it acts while you speak (Gemini Live). Your key stays on the server: the browser only ever gets a single-use pass that expires within minutes.",
+          fields: [
+            { name: "voiceEnabled", label: "Voice conversations are on", type: "checkbox", defaultValue: true },
+            {
+              type: "row",
+              fields: [
+                {
+                  name: "voiceModel",
+                  label: "Live model",
+                  type: "text",
+                  defaultValue: DEFAULT_VOICE_MODEL,
+                  admin: {
+                    width: "50%",
+                    description: "A Gemini model that supports live audio. Choose from your account to see the ones your key can use.",
+                    components: { afterInput: [VOICE_MODEL_PICKER] },
+                  },
+                },
+                {
+                  name: "voiceName",
+                  label: "Its voice",
+                  type: "text",
+                  defaultValue: "Kore",
+                  admin: {
+                    width: "25%",
+                    description: `e.g. ${VOICES.join(", ")}`,
+                  },
+                },
+                {
+                  name: "voiceLanguage",
+                  label: "Language (optional)",
+                  type: "text",
+                  admin: { width: "25%", description: "e.g. en-US, en-GB. Empty: it follows you." },
+                },
+              ],
+            },
+            ...secret(
+              "voiceApiKey",
+              "Gemini key for voice (optional)",
+              "Empty: the main key when the main provider is Google, else GEMINI_API_KEY from the environment.",
+            ),
           ],
         },
         {
@@ -190,7 +251,7 @@ export const AgentSettings: GlobalConfig = {
           ],
         },
         {
-          label: "Voice & standing orders",
+          label: "Style & standing orders",
           fields: [
             {
               name: "persona",
@@ -266,16 +327,25 @@ export const AgentSettings: GlobalConfig = {
   hooks: {
     beforeChange: [
       async ({ data, req }) => {
-        const incoming = (data as Record<string, unknown>).apiKey as string | null | undefined;
-        if (incoming === CLEAR_KEY) return { ...data, apiKey: null, apiKeyHint: null };
-        if (typeof incoming === "string" && incoming.trim() && !isEncrypted(incoming)) {
-          const plain = incoming.trim();
-          return { ...data, apiKey: encrypt(plain), apiKeyHint: hint(plain) };
+        const next = { ...data } as Record<string, unknown>;
+        let stored: Record<string, unknown> | null | undefined;
+        for (const name of SECRET_FIELDS) {
+          const incoming = next[name] as string | null | undefined;
+          if (incoming === CLEAR_KEY) {
+            next[name] = null;
+            next[`${name}Hint`] = null;
+          } else if (typeof incoming === "string" && incoming.trim() && !isEncrypted(incoming)) {
+            next[name] = encrypt(incoming.trim());
+            next[`${name}Hint`] = hint(incoming.trim());
+          } else {
+            // Untouched (the browser never has the saved key): keep what's stored. Read
+            // it from the database itself, since every normal read leaves keys out.
+            stored ??= (await req.payload.db.findGlobal({ slug: "agent", req })) as Record<string, unknown> | null;
+            next[name] = stored?.[name] ?? null;
+            next[`${name}Hint`] = stored?.[`${name}Hint`] ?? null;
+          }
         }
-        // Untouched (the browser never has the saved key): keep what's stored. Read
-        // it from the database itself, since every normal read leaves the key out.
-        const stored = (await req.payload.db.findGlobal({ slug: "agent", req })) as { apiKey?: string | null; apiKeyHint?: string | null } | null;
-        return { ...data, apiKey: stored?.apiKey ?? null, apiKeyHint: stored?.apiKeyHint ?? null };
+        return next;
       },
     ],
   },
@@ -309,6 +379,7 @@ export const AgentThreads: CollectionConfig = {
       options: [
         { value: "console", label: "Agent console" },
         { value: "page", label: "While editing" },
+        { value: "voice", label: "Voice" },
         { value: "routine", label: "Routine" },
         { value: "inbox", label: "New message" },
       ],

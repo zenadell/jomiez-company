@@ -33,6 +33,9 @@ export type ToolEnv = {
 };
 
 export type ToolMeta = {
+  /** The input's shape (zod), e.g. for voice sessions that declare tools themselves. */
+  schema?: z.ZodTypeAny;
+  description?: string;
   risk: (input: Record<string, unknown>) => Risk;
   title: (input: Record<string, unknown>) => string;
   preview?: (input: Record<string, unknown>) => Promise<{ changes?: ChangeRow[]; detail?: string }>;
@@ -100,7 +103,7 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
     def: { description: string; input: S; risk: ToolMeta["risk"]; title: ToolMeta["title"]; preview?: ToolMeta["preview"] },
     run: (input: z.infer<S>) => Promise<unknown>,
   ) {
-    meta[name] = { risk: def.risk, title: def.title, preview: def.preview };
+    meta[name] = { schema: def.input, description: def.description, risk: def.risk, title: def.title, preview: def.preview };
     tools[name] = tool({ description: def.description, inputSchema: def.input, execute: async (input: z.infer<S>) => run(input) });
   }
 

@@ -57,10 +57,33 @@ The admin has its own operator: an AI agent (called **Keeper** until you rename 
 - **The console** (sidebar → *Keeper console*, or `/admin/agent`): ask for anything, watch every step, answer approvals, undo. The bell lists everything it did on its own.
 - **On every admin screen**: the round button in the corner opens a chat that knows which page you're on ("tighten this headline" means this one). When it changes that page, the page reloads to show it.
 - **The dashboard** shows what it's doing, what's waiting for you and its latest briefing.
+- **Out loud**: the microphone button next to *Send* (in the console and in the chat on every screen) starts a live voice conversation. See [Talking to it](#talking-to-it).
 
 **What it can do.** Read and change every page, section, product, journal post, image, link, the nav and footer, search listings, redirects, effects and settings; create pages and posts; publish; bring back earlier versions; add images from the web; read the inbox and write replies; view any page as a visitor sees it; audit the whole site (search listings, image descriptions, broken links, leftover placeholder text); research other websites; hand big reading jobs to a helper; keep a memory; and set up routines. It plans multi-step work in the open and checks its own work.
 
-**Any model.** In *Agent settings → Model*, pick a provider and model: Anthropic (Claude), OpenAI, Google (Gemini), OpenRouter (hundreds of models), Groq, DeepSeek, xAI, Mistral, Together, Ollama on your own machine, or any OpenAI-compatible service. Paste the key there (it's stored encrypted and never shown again, not even to the agent) or set it as an environment variable (`GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, …). **Test the connection** checks it. The quick model (optional) does background work cheaply.
+**Any model.** In *Agent settings → Model*, pick a provider and model: Anthropic (Claude), OpenAI, Google (Gemini), OpenRouter (hundreds of models), Groq, DeepSeek, xAI, Mistral, Together, Ollama on your own machine, or any OpenAI-compatible service.
+
+- Paste the key there (it's stored encrypted and never shown again, not even to the agent) or set it as an environment variable (`GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, …).
+- The model box takes the model's **ID**, exactly as the provider writes it: `deepseek-v4-flash`, not "DeepSeek V4 Flash". **Choose from your account** under the box asks the provider which models your key can use right now and fills in the exact ID, so new models show up the day they're released.
+- **Test the connection** checks it. If the name isn't one the provider knows, it says which IDs are closest.
+- The quick model (optional) does background work cheaply. It must come from the same provider; a leftover model from another provider is ignored.
+
+### Talking to it
+
+Press the microphone next to *Send* and talk. It answers out loud, and it acts while you talk: "change the home headline to …", "publish it", "what came into the inbox today?".
+
+- It runs on **Gemini Live**. Set it up in *Agent settings → Voice*:
+  - **Live model**: `gemini-3.1-flash-live-preview` by default. **Choose from your account** lists the live-audio models your key can use.
+  - **Its voice**: Kore by default, or any Gemini voice (Puck, Charon, Fenrir, Aoede, Leda, Orus, Zephyr, …).
+  - **Language** (optional): e.g. `en-GB`. Empty means it follows you.
+  - **Gemini key for voice**: only needed if neither of these applies: the main provider is Google, or `GEMINI_API_KEY` is set.
+- Your key never reaches the browser. Each conversation gets a single-use pass from Google that expires within minutes and is locked to that conversation's model, voice, instructions and actions.
+- The same rules apply as for typed requests. Anything that needs your approval shows as a card on screen; it tells you so, and carries on when you click **Approve** or **Decline**. Every change is recorded and can be undone.
+- **Talk over it** to interrupt. **Mute** stops it hearing you. The box under the controls lets you type a name or address mid-conversation.
+- What you both say is transcribed as you speak and saved as a conversation (◉ in the console). When you press **End**, it opens there: undo its changes, or keep going by typing.
+- Long conversations carry on: Google moves a live session to a fresh connection every few minutes, and that happens between sentences, with the conversation intact.
+- In the chat on an edit screen, the page doesn't reload mid-conversation when the agent changes it. A button offers the reload, and the page reloads by itself when you press *End*.
+- It needs a microphone, the browser's permission to use it, and https (or localhost).
 
 **You stay in charge** (*Agent settings → Permissions*):
 
@@ -152,9 +175,9 @@ SUPABASE_DATABASE_URL=postgres://… npm run payload -- migrate:create <name>   
 | `cms/migrations/` | Database structure changes, applied automatically |
 | `cms/seed/` | The site's original content and the seed that loads it |
 | `cms/admin/` | Admin customisations: logo, dashboard, list-row labels, "View the site" link, page picker |
-| `cms/agent/` | The agent: settings and records (`config.ts`), models (`providers.ts`), the run loop with approvals and notices (`run.ts`, `notify.ts`), its tools (`tools.ts`), how it reads and changes documents with undo (`docs.ts`, `diff.ts`), the permission rules (`policy.ts`), its instructions (`prompt.ts`), routines and inbox sorting (`routines.ts`, `triage.ts`) |
-| `cms/admin/agent/` | The console, the chat on every screen, approval cards, the dashboard card |
-| `app/(payload)/api/agent/` | The agent's endpoints (chat, approve, stop, undo, status, tick) |
+| `cms/agent/` | The agent: settings and records (`config.ts`), models and their lists (`providers.ts`), the run loop with approvals and notices (`run.ts`, `notify.ts`), its tools (`tools.ts`), how it reads and changes documents with undo (`docs.ts`, `diff.ts`), the permission rules (`policy.ts`), its instructions (`prompt.ts`), routines and inbox sorting (`routines.ts`, `triage.ts`), live voice sessions (`voice.ts`) |
+| `cms/admin/agent/` | The console, the chat on every screen, approval cards, the dashboard card, the model picker, and voice (`useVoice.ts` for the microphone, playback and the live connection; `Voice.tsx` for its controls) |
+| `app/(payload)/api/agent/` | The agent's endpoints (chat, approve, stop, undo, status, models, voice, tick) |
 | `cms/db.ts` | Postgres (Supabase) in production, SQLite locally, each with its own migrations |
 | `cms/storage/cloudinary.ts` | Images in Cloudinary |
 | `render.yaml` | The Render service and its settings |

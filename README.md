@@ -2,7 +2,7 @@
 
 The official site for **Jomiez Innovation**, a software company that makes its own AI products (Chaka AI, Chaka WAP) and builds custom software for businesses. Built in React with Next.js; the design and motion system is a code rebuild of the Spartan AI Framer template (purchased), and the copy is written in an ancient, natural voice to match the garden imagery.
 
-**Everything on the site is edited in the admin at `/admin`** (Payload CMS, built into this app), and the admin has its own AI agent that can do anything there, on request or on a schedule, under your approval rules. See **[ADMIN.md](ADMIN.md)** for the guide: what each part of the admin controls, drafts and live preview, the agent, the contact inbox, email, and going live.
+**Everything on the site is edited in the admin at `/admin`** (Payload CMS, built into this app), and the admin has its own AI agent that can do anything there, typed or spoken (live voice), on request or on a schedule, under your approval rules. See **[ADMIN.md](ADMIN.md)** for the guide: what each part of the admin controls, drafts and live preview, the agent, the contact inbox, email, and going live.
 
 ## Run it
 

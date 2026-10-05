@@ -1,6 +1,7 @@
 import * as migration_20260929_204052_initial from './20260929_204052_initial';
 import * as migration_20260929_222020_page_placement from './20260929_222020_page_placement';
 import * as migration_20260930_093734_agent from './20260930_093734_agent';
+import * as migration_20261005_080151_voice from './20261005_080151_voice';
 
 export const migrations = [
   {
@@ -16,6 +17,11 @@ export const migrations = [
   {
     up: migration_20260930_093734_agent.up,
     down: migration_20260930_093734_agent.down,
-    name: '20260930_093734_agent'
+    name: '20260930_093734_agent',
+  },
+  {
+    up: migration_20261005_080151_voice.up,
+    down: migration_20261005_080151_voice.down,
+    name: '20261005_080151_voice'
   },
 ];

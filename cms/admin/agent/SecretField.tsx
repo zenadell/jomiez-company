@@ -12,7 +12,7 @@ const CLEAR = "__clear__";
  */
 export function SecretField({ path, field }: { path: string; field?: { label?: string; admin?: { description?: string } } }) {
   const { value, setValue } = useField<string>({ path });
-  const hintPath = path.replace(/apiKey$/, "apiKeyHint");
+  const hintPath = `${path}Hint`;
   const hint = useFormFields(([fields]) => fields[hintPath]?.value as string | undefined);
   const [editing, setEditing] = useState(!hint);
   const removing = value === CLEAR;

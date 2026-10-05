@@ -5,9 +5,10 @@ import { getPayload, type TypedUser, type Where } from "payload";
 import { originOf } from "@/cms/preview";
 import type { AgentEvent } from "@/cms/agent/events";
 import { listNotices, markNoticesRead } from "@/cms/agent/notify";
-import { buildModel, missingSetup } from "@/cms/agent/providers";
+import { buildModel, listModels, missingSetup, PROVIDERS, type ModelInfo, type ProviderId } from "@/cms/agent/providers";
 import { tickRoutines } from "@/cms/agent/routines";
-import { loadConfig, requestStop, runAgent, undoThread, usageToday, type Decision } from "@/cms/agent/run";
+import { loadConfig, requestStop, runAgent, undoThread, usageToday, voiceKey, type Decision } from "@/cms/agent/run";
+import { answerVoiceApproval, logVoice, runVoiceCalls, startVoice } from "@/cms/agent/voice";
 
 /*
  * The agent's endpoints, used by the admin console and drawer. All need a
@@ -18,7 +19,12 @@ import { loadConfig, requestStop, runAgent, undoThread, usageToday, type Decisio
  *   POST stop      stop a conversation that's working
  *   POST undo      undo a conversation's changes (or one request's)
  *   POST test      check the model connection (admins)
+ *   POST models    the models a key can use, for the settings screen (admins)
  *   POST seen      mark the notices read
+ *   POST voice-session   open a live voice conversation (a single-use Gemini pass)
+ *   POST voice-tool      run what the voice model asked to do, under the same rules
+ *   POST voice-approve   answer an approval asked for while talking
+ *   POST voice-log       keep what was said in the conversation
  *   GET  status    on/off, set up, waiting approvals, unread notices
  *   GET  thread    one conversation's transcript
  *   GET  threads   the conversation list
@@ -71,6 +77,30 @@ function stream(work: (emit: (e: AgentEvent) => void) => Promise<unknown>) {
   });
 }
 
+/* The IDs closest to what was typed ("DeepSeek V4 Flash" → deepseek-v4-flash). */
+function closest(typed: string, models: ModelInfo[]) {
+  const norm = (v: string) => v.toLowerCase().replace(/^models\//, "").replace(/[\s_]+/g, "-");
+  const want = norm(typed);
+  const parts = want.split(/[-./]+/).filter(Boolean);
+  return models
+    .map((m) => {
+      const id = norm(m.id);
+      const label = norm(m.label ?? "");
+      const score = id === want || label === want ? 100 : parts.filter((p) => id.includes(p) || label.includes(p)).length;
+      return { id: m.id, score };
+    })
+    .filter((m) => m.score > 0)
+    .sort((a, b) => b.score - a.score || a.id.length - b.id.length)
+    .slice(0, 4)
+    .map((m) => m.id);
+}
+
+async function tryModel(s: { provider: ProviderId; model: string; apiKey: string; baseURL: string | null }) {
+  const started = Date.now();
+  const { text } = await generateText({ model: buildModel(s), prompt: "Reply with exactly one word: ready", maxOutputTokens: 20 });
+  return { ms: Date.now() - started, text: text.trim().slice(0, 60) };
+}
+
 export async function POST(req: Request, { params }: Params) {
   const { action } = await params;
   if (!sameOrigin(req)) return json({ error: "Wrong origin." }, 403);
@@ -103,6 +133,19 @@ export async function POST(req: Request, { params }: Params) {
       if (!body.threadId || !decisions.length) return json({ error: "Nothing to answer." }, 400);
       const thread = await payload.findByID({ collection: "agent-threads", id: Number(body.threadId), user, overrideAccess: false }).catch(() => null);
       if (!thread) return json({ error: "Not found." }, 404);
+      // Approvals asked for while talking are answered here too (e.g. after the call has ended).
+      if (decisions.every((d) => String(d.approvalId).startsWith("va_"))) {
+        return stream(async (emit) => {
+          emit({ t: "thread", id: String(thread.id), title: thread.title ?? "" });
+          emit({ t: "status", status: "running" });
+          for (const d of decisions) {
+            const out = await answerVoiceApproval({ payload, user, origin, threadId: thread.id, approvalId: d.approvalId, approved: d.approved, note: d.note });
+            out.events.forEach(emit);
+          }
+          const after = await payload.findByID({ collection: "agent-threads", id: thread.id, depth: 0, overrideAccess: true });
+          emit({ t: "status", status: after.status === "waiting" ? "waiting" : "idle" });
+        });
+      }
       return stream((emit) => runAgent({ payload, user, threadId: thread.id, decisions, source: "console", origin, emit }));
     }
     case "stop": {
@@ -119,18 +162,100 @@ export async function POST(req: Request, { params }: Params) {
     case "test": {
       if (!isAdmin(user)) return json({ ok: false, message: "Admins only." }, 403);
       const cfg = await loadConfig(payload);
-      const setup = missingSetup({ provider: cfg.provider, model: cfg.model, apiKey: cfg.apiKey, baseURL: cfg.baseURL });
+      const main = { provider: cfg.provider, model: cfg.model, apiKey: cfg.apiKey, baseURL: cfg.baseURL };
+      const setup = missingSetup(main);
       if (setup) return json({ ok: false, message: setup });
       try {
-        const started = Date.now();
-        const { text } = await generateText({
-          model: buildModel({ provider: cfg.provider, model: cfg.model, apiKey: cfg.apiKey, baseURL: cfg.baseURL }),
-          prompt: "Reply with exactly one word: ready",
-          maxOutputTokens: 20,
-        });
-        return json({ ok: true, message: `Connected to ${cfg.model} in ${Date.now() - started} ms. It answered: “${text.trim().slice(0, 60)}”` });
+        const r = await tryModel(main);
+        let message = `Connected to ${cfg.model} in ${r.ms} ms. It answered: “${r.text}”`;
+        if (cfg.fastModel && cfg.fastModel !== cfg.model) {
+          try {
+            await tryModel({ ...main, model: cfg.fastModel });
+            message += ` The quick model ${cfg.fastModel} works too.`;
+          } catch (err) {
+            return json({ ok: false, message: `${message} But the quick model “${cfg.fastModel}” failed: ${(err as Error).message.slice(0, 200)}` });
+          }
+        }
+        return json({ ok: true, message });
       } catch (err) {
-        return json({ ok: false, message: (err as Error).message.slice(0, 400) });
+        let message = (err as Error).message.slice(0, 400);
+        // A model name the provider doesn't know: say which IDs it does know.
+        const models = await listModels(main, "text").catch(() => null);
+        if (models?.length && !models.some((m) => m.id === cfg.model.trim())) {
+          const near = closest(cfg.model, models);
+          message = `“${cfg.model}” isn't a model ID this key can use.${near.length ? ` Closest: ${near.join(", ")}.` : ""} Use “Choose from your account” under the Model box to pick one. (${message.slice(0, 160)})`;
+        }
+        return json({ ok: false, message });
+      }
+    }
+    case "models": {
+      if (!isAdmin(user)) return json({ error: "Admins only." }, 403);
+      const cfg = await loadConfig(payload);
+      const purpose = body.purpose === "voice" ? "voice" : "text";
+      const provider = (purpose === "voice" ? "google" : String(body.provider || cfg.provider)) as ProviderId;
+      if (!PROVIDERS[provider]) return json({ error: "Choose a provider first." }, 400);
+      const typedKey = typeof body.apiKey === "string" ? body.apiKey.trim() : "";
+      const typedBase = purpose === "voice" || typeof body.baseURL !== "string" ? "" : body.baseURL.trim().replace(/\/$/, "");
+      const savedBase = provider === cfg.provider ? (cfg.baseURL ?? "").trim().replace(/\/$/, "") : "";
+      let apiKey = typedKey;
+      if (!apiKey) {
+        // A saved key only ever goes to the address it was saved with.
+        if (typedBase && typedBase !== savedBase) return json({ error: "Type the key for this address in the key box first (or save the address)." });
+        apiKey = purpose === "voice" ? voiceKey(cfg) : provider === cfg.provider ? cfg.apiKey : "";
+      }
+      try {
+        const models = await listModels({ provider, apiKey, baseURL: typedBase || savedBase || null }, purpose);
+        models.sort((a, b) => a.id.localeCompare(b.id));
+        return json({ models });
+      } catch (err) {
+        const msg = (err as Error).message;
+        return json({ error: /^(401|403)/.test(msg) ? `The provider refused the key (${msg.slice(0, 160)}).` : `Couldn't list the models: ${msg.slice(0, 200)}` });
+      }
+    }
+    case "voice-session": {
+      try {
+        const context = body.context && typeof body.context === "object" ? (body.context as { path?: string; title?: string }) : null;
+        const resume = body.resume && typeof body.resume === "object" ? (body.resume as { threadId: number; handle?: string }) : null;
+        return json(await startVoice({ payload, user, origin, context, resume }));
+      } catch (err) {
+        return json({ error: (err as Error).message }, 400);
+      }
+    }
+    case "voice-tool": {
+      const calls = Array.isArray(body.calls) ? (body.calls as { id: string; name: string; args?: Record<string, unknown> }[]) : [];
+      if (!body.threadId || !calls.length) return json({ error: "Nothing to do." }, 400);
+      try {
+        return json(await runVoiceCalls({ payload, user, origin, threadId: body.threadId as number, calls: calls.slice(0, 12) }));
+      } catch (err) {
+        const message = (err as Error).message;
+        return json({ error: message, responses: calls.map((c) => ({ id: c.id, name: c.name, response: { error: message } })) }, 400);
+      }
+    }
+    case "voice-approve": {
+      if (!body.threadId || !body.approvalId) return json({ error: "Nothing to answer." }, 400);
+      try {
+        return json(
+          await answerVoiceApproval({
+            payload,
+            user,
+            origin,
+            threadId: body.threadId as number,
+            approvalId: String(body.approvalId),
+            approved: body.approved === true,
+            note: typeof body.note === "string" ? body.note.slice(0, 1000) : undefined,
+          }),
+        );
+      } catch (err) {
+        return json({ error: (err as Error).message }, 400);
+      }
+    }
+    case "voice-log": {
+      const lines = Array.isArray(body.lines) ? (body.lines as { who: "you" | "agent"; text: string }[]).slice(0, 50) : [];
+      if (!body.threadId) return json({ error: "Nothing to keep." }, 400);
+      try {
+        return json(await logVoice({ payload, user, threadId: body.threadId as number, lines, tokens: Number(body.tokens) || 0, end: body.end === true }));
+      } catch (err) {
+        return json({ error: (err as Error).message }, 400);
       }
     }
     case "seen":
@@ -189,6 +314,11 @@ export async function GET(req: Request, { params }: Params) {
       usage,
       limits: { runs: cfg.dailyRuns, tokens: cfg.dailyTokens },
       briefing,
+      voice: {
+        ready: cfg.enabled && cfg.voice.enabled && Boolean(voiceKey(cfg)),
+        setup: !cfg.voice.enabled ? "Voice is switched off (Agent settings → Voice)." : voiceKey(cfg) ? null : "Add a Gemini key in Agent settings → Voice.",
+        model: cfg.voice.model,
+      },
       canConfigure: admin,
     });
   }

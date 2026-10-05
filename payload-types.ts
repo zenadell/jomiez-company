@@ -196,7 +196,7 @@ export interface AgentThread {
   id: number;
   title: string;
   owner?: (number | null) | User;
-  source?: ('console' | 'page' | 'routine' | 'inbox') | null;
+  source?: ('console' | 'page' | 'voice' | 'routine' | 'inbox') | null;
   status?: ('idle' | 'running' | 'waiting' | 'stopped' | 'error') | null;
   context?:
     | {
@@ -2239,7 +2239,7 @@ export interface Agent {
     | 'ollama'
     | 'custom';
   /**
-   * The model's ID. Claude: claude-opus-5-5, claude-sonnet-5-5, claude-haiku-4-5-20251001, claude-fable-5-1. Others: see the provider's model list.
+   * The model's ID, exactly as the provider writes it (e.g. deepseek-v4-flash). Choose from your account to see every model your key can use, new ones included.
    */
   model: string;
   /**
@@ -2259,6 +2259,24 @@ export interface Agent {
    * How hard it thinks before acting, on models that support it.
    */
   thinking?: ('provider-default' | 'none' | 'low' | 'medium' | 'high' | 'xhigh') | null;
+  voiceEnabled?: boolean | null;
+  /**
+   * A Gemini model that supports live audio. Choose from your account to see the ones your key can use.
+   */
+  voiceModel?: string | null;
+  /**
+   * e.g. Kore, Puck, Charon, Fenrir, Aoede, Leda, Orus, Zephyr
+   */
+  voiceName?: string | null;
+  /**
+   * e.g. en-US, en-GB. Empty: it follows you.
+   */
+  voiceLanguage?: string | null;
+  /**
+   * Empty: the main key when the main provider is Google, else GEMINI_API_KEY from the environment.
+   */
+  voiceApiKey?: string | null;
+  voiceApiKeyHint?: string | null;
   mode?: ('ask' | 'drafts' | 'trusted' | 'full') | null;
   deletes?: ('never' | 'ask' | 'auto') | null;
   email?: ('never' | 'ask' | 'auto') | null;
@@ -3062,6 +3080,12 @@ export interface AgentSelect<T extends boolean = true> {
   baseURL?: T;
   fastModel?: T;
   thinking?: T;
+  voiceEnabled?: T;
+  voiceModel?: T;
+  voiceName?: T;
+  voiceLanguage?: T;
+  voiceApiKey?: T;
+  voiceApiKeyHint?: T;
   mode?: T;
   deletes?: T;
   email?: T;
