@@ -42,7 +42,7 @@
     "@payloadcms/storage-vercel-blob": "3.90.2",
     "@payloadcms/ui": "3.90.2",
     "@samasante/liquid-glass": "0.1.1",
-    "@sparticuz/chromium": "153.0.0",
+    "@sparticuz/chromium-min": "153.0.0",
     "ai": "7.0.122",
     "cloudinary": "2.11.0",
     "graphql": "16.14.2",

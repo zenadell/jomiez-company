@@ -29,6 +29,9 @@ const WINDOWS_BROWSERS = [
   "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
 ];
 
+/** The Chromium build matching @sparticuz/chromium-min's version. */
+const CHROMIUM = "153.0.0";
+
 async function launch(): Promise<Browser> {
   const { chromium } = await import("playwright-core");
   // A browser service (e.g. Browserless), when the server is too small to run one.
@@ -36,9 +39,11 @@ async function launch(): Promise<Browser> {
   const local = process.env.BROWSER_EXECUTABLE_PATH || [...MAC_BROWSERS, ...WINDOWS_BROWSERS].find((p) => fs.existsSync(p));
   if (local) return chromium.launch({ executablePath: local, headless: true });
   if (process.platform !== "linux") throw new Error("No browser found. Install Google Chrome, or set BROWSER_EXECUTABLE_PATH.");
-  // On Linux servers (Render): a self-contained Chromium shipped as a package.
-  const { default: bundled } = await import("@sparticuz/chromium");
-  return chromium.launch({ executablePath: await bundled.executablePath(), args: bundled.args, headless: true });
+  // On Linux servers (Render): a self-contained Chromium, fetched the first time it's
+  // needed and kept in /tmp (so computers that never take screenshots never download it).
+  const { default: bundled } = await import("@sparticuz/chromium-min");
+  const pack = process.env.CHROMIUM_PACK_URL || `https://github.com/Sparticuz/chromium/releases/download/v${CHROMIUM}/chromium-v${CHROMIUM}-pack.${process.arch === "arm64" ? "arm64" : "x64"}.tar`;
+  return chromium.launch({ executablePath: await bundled.executablePath(pack), args: bundled.args, headless: true });
 }
 
 export const DEVICES = {

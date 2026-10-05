@@ -73,7 +73,7 @@ It won't put images from Pinterest, Google Images or other people's sites on the
 
 Seeing and making images use the Gemini key from the Voice tab (or `GEMINI_API_KEY`). It picks the newest suitable Gemini models on your key; *Agent settings → Sight & images* can pin others. The browser is a fresh, empty one each time (never signed in), and it refuses private and internal addresses.
 
-On the server the browser needs about 300 MB of memory on top of the site. Render's Standard plan (2 GB) is comfortable; on Starter, point `BROWSER_WS_ENDPOINT` at a browser service (e.g. Browserless) instead. On your Mac it uses Google Chrome (or set `BROWSER_EXECUTABLE_PATH`).
+On a Linux server the browser (about 60 MB) is downloaded the first time a screenshot is needed, not at install. It needs about 300 MB of memory on top of the site. Render's Standard plan (2 GB) is comfortable; on Starter, point `BROWSER_WS_ENDPOINT` at a browser service (e.g. Browserless) instead. On your Mac it uses Google Chrome (or set `BROWSER_EXECUTABLE_PATH`).
 
 **Any model.** In *Agent settings → Model*, pick a provider and model: Anthropic (Claude), OpenAI, Google (Gemini), OpenRouter (hundreds of models), Groq, DeepSeek, xAI, Mistral, Together, Ollama on your own machine, or any OpenAI-compatible service.
 
