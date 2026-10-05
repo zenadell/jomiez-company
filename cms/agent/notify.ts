@@ -1,10 +1,12 @@
 import type { Payload } from "payload";
+import { gist, push } from "../app/push";
 import type { Recorded } from "./docs";
 
 /*
  * The owner hears about everything the agent does on its own (routines and new
- * contact messages): a notice in the admin (the bell on the Agent console) and
- * an email with what it did, what it changed and anything waiting for approval.
+ * contact messages): a notice in the admin (the bell on the Agent console), a
+ * notification on phones with the app (/app), and an email with what it did,
+ * what it changed and anything waiting for approval.
  */
 
 export type Notice = {
@@ -82,6 +84,12 @@ export async function reportAutomaticRun(payload: Payload, r: RunReport, opts: {
     .join("\n\n");
 
   await addNotice(payload, { kind: r.status === "error" ? "error" : r.waiting.length ? "approval" : r.kind, title, body: body.slice(0, 4000), link });
+  await push(payload, {
+    title,
+    body: r.waiting.length ? `Waiting for you: ${r.waiting.join(" · ")}` : gist(r.summary) || changeLines.join(" ") || "Nothing needed changing.",
+    url: `/app?thread=${r.threadId}`,
+    tag: `thread-${r.threadId}`,
+  }).catch((err) => payload.logger.warn({ err, msg: "Couldn't send the phone notification" }));
 
   if (!opts.email || !opts.to) return;
   const html = `<div style="font-family:system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.6;color:#1a1a1a;max-width:620px">

@@ -127,6 +127,30 @@ Press the microphone next to *Send* and talk. It answers out loud, and it acts w
 
 Routines need the server's clock: while the server is running it checks every minute. A server that sleeps (Render's free plan) or Vercel needs a scheduler calling `GET /api/agent/tick` with the header `Authorization: Bearer <CRON_SECRET>` (set up in *Going live → On the free plan*); while anyone has the admin open, due routines also get their chance.
 
+## The phone app
+
+**www.jomiez.com/app** is the agent on your phone: ask it things, send it photos, approve or decline its changes, talk to it, and get a notification when it needs you. It works on iPhone and Android, and installs like an app.
+
+**Install it**
+- **iPhone**: open www.jomiez.com/app in Safari, tap **Share** (the box with an arrow), then **Add to Home Screen**. Open it from the icon from then on.
+- **Android**: open it in Chrome and tap **Install** on the card at the top (or ⋮ → *Install app*).
+- Sign in with your admin account. With **Stay signed in on this phone** on, it stays signed in for 90 days, until you sign out from its settings. (The admin itself signs you out after 8 hours.)
+
+**Using it**
+- **New task** starts a conversation; tap one in the list to reopen it. Swipe from the left edge, or tap **‹ Tasks**, to go back.
+- **+** in the message box adds photos from the camera or the library. The agent looks at them, and can add one to the media library and use it on the site ("put this photo on the About page"). Photos you send are kept for a short while only, not stored in the library unless it adds them.
+- Approval cards show the exact change, with big **Approve** and **Decline** buttons. **⋯** in a conversation lists every change it made, each with **Undo**.
+- The microphone (on the dock, or in an empty message box) starts a voice conversation, the same as in the admin. It needs a working Gemini key.
+- Tap the model under its name to switch models (admins).
+- Pull the list down to refresh it. The bell lists what it did on its own.
+
+**Notifications** (Settings → *Notifications*):
+- You get one when a routine or a new contact message needs your approval or has been dealt with, and when a task you left running finishes or needs you (lock the phone mid-task and it tells you when it's done).
+- On iPhone they need iOS 16.4 or later and the app added to the Home Screen; turn them on from inside the installed app.
+- There's nothing to set up: the site makes its own notification keys the first time. To use your own, set `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` (generate a pair with `npx web-push generate-vapid-keys`).
+
+The app opens instantly and offline (it keeps its own copy); conversations always come fresh from the site. On the free plan, the first open after a quiet spell takes up to a minute while the server wakes.
+
 ## Email (contact form)
 
 Every message is saved to the Inbox. To also get an email for each one, and to send visitors the automatic reply:
