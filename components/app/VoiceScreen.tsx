@@ -3,14 +3,14 @@
 import { motion } from "motion/react";
 import { useState } from "react";
 import type { VoiceApi } from "@/cms/admin/agent/useVoice";
-import { GlassPane } from "./Glass";
-import { Orb } from "./Orb";
+import { Droplet } from "./Droplet";
+import { LiquidGlass } from "./LiquidGlass";
 import { AppTranscript } from "./Transcript";
 
 /*
- * Talking to the agent: a full screen like a call. The ember moves with whoever
- * is speaking, the words show as they're said, what it does appears below, and
- * the buttons are mute, type a word, and end.
+ * Talking to the agent, like a call: a big drop of glass that swells with
+ * whoever is speaking, the words as they're said, what it does below, and
+ * three glass buttons: mute, type a word, end.
  */
 
 const LABEL: Record<string, string> = {
@@ -40,13 +40,19 @@ export function VoiceScreen({ voice, name }: { voice: VoiceApi; name: string }) 
   return (
     <motion.section
       className={`ja-voice is-${state.phase}${state.muted ? " is-muted" : ""}`}
-      initial={{ y: "100%" }}
-      animate={{ y: 0 }}
-      exit={{ y: "100%" }}
-      transition={{ type: "spring", stiffness: 300, damping: 34 }}
+      initial={{ y: 40, scale: 0.98 }}
+      animate={{ y: 0, scale: 1 }}
+      exit={{ y: 60, scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 260, damping: 30 }}
     >
+      {/* Only the shade fades: a fading section would stop the platters inside frosting the wallpaper. */}
+      <motion.div className="ja-voice__shade" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }} />
       <div className="ja-voice__top">
-        <Orb size={148} state={state.phase === "working" || state.phase === "starting" ? "working" : "voice"} bind={bindOrb} />
+        <motion.span initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 200, damping: 16 }}>
+          <span className="ja-voice__wobble" ref={bindOrb}>
+            <Droplet size={168} state={state.phase === "working" || state.phase === "starting" ? "working" : "voice"} />
+          </span>
+        </motion.span>
         <div className="ja-voice__label" aria-live="polite">
           <strong>{label}</strong>
           <span>{hint}</span>
@@ -66,7 +72,7 @@ export function VoiceScreen({ voice, name }: { voice: VoiceApi; name: string }) 
         />
       </div>
 
-      {state.error && <p className="ja-composer__note">{state.error}</p>}
+      {state.error && <p className="ja-composer__note" style={{ margin: "0 16px 10px" }}>{state.error}</p>}
 
       {typing && (
         <form
@@ -82,29 +88,35 @@ export function VoiceScreen({ voice, name }: { voice: VoiceApi; name: string }) 
         </form>
       )}
 
-      <GlassPane className="ja-voice__controls">
-        <motion.button type="button" whileTap={{ scale: 0.9 }} className={`ja-call-btn${state.muted ? " is-on" : ""}`} aria-pressed={state.muted} aria-label={state.muted ? "Unmute" : "Mute"} onClick={toggleMute}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-            <rect x="9" y="3" width="6" height="11" rx="3" />
-            <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
-            {state.muted && <path d="M4 4l16 16" />}
-          </svg>
-          <span>{state.muted ? "Unmute" : "Mute"}</span>
-        </motion.button>
-        <motion.button type="button" whileTap={{ scale: 0.9 }} className={`ja-call-btn${typing ? " is-on" : ""}`} aria-label="Type" onClick={() => setTyping((v) => !v)}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-            <rect x="2" y="6" width="20" height="12" rx="2" />
-            <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10" />
-          </svg>
-          <span>Type</span>
-        </motion.button>
-        <motion.button type="button" whileTap={{ scale: 0.9 }} className="ja-call-btn ja-call-btn--end" aria-label="End" onClick={() => void end()}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28a11.27 11.27 0 0 0-2.67-1.85.996.996 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
-          </svg>
-          <span>End</span>
-        </motion.button>
-      </GlassPane>
+      <div className="ja-voice__controls">
+        <button type="button" className={`ja-call${state.muted ? " is-on" : ""}`} aria-pressed={state.muted} onClick={toggleMute}>
+          <LiquidGlass press>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <rect x="9" y="3" width="6" height="11" rx="3" />
+              <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+              {state.muted && <path d="M4 4l16 16" />}
+            </svg>
+          </LiquidGlass>
+          {state.muted ? "Unmute" : "Mute"}
+        </button>
+        <button type="button" className={`ja-call${typing ? " is-on" : ""}`} onClick={() => setTyping((v) => !v)}>
+          <LiquidGlass press>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <rect x="2" y="6" width="20" height="12" rx="2.5" />
+              <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10" />
+            </svg>
+          </LiquidGlass>
+          Type
+        </button>
+        <button type="button" className="ja-call ja-call--end" onClick={() => void end()}>
+          <LiquidGlass press material="tint">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28a11.27 11.27 0 0 0-2.67-1.85.996.996 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
+            </svg>
+          </LiquidGlass>
+          End
+        </button>
+      </div>
     </motion.section>
   );
 }

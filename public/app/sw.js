@@ -8,7 +8,7 @@
  * Nothing from /api is ever kept: conversations always come fresh.
  */
 
-const SHELL = "jz-app-shell-v1";
+const SHELL = "jz-app-shell-v2";
 const FILES = "jz-app-files-v1";
 const PAGE = "/app";
 
@@ -16,7 +16,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(SHELL)
-      .then((cache) => cache.addAll([PAGE, "/app/icon-192.png", "/app/badge-96.png"]))
+      .then((cache) => cache.addAll([PAGE, "/app/wallpaper.webp", "/app/icon-192.png", "/app/badge-96.png"]))
       .catch(() => {})
       .then(() => self.skipWaiting()),
   );

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { AgentStatus } from "@/cms/admin/agent/useAgent";
+import type { AgentStatus, ThreadApi } from "@/cms/admin/agent/useAgent";
 import { Sheet } from "./Sheet";
 import { ago, isIOS, isStandalone, post, pushSupported, tap, turnOffPush, turnOnPush, type Me, type Notice } from "./lib";
 
@@ -146,7 +146,7 @@ export function SettingsSheet({
     <Sheet open={open} onClose={onClose} title="Settings" tall>
       <section className="ja-group">
         <div className="ja-group__row">
-          <span className="ja-avatar" aria-hidden="true">
+          <span className="ja-face" aria-hidden="true">
             {(me.user.name || me.user.email).slice(0, 1).toUpperCase()}
           </span>
           <span className="ja-group__main">
@@ -260,6 +260,81 @@ export function NoticesSheet({ open, onClose, onOpenThread }: { open: boolean; o
             );
           })}
         </ul>
+      )}
+    </Sheet>
+  );
+}
+
+/* One conversation: its plan, and every change it made, each one undoable. */
+export function ThreadSheet({ open, onClose, api }: { open: boolean; onClose: () => void; api: ThreadApi }) {
+  const [undoResult, setUndoResult] = useState<string[] | null>(null);
+  const live = api.changes.filter((c) => !c.undone);
+  return (
+    <Sheet open={open} onClose={onClose} title={api.title || "This conversation"} tall={api.changes.length + api.plan.length > 6}>
+      {api.plan.length > 0 && (
+        <section className="ja-sheet-section">
+          <span className="ja-eyebrow">Plan</span>
+          <ol className="ja-plan">
+            {api.plan.map((s, i) => (
+              <li key={i} className={s.done ? "is-done" : ""}>
+                {s.title}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+      <section className="ja-sheet-section">
+        <span className="ja-eyebrow">Changes it made</span>
+        {api.changes.length === 0 ? (
+          <p className="ja-muted">None yet.</p>
+        ) : (
+          <ul className="ja-changes">
+            {api.changes.map((c, i) => (
+              <li key={i} className={c.undone ? "is-undone" : ""}>
+                <span>
+                  <em>{c.action === "update" ? "changed" : c.action}</em> {c.title}
+                </span>
+                {!c.undone && (
+                  <button
+                    type="button"
+                    className="ja-btn ja-btn--plain ja-btn--small"
+                    disabled={api.busy}
+                    onClick={async () => {
+                      if (!window.confirm(`Undo “${c.action === "update" ? "changed" : c.action} ${c.title}”?`)) return;
+                      setUndoResult(await api.undo(c.runId));
+                    }}
+                  >
+                    Undo
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {live.length > 1 && (
+          <button
+            type="button"
+            className="ja-btn ja-btn--plain ja-btn--block"
+            disabled={api.busy}
+            onClick={async () => {
+              if (!window.confirm(`Undo all ${live.length} changes from this conversation?`)) return;
+              setUndoResult(await api.undo());
+            }}
+          >
+            Undo all {live.length}
+          </button>
+        )}
+        {undoResult && <p className="ja-muted">{undoResult.join(" · ")}</p>}
+      </section>
+      {api.busy && (
+        <button type="button" className="ja-btn ja-btn--danger ja-btn--block" onClick={() => void api.stop()}>
+          Stop working
+        </button>
+      )}
+      {api.threadId && (
+        <Link className="ja-btn ja-btn--plain ja-btn--block" href={`/admin/agent?thread=${api.threadId}`}>
+          Open in the full admin
+        </Link>
       )}
     </Sheet>
   );

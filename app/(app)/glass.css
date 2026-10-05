@@ -1,0 +1,125 @@
+/*
+ * Liquid glass (components/app/LiquidGlass.tsx). The lens bends a copy of the
+ * wallpaper; this file adds what light does on real glass: a bright rim where
+ * the light comes from, a faint inner glow, a shadow that grounds it, and the
+ * glow that spreads from under a finger.
+ */
+
+.lg-frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  overflow: clip;
+}
+
+.lg-wallpaper {
+  position: absolute;
+  inset: 0;
+  background: url(/app/wallpaper.webp) center bottom / cover no-repeat, #0b1a12;
+}
+
+.lg {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.22);
+}
+
+/* Below the content, above nothing: the pane's own stacking context (isolation) keeps it there. */
+.lg__lens,
+.lg__light {
+  position: absolute !important;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/*
+ * The library marks its layers `will-change: filter`, but a filter that bends
+ * (an SVG one) can't be handed to the graphics chip: the hint only makes the
+ * browser redo the bending on every frame anything on screen moves (3 frames a
+ * second instead of 60). Painted normally, it's worked out once and kept.
+ */
+.lg__lens > div {
+  will-change: auto !important;
+}
+
+/* The regular glass keeps a whisper of shade, so white text on it reads over the bright moss too. */
+.lg__light {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(10, 22, 15, 0.16) 45%, rgba(10, 22, 15, 0.22));
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.6),
+    inset 0 -0.5px 0.5px rgba(255, 255, 255, 0.18),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.2),
+    inset 0 0 18px rgba(255, 255, 255, 0.07);
+}
+
+.lg--thick .lg__light {
+  background: linear-gradient(180deg, rgba(16, 28, 20, 0.5), rgba(10, 18, 13, 0.62));
+}
+
+/* Tinted glass: the one primary action on screen (Send, Approve, Sign in). */
+.lg--tint .lg__light {
+  background: linear-gradient(180deg, rgba(255, 160, 90, 0.82), rgba(255, 110, 40, 0.88));
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 236, 214, 0.85),
+    inset 0 -1px 1px rgba(120, 40, 0, 0.25),
+    inset 0 0 0 0.5px rgba(255, 220, 190, 0.4),
+    inset 0 0 14px rgba(255, 220, 180, 0.3);
+}
+
+.lg--drop {
+  box-shadow:
+    0 0 28px rgba(255, 170, 90, 0.22),
+    0 14px 34px rgba(0, 0, 0, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.lg--drop .lg__light {
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.75) 0, rgba(255, 255, 255, 0) 20%),
+    radial-gradient(circle at 50% 110%, rgba(255, 200, 140, 0.35), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
+  box-shadow:
+    inset 0 2px 1px rgba(255, 255, 255, 0.55),
+    inset 0 -6px 14px rgba(255, 255, 255, 0.12),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.25);
+}
+
+/* A control: it flexes like gel and lights up from inside, from under the finger. */
+.lg--press {
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.lg--press:active {
+  transform: scale(0.93);
+  transition-duration: 0.14s;
+  transition-timing-function: ease-out;
+}
+
+.lg--press .lg__light::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--lg-x, 50%) var(--lg-y, 50%), rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.08) 45%, transparent 75%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.lg--press:active .lg__light::after {
+  opacity: 1;
+  transition-duration: 0.08s;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .lg__light {
+    background: rgba(20, 30, 24, 0.92);
+  }
+}

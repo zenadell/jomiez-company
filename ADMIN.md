@@ -137,11 +137,11 @@ Routines need the server's clock: while the server is running it checks every mi
 - Sign in with your admin account. With **Stay signed in on this phone** on, it stays signed in for 90 days, until you sign out from its settings. (The admin itself signs you out after 8 hours.)
 
 **Using it**
-- **New task** starts a conversation; tap one in the list to reopen it. Swipe from the left edge, or tap **‹ Tasks**, to go back.
+- Type in the message box on the first screen to start a conversation; tap one in the list to reopen it. Swipe from the left edge, or tap **‹**, to go back.
 - **+** in the message box adds photos from the camera or the library. The agent looks at them, and can add one to the media library and use it on the site ("put this photo on the About page"). Photos you send are kept for a short while only, not stored in the library unless it adds them.
 - Approval cards show the exact change, with big **Approve** and **Decline** buttons. **⋯** in a conversation lists every change it made, each with **Undo**.
-- The microphone (on the dock, or in an empty message box) starts a voice conversation, the same as in the admin. It needs a working Gemini key.
-- Tap the model under its name to switch models (admins).
+- The microphone (in an empty message box) starts a voice conversation, the same as in the admin. It needs a working Gemini key.
+- Tap the status under its name to switch models (admins). Your initial, top right, opens the settings.
 - Pull the list down to refresh it. The bell lists what it did on its own.
 
 **Notifications** (Settings → *Notifications*):
