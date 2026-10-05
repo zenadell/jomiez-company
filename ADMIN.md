@@ -168,15 +168,23 @@ git push
 **Steps**
 
 1. Save your local content (above), then merge this work into `main`.
-2. Render → **New → Blueprint** → choose this repository. Fill in the settings it asks for by copying each value from the old service (Render → old service → Environment): `SUPABASE_DATABASE_URL`, the three `CLOUDINARY_*`, `RESEND_API_KEY`, `LEAD_FROM_EMAIL`, `LEAD_REPLY_TO`, `ADMIN_NOTIFY_EMAIL`. For `GEMINI_API_KEY`, use a **new** key (see below).
+2. Render → **New → Blueprint** → choose this repository (a new Render account works: values are copied by hand). Fill in the settings it asks for by copying each value from the old service (Render → old service → Environment): `SUPABASE_DATABASE_URL`, the three `CLOUDINARY_*`, `RESEND_API_KEY`, `LEAD_FROM_EMAIL`, `LEAD_REPLY_TO`, `ADMIN_NOTIFY_EMAIL`. For `GEMINI_API_KEY`, use a **new** key (see below).
 3. The first deploy builds the database structure in Supabase, loads your content snapshot (or the starter content), uploads the images to Cloudinary (folder `jomiez-site`) and pre-builds every page. Each later deploy only applies new migrations.
 4. Open `https://jomiez-site.onrender.com/admin` (Render shows the exact address), create the first account, and look around. The dashboard's **Going live** panel shows whether the database, images, email, agent and voice are connected; **Send a test email** proves email end to end. API keys saved in the local Agent settings aren't copied: add them again there, or set them on Render. The old site is still live on jomiez.com.
-5. **Move the domain.** In the old service → Settings → Custom domains, remove `jomiez.com` and `www.jomiez.com`. In the new service, add both. Render shows the DNS records: the bare domain's A record already points at Render; change the `www` CNAME to the new service's `.onrender.com` address. Render issues the certificates and redirects `www` to the bare domain.
-6. Old addresses keep working: `/works`, `/contact-us`, `/blog`, `/testimonials`, `/resume`, `/terms-condition` and the old `.html` pages redirect to their new pages, and the Google Search Console file is kept, so the site stays verified.
-7. Optional, once the domain works: set `NEXT_PUBLIC_SERVER_URL=https://jomiez.com` to pin the admin to it.
-8. Suspend the old service when you're happy.
+5. **Move the domain.** In the old service → Settings → Custom domains, remove `www.jomiez.com` and `jomiez.com` (a domain can only be on one service). In the new service, add **`www.jomiez.com`**: it's the old site's main address, the one Google knows, so every address stays exactly the same. Render adds `jomiez.com` too and redirects it to `www`, as the old site did. At your domain's DNS: the bare domain's A record already points at Render; change the `www` CNAME to the new service's `.onrender.com` address. Render issues the certificates.
+6. **Site settings → URL** must be `https://www.jomiez.com` (the content snapshot already says so). It's the address in every page's canonical link, the sitemap and sharing previews; the dashboard's Going live panel shows it.
+7. Old addresses keep working: `/works`, `/contact-us`, `/blog`, `/services/…`, `/testimonials`, `/resume`, `/terms-condition`, the old `.html` pages and the old project pages (`/work/zyro-saas-landing`, `/work/chaka.jomiez`, …) redirect permanently to their new pages, and the Google Search Console file is kept, so the site stays verified.
+8. In Google Search Console, submit `https://www.jomiez.com/sitemap.xml` (see *Keeping the search ranking*).
+9. Optional, once the domain works: set `NEXT_PUBLIC_SERVER_URL=https://www.jomiez.com` to pin the admin to it.
 
-**Replace the old Gemini and Groq keys.** The old portfolio's public `/api/chaka/voice-token` address hands its saved Gemini and Groq keys to anyone who asks, so treat them as exposed: create new keys in Google AI Studio (and Groq), use the new ones here, and delete the old ones once the old service is off. The new site never sends a key to the browser.
+**Keeping the search ranking.** Search engines rank addresses on a domain, not the server behind them, so pointing `www.jomiez.com` at the new site carries the ranking over as long as the addresses keep working. They do: the main pages keep their addresses, and each of the old site's 24 sitemap addresses either exists or redirects permanently (308) to its new page, which passes its ranking on. Every page names its address on `www.jomiez.com` as canonical, so the `.onrender.com` copy and any other copy don't compete with it. After the switch, submit the sitemap in Search Console and use **URL inspection → Request indexing** on the home page. The pages' words are new, so expect positions for particular searches to move for a few weeks while Google reads them again.
+
+**The old portfolio on its own address.** It can keep running on the old Render service under a subdomain, e.g. `portfolio.jomiez.com`: in the old service → Custom domains, add it; at your DNS, add a CNAME `portfolio` → the old service's `.onrender.com` address. It builds its canonical links, sitemap and robots file from the address it's visited at, so it will present itself as `portfolio.jomiez.com` with no change, and start as a new site in search. Two things to change there:
+
+- **Its exposed keys.** The old site's `/api/chaka/voice-token` hands its Gemini and Groq keys to anyone who asks, and it stays online. Remove those keys from the old service (its voice assistant stops), or give it its own new keys you're willing to expose, with tight limits. Never give it the new site's key.
+- **Its wording.** It still presents itself as Jomiez Innovation, so it will compete with the new site in searches for "Jomiez". As a personal portfolio, retitle it around your name.
+
+**Replace the old Gemini and Groq keys.** The old portfolio's public `/api/chaka/voice-token` address hands its saved Gemini and Groq keys to anyone who asks, so treat them as exposed: create new keys in Google AI Studio (and Groq), use the new ones here, and delete the old ones (see above if the old site stays online). The new site never sends a key to the browser.
 
 ### On the free plan
 
@@ -184,10 +192,10 @@ git push
 
 - **It sleeps after 15 minutes without visitors**, and the next visitor waits about a minute while it wakes. While asleep, the agent's routines don't run. The fix is a free scheduler that calls the site every 10 minutes, which keeps it awake and runs routines on time:
   1. Make a free account at [cron-job.org](https://cron-job.org) → **Create cronjob**.
-  2. URL: `https://jomiez.com/api/agent/tick` (or the `.onrender.com` address until the domain moves). Schedule: every 10 minutes.
+  2. URL: `https://www.jomiez.com/api/agent/tick` (or the `.onrender.com` address until the domain moves). Schedule: every 10 minutes.
   3. Under **Advanced → Headers**, add `Authorization` with the value `Bearer ` followed by the `CRON_SECRET` from Render → the service → Environment.
   4. Save, then **Test run**: it should answer `200` with `{"ok":true}` (due routines then run in the background). A `401` means the header's secret doesn't match.
-- **Free hours.** Render gives each workspace 750 free hours a month, enough for one service awake all month. If the old portfolio is also a free service in the same workspace, suspend it once the domain has moved (step 8 above): two always-on free services run out of hours and Render pauses both until the next month.
+- **Free hours.** Render gives each workspace 750 free hours a month, enough for one service awake all month. Keep the new site in its own Render account (or workspace) if the old portfolio is a free service that stays on: two always-on free services in one workspace run out of hours and Render pauses both until the next month.
 - **Restarts.** Render may restart a free service at any time, and its disk starts over each time. Nothing is lost: content is in Supabase, images in Cloudinary, and each page is rebuilt from the database on its first visit after a start, so what you published is what visitors see.
 - **Speed.** Pages visitors see are cached and fast; the first visit to each page after a restart takes a few seconds while it's built. Photos are resized by Cloudinary, not the server. The admin is usable but slower than on your computer (a few seconds per screen), most of all just after it wakes.
 - **Screenshots** need a browser service on this plan (see *Sight and images*).
