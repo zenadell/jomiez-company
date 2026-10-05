@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const page = slug.length === 1 ? await getPage(slug[0]) : null;
   if (!page) return {};
-  return pageMetadata(page.meta, { title: page.title });
+  return pageMetadata(`/${page.slug}`, page.meta, { title: page.title });
 }
 
 export default async function CustomPage({ params }: Params) {

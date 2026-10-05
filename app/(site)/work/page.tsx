@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getGlobal("work-page");
-  return pageMetadata(page.meta, { title: "Products & Work" });
+  return pageMetadata("/work", page.meta, { title: "Products & Work" });
 }
 
 export default async function WorkPage() {

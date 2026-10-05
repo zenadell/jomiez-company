@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const project = await getProject(slug);
   if (!project) return {};
-  return pageMetadata(project.meta, { title: project.name, description: project.summary, image: project.image });
+  return pageMetadata(`/work/${project.slug}`, project.meta, { title: project.name, description: project.summary, image: project.image });
 }
 
 /* A product page or case study (components/views/ProjectView.tsx). */

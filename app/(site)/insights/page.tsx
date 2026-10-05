@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getGlobal("journal-page");
-  return pageMetadata(page.meta, { title: "Journal", description: page.intro });
+  return pageMetadata("/insights", page.meta, { title: "Journal", description: page.intro });
 }
 
 export default async function InsightsPage() {

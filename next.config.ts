@@ -43,6 +43,14 @@ const nextConfig: NextConfig = {
       to("/terms-condition", "/terms-conditions"),
       to("/terms-condition.html", "/terms-conditions"),
       to("/404.html", "/"),
+      // Project pages listed in the old site's sitemap, under their old addresses.
+      to("/work/chaka.jomiez", "/work/chaka-ai"),
+      to("/work/zyro-saas-landing", "/work/zyro"),
+      to("/work/renok-creative-studio", "/work/renok"),
+      to("/work/siatra-ecommerce-design", "/work/siatra"),
+      to("/work/morae-audio-ecommerce", "/work/morae"),
+      to("/work/fluxa-portfolio-template", "/work"),
+      to("/work/auramax-product-landing", "/work"),
     ];
   },
 };

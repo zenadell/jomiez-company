@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getGlobal("privacy");
-  return pageMetadata(page.meta, { title: page.title || "Privacy Policy", description: page.intro });
+  return pageMetadata("/privacy-policy", page.meta, { title: page.title || "Privacy Policy", description: page.intro });
 }
 
 export default async function PrivacyPolicyPage() {

@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const home = await getGlobal("home");
-  return pageMetadata(home.meta);
+  return pageMetadata("/", home.meta);
 }
 
 /* The home page (components/views/HomeView.tsx), from the admin's Home page. */

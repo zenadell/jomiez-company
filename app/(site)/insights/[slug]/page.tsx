@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const article = await getArticle(slug);
   if (!article) return {};
-  const meta = pageMetadata(article.meta, { title: article.title, description: article.excerpt, image: article.image });
+  const meta = pageMetadata(`/insights/${article.slug}`, article.meta, { title: article.title, description: article.excerpt, image: article.image });
   return { ...meta, openGraph: { type: "article", ...meta.openGraph } };
 }
 

@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getGlobal("terms");
-  return pageMetadata(page.meta, { title: page.title || "Terms & Conditions", description: page.intro });
+  return pageMetadata("/terms-conditions", page.meta, { title: page.title || "Terms & Conditions", description: page.intro });
 }
 
 export default async function TermsPage() {
