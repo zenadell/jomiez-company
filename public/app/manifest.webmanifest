@@ -1,0 +1,23 @@
+{
+  "id": "/app",
+  "name": "Jomiez",
+  "short_name": "Jomiez",
+  "description": "Run jomiez.com from your phone: ask the agent, approve its changes, talk to it.",
+  "lang": "en",
+  "start_url": "/app",
+  "scope": "/app",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0b0a",
+  "theme_color": "#0d0b0a",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/app/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "New task", "short_name": "New task", "url": "/app?new=1", "icons": [{ "src": "/app/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Talk to the agent", "short_name": "Talk", "url": "/app?talk=1", "icons": [{ "src": "/app/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

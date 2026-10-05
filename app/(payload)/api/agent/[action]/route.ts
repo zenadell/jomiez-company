@@ -1,7 +1,7 @@
 import config from "@payload-config";
 import { generateText } from "ai";
 import { after } from "next/server";
-import { getPayload, type TypedUser, type Where } from "payload";
+import { getPayload, type Payload, type TypedUser, type Where } from "payload";
 import { originOf } from "@/cms/preview";
 import type { AgentEvent } from "@/cms/agent/events";
 import { listNotices, markNoticesRead } from "@/cms/agent/notify";
@@ -10,6 +10,7 @@ import { tickRoutines } from "@/cms/agent/routines";
 import { connectionFor, loadConfig, requestStop, runAgent, undoThread, usableProviders, usageToday, voiceKey, type Decision } from "@/cms/agent/run";
 import { answerVoiceApproval, logVoice, runVoiceCalls, startVoice } from "@/cms/agent/voice";
 import { getShot } from "@/cms/agent/eyes";
+import { gist, push } from "@/cms/app/push";
 
 /*
  * The agent's endpoints, used by the admin console and drawer. All need a
@@ -56,27 +57,61 @@ function sameOrigin(req: Request) {
 }
 
 /* Streams the agent's events as JSON lines, and keeps working if the browser leaves. */
-function stream(work: (emit: (e: AgentEvent) => void) => Promise<unknown>) {
+/** How a streamed run ended, for telling someone who left before it did. */
+type Outcome = { threadId: string | null; title: string; status: string; said: string };
+
+/*
+ * Streams a run's events to the browser. The run carries on if the browser goes
+ * away (a phone locked, a tab closed); `away` then hears how it ended.
+ */
+function stream(work: (emit: (e: AgentEvent) => void) => Promise<unknown>, away?: (o: Outcome) => Promise<unknown>) {
   const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>();
   const writer = writable.getWriter();
   const enc = new TextEncoder();
   let open = true;
+  let left = false;
+  let lastWrite: Promise<void> = Promise.resolve();
+  const outcome: Outcome = { threadId: null, title: "", status: "idle", said: "" };
+  let textId = "";
   const emit = (e: AgentEvent) => {
+    if (e.t === "thread") Object.assign(outcome, { threadId: e.id, title: e.title });
+    else if (e.t === "status") outcome.status = e.status;
+    else if (e.t === "text") {
+      // Only its last message counts: that's the answer.
+      if (e.id !== textId) [textId, outcome.said] = [e.id, ""];
+      if (outcome.said.length < 2000) outcome.said += e.delta;
+    }
     if (!open) return;
-    writer.write(enc.encode(`${JSON.stringify(e)}\n`)).catch(() => {
+    lastWrite = writer.write(enc.encode(`${JSON.stringify(e)}\n`)).catch(() => {
       open = false;
+      left = true;
     });
   };
   const done = work(emit)
     .catch((err) => emit({ t: "error", message: (err as Error).message || "Something went wrong." }))
-    .finally(() => {
+    .finally(async () => {
+      await lastWrite;
       open = false;
-      writer.close().catch(() => {});
+      await writer.close().catch(() => {
+        left = true;
+      });
+      if (left && away) await away(outcome).catch(() => {});
     });
   after(() => done);
   return new Response(readable, {
     headers: { "content-type": "application/x-ndjson; charset=utf-8", "cache-control": "no-store, no-transform", "x-accel-buffering": "no" },
   });
+}
+
+/** Tells someone on their phone how a task they left running ended (if they turned notifications on in the app). */
+function tellWhenAway(payload: Payload, user: { id: number | string }) {
+  return async (o: Outcome) => {
+    if (!o.threadId || o.status === "running" || o.status === "stopped") return;
+    const { name } = await loadConfig(payload);
+    const title = o.status === "waiting" ? `${name} needs your approval` : o.status === "error" ? `${name} ran into a problem` : `${name} finished`;
+    const body = o.status === "waiting" ? `${o.title}: open it to approve or decline.` : gist(o.said) || o.title;
+    await push(payload, { title, body, url: `/app?thread=${o.threadId}`, tag: `thread-${o.threadId}` }, { userId: user.id });
+  };
 }
 
 /* The IDs closest to what was typed ("DeepSeek V4 Flash" → deepseek-v4-flash). */
@@ -128,6 +163,7 @@ export async function POST(req: Request, { params }: Params) {
           origin,
           emit,
         }),
+        tellWhenAway(payload, user),
       );
     }
     case "approve": {
@@ -148,7 +184,7 @@ export async function POST(req: Request, { params }: Params) {
           emit({ t: "status", status: after.status === "waiting" ? "waiting" : "idle" });
         });
       }
-      return stream((emit) => runAgent({ payload, user, threadId: thread.id, decisions, source: "console", origin, emit }));
+      return stream((emit) => runAgent({ payload, user, threadId: thread.id, decisions, source: "console", origin, emit }), tellWhenAway(payload, user));
     }
     case "stop": {
       const thread = await payload.findByID({ collection: "agent-threads", id: Number(body.threadId), user, overrideAccess: false }).catch(() => null);

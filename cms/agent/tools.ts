@@ -7,7 +7,7 @@ import { Engine, readLatest, readPublished, resolveId, titleOf, type Actor } fro
 import type { AgentEvent, ChangeRow, PlanStep } from "./events";
 import type { Permissions, Risk } from "./policy";
 import { adminUrl, describeFields, siteUrl, targetsOf, toModel, walk, type Target } from "./schema";
-import { browserAvailable, canSee, findPhotos, imagesInHtml, imagesOn, keepShot, loadImage, makeImage, see, serviceShot, wake, withPage, DEVICES, type Sight } from "./eyes";
+import { browserAvailable, canSee, findPhotos, getShot, imagesInHtml, imagesOn, keepShot, loadImage, makeImage, see, serviceShot, wake, withPage, DEVICES, type Sight } from "./eyes";
 import { outline, safeFetch } from "./web";
 
 /*
@@ -616,17 +616,27 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
   add(
     "upload_image",
     {
-      description: "Add an image to the media library from a web address, with a description (alt text). Returns its media id for use in image fields.",
-      input: z.object({ url: z.string().url(), alt: z.string().min(3), filename: z.string().optional() }),
+      description:
+        "Add an image to the media library from a web address, or from a photo the owner attached or a screenshot you took (give its id, s…), with a description (alt text). Returns its media id for use in image fields.",
+      input: z.object({
+        url: z.string().min(2).describe("A full web address, or the id of an attached photo or a screenshot (s…)."),
+        alt: z.string().min(3),
+        filename: z.string().optional(),
+      }),
       risk: () => "draft",
       title: (i) => `Adding an image: ${i.alt}`,
     },
     async ({ url, alt, filename }) => {
-      const res = await safeFetch(url, { maxBytes: 12_000_000, timeoutMs: 30_000 });
-      if (res.status >= 400) throw new Error(`The image address answered ${res.status}.`);
+      // A photo from the owner's phone or a screenshot: already here, kept for a while.
+      const shotId = /^s[a-z0-9]{8,}$/.exec(url.trim())?.[0] ?? /\/api\/agent\/shot\?id=(s[a-z0-9]+)/.exec(url)?.[1];
+      const shot = shotId ? getShot(shotId) : null;
+      if (shotId && !shot) throw new Error("That photo has expired. Ask the owner to attach it again.");
+      if (!shot && !/^https?:\/\//i.test(url)) throw new Error("Give a full web address (https://…) or the id of an attached photo.");
+      const res = shot ? { body: shot.data, type: shot.type, url: `https://photo.local/${shotId}` } : await safeFetch(url, { maxBytes: 12_000_000, timeoutMs: 30_000 });
+      if ("status" in res && res.status >= 400) throw new Error(`The image address answered ${res.status}.`);
       if (!res.type.startsWith("image/")) throw new Error(`That address isn't an image (${res.type || "unknown type"}).`);
       const ext = res.type.split("/")[1]?.split(";")[0].replace("jpeg", "jpg") || "jpg";
-      const name = (filename || new URL(res.url).pathname.split("/").pop() || "image").replace(/\.[a-z0-9]+$/i, "").replace(/[^a-z0-9-_]+/gi, "-").slice(0, 60);
+      const name = (filename || (shot ? "photo" : new URL(res.url).pathname.split("/").pop()) || "image").replace(/\.[a-z0-9]+$/i, "").replace(/[^a-z0-9-_]+/gi, "-").slice(0, 60);
       const doc = await payload.create({
         collection: "media",
         data: { alt },

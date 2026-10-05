@@ -17,6 +17,18 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com" },
     ],
   },
+  async headers() {
+    return [
+      // The phone app's service worker looks after /app (the page) as well as /app/… (its files).
+      {
+        source: "/app/sw.js",
+        headers: [
+          { key: "Service-Worker-Allowed", value: "/app" },
+          { key: "Cache-Control", value: "no-cache" },
+        ],
+      },
+    ];
+  },
   // The previous jomiez.com (the portfolio) used these addresses. Old links and
   // search results land on their new pages instead of a 404.
   async redirects() {

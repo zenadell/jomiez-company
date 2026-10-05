@@ -275,7 +275,9 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
     const isAdmin = (input.user as { roles?: string[] } | null)?.roles?.includes("admin");
     if (input.user && owner && owner !== input.user.id && !isAdmin) throw new Error("That conversation belongs to someone else.");
   } else {
-    const title = (input.message ?? "New task").replace(/\s+/g, " ").trim().slice(0, 80) || "New task";
+    // Photos attached from the phone ("📷 Photo s…") aren't words for a title.
+    const words = (input.message ?? "").replace(/^📷 Photo s[a-z0-9]+$/gm, "").replace(/\s+/g, " ").trim();
+    const title = words.slice(0, 80) || (/📷 Photo/.test(input.message ?? "") ? "A photo" : "New task");
     thread = (await payload.create({
       collection: "agent-threads",
       data: {
