@@ -2,20 +2,20 @@
 
 import { AnimatePresence, motion, useDragControls, type PanInfo } from "motion/react";
 import type { ReactNode } from "react";
+import { LiquidGlass, relayout } from "./LiquidGlass";
 
 /*
- * An iOS-style sheet: it springs up from the bottom over a dimmed screen, and
- * goes away with a tap outside or a flick down on its handle or header. (The
- * phone's back gesture closes it too: the app handles that, see JomiezApp.)
+ * A sheet of thick liquid glass: it springs up from the bottom while the app
+ * behind it settles back (JomiezApp), and goes away with a tap outside or a
+ * flick down on its handle. (The phone's back gesture closes it too.)
  */
 
-const SPRING = { type: "spring", stiffness: 420, damping: 40, mass: 0.9 } as const;
+const SPRING = { type: "spring", stiffness: 380, damping: 36, mass: 0.9 } as const;
 
 export function Sheet({ open, onClose, title, children, tall = false }: { open: boolean; onClose: () => void; title?: ReactNode; children: ReactNode; tall?: boolean }) {
   const drag = useDragControls();
-
   const end = (_: unknown, info: PanInfo) => {
-    if (info.offset.y > 120 || info.velocity.y > 600) onClose();
+    if (info.offset.y > 110 || info.velocity.y > 600) onClose();
   };
 
   return (
@@ -29,24 +29,26 @@ export function Sheet({ open, onClose, title, children, tall = false }: { open: 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.3 }}
             onClick={onClose}
           />
           <motion.div
             role="dialog"
             aria-modal="true"
             className={`ja-sheet${tall ? " is-tall" : ""}`}
-            initial={{ y: "100%" }}
+            initial={{ y: "105%" }}
             animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+            exit={{ y: "105%" }}
             transition={SPRING}
             drag="y"
             dragListener={false}
             dragControls={drag}
             dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0.05, bottom: 0.9 }}
+            dragElastic={{ top: 0.04, bottom: 0.9 }}
             onDragEnd={end}
+            onAnimationComplete={relayout}
           >
+            <LiquidGlass material="thick" radius={38} className="ja-sheet__glass" style={{ position: "absolute", inset: 0 }} />
             <div className="ja-sheet__grab" onPointerDown={(e) => drag.start(e)}>
               <span className="ja-sheet__handle" />
               {title && <div className="ja-sheet__title">{title}</div>}
