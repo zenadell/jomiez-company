@@ -4,6 +4,7 @@ import { Engine, undoChanges, type Recorded } from "./docs";
 import { fold, type AgentEvent, type PlanStep, type TranscriptItem } from "./events";
 import { decide, type Mode, type Permissions, type Risk } from "./policy";
 import { buildInstructions } from "./prompt";
+import { situation } from "./situation";
 import { buildModel, missingSetup, type ProviderId } from "./providers";
 import { targetsOf } from "./schema";
 import { decrypt } from "./secrets";
@@ -342,7 +343,11 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
   });
 
   const { docs: memory } = await payload.find({ collection: "agent-memory", sort: "-updatedAt", limit: 60, depth: 0, overrideAccess: true });
+  const now = await (scope === "full" ? situation(payload, input.user ?? null, { exclude: threadId, timeZone: process.env.AGENT_TIMEZONE || "Africa/Lagos" }) : Promise.resolve(undefined)).catch(
+    () => undefined,
+  );
   const instructions = buildInstructions({
+    situation: now,
     name: cfg.name,
     persona: cfg.persona,
     memory: memory.map((m) => ({ id: m.id, kind: String(m.kind ?? "fact"), content: String(m.content ?? "") })),

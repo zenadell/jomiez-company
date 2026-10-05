@@ -193,13 +193,14 @@ export function useThread(opts: { onChange?: (e: Extract<AgentEvent, { t: "chang
     });
   }, []);
 
-  const undo = useCallback(async () => {
+  /** Undoes the whole conversation's changes, or one request's (runId). */
+  const undo = useCallback(async (runId?: string) => {
     if (!idRef.current) return null;
     const res = await fetch("/api/agent/undo", {
       method: "POST",
       credentials: "include",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ threadId: idRef.current }),
+      body: JSON.stringify({ threadId: idRef.current, runId }),
     });
     const out = await res.json().catch(() => ({ results: ["Couldn't undo."] }));
     await load(idRef.current);

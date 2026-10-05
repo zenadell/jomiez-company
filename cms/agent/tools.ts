@@ -81,10 +81,57 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
     return t.drafts && !publish ? "draft" : "live";
   };
 
-  const idOf = async (t: Target, ref: unknown) => (t.kind === "global" ? null : await resolveId(actor, t, ref));
+  /*
+   * What it's working on in this conversation: the last document of each kind it
+   * read or changed. "Publish it" then means that one, the way a person keeps
+   * track of the page in front of them, and moving to a different one is noticed.
+   */
+  type Focus = Record<string, { id: number; title: string }>;
+  const focusKey = env.threadId ? `agent:focus:${env.threadId}` : null;
+  let focusCache: Focus | null = null;
+  const getFocus = async (): Promise<Focus> => {
+    if (!focusKey) return {};
+    focusCache ??= (await payload.kv.get<Focus>(focusKey)) ?? {};
+    return focusCache;
+  };
+  const setFocus = async (t: Target, id: unknown, title: string) => {
+    if (!focusKey || t.kind !== "collection" || id == null || env.scope !== "full") return;
+    const focus = await getFocus();
+    focus[t.slug] = { id: Number(id), title };
+    await payload.kv.set(focusKey, focus);
+  };
+  /** A heads-up when an edit lands on a different document from the one it was working on. */
+  const switchedFrom = async (t: Target, id: unknown, title: string) => {
+    if (t.kind !== "collection") return undefined;
+    const was = (await getFocus())[t.slug];
+    if (!was || String(was.id) === String(id)) return undefined;
+    return `Heads-up: this was “${title}” (id ${id}), not “${was.title}” (id ${was.id}) that you were working on. If that wasn't what the owner meant, tell them and undo it.`;
+  };
 
-  const recordChange = (t: Target, doc: Record<string, unknown>, action: string, changes?: ChangeRow[]) =>
+  /** Which one, when none is named: the one it's working on, else a list to pick from. */
+  const idOf = async (t: Target, ref: unknown) => {
+    if (t.kind === "global") return null;
+    if (ref == null || ref === "") {
+      const current = (await getFocus())[t.slug];
+      if (current) return current.id;
+      const { docs } = await payload.find({
+        collection: t.slug as CollectionSlug,
+        draft: t.drafts,
+        depth: 0,
+        limit: 8,
+        sort: "-updatedAt",
+        ...(actor.system ? { overrideAccess: true } : { user: actor.user ?? undefined, overrideAccess: false }),
+      });
+      const list = docs.map((d) => `“${titleOf(t, d as unknown as Record<string, unknown>)}” (id ${d.id})`).join(", ");
+      throw new Error(`Nothing was done: say which ${t.label} by id.${list ? ` Most recent: ${list}.` : ""}`);
+    }
+    return await resolveId(actor, t, ref);
+  };
+
+  const recordChange = (t: Target, doc: Record<string, unknown>, action: string, changes?: ChangeRow[]) => {
+    void setFocus(t, doc.id, titleOf(t, doc));
     env.emit({ t: "change", title: titleOf(t, doc), action, admin: adminUrl(t, doc.id as number), site: siteUrl(t, doc), changes });
+  };
 
   async function mediaFor(t: Target, doc: unknown) {
     const ids = new Set<number>();
@@ -199,6 +246,7 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
       const doc = live ? await readPublished(actor, t, docId) : await readLatest(actor, t, docId);
       if (!doc) return { error: "Not published yet. Read without `live` to see the draft." };
       const published = t.drafts ? await readPublished(actor, t, docId) : doc;
+      await setFocus(t, docId, titleOf(t, doc));
       let content = (await toModel(payload, t.fields, doc)) as Record<string, unknown>;
       if (only?.length) content = Object.fromEntries(Object.entries(content).filter(([k]) => only.includes(k) || k === "id"));
       return {
@@ -313,6 +361,12 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
           });
         }
       }
+      // Everything found is on one document: that's the one being worked on now.
+      const docsHit = new Set(hits.map((h) => `${h.area}:${h.id ?? ""}`));
+      if (docsHit.size === 1 && hits[0].id != null) {
+        const t = targets.find((x) => x.slug === hits[0].area);
+        if (t) await setFocus(t, hits[0].id, hits[0].title);
+      }
       return { query, matches: hits.slice(0, limit ?? 40), total: hits.length };
     },
   );
@@ -330,6 +384,9 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
       if (!path.startsWith("/") || path.startsWith("//")) throw new Error("Give a path on this site, starting with /.");
       const res = await fetch(new URL(path, env.origin), { signal: AbortSignal.timeout(20_000), headers: { "x-jomiez-agent": "1" } });
       const html = await res.text();
+      if (res.status === 404) {
+        return { path, status: 404, error: `There's no page at ${path}. Use the onSite address from a read or an edit result, then look again.` };
+      }
       return { path, status: res.status, ...outline(html) };
     },
   );
@@ -403,10 +460,13 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
           throw new Error("While reading a new message, only its status and notes can change.");
         }
       }
+      const headsUp = await switchedFrom(t, id, titleOf(t, await readLatest(actor, t, id).catch(() => null)));
       const { saved, changes } = await engine.update(t, id, input, Boolean(input.publish));
       recordChange(t, saved, input.publish ? "published" : t.drafts ? "saved a draft of" : "changed", changes);
       return {
         ok: true,
+        page: titleOf(t, saved),
+        ...(headsUp ? { headsUp } : {}),
         status: !t.drafts || input.publish ? "live now" : "draft saved (not live until published)",
         changed: describeChanges(changes),
         onSite: siteUrl(t, saved),
@@ -474,9 +534,10 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
           note: "If you expected an edit to show, it never saved. Use search to find where that text really is, change it there, then publish.",
         };
       }
+      const headsUp = await switchedFrom(t, docId, titleOf(t, await readLatest(actor, t, docId).catch(() => null)));
       const { saved, changes } = await engine.publish(t, docId);
       recordChange(t, saved, "published", changes);
-      return { ok: true, published: describeChanges(changes), onSite: siteUrl(t, saved) };
+      return { ok: true, page: titleOf(t, saved), published: describeChanges(changes), onSite: siteUrl(t, saved), ...(headsUp ? { headsUp } : {}) };
     },
   );
 

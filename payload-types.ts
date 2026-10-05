@@ -2265,7 +2265,7 @@ export interface Agent {
    */
   voiceModel?: string | null;
   /**
-   * e.g. Kore, Puck, Charon, Fenrir, Aoede, Leda, Orus, Zephyr
+   * Choose one to hear the difference in your next conversation.
    */
   voiceName?: string | null;
   /**

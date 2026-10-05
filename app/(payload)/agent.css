@@ -506,6 +506,37 @@
   text-decoration: line-through;
 }
 
+.jz-change-undo {
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--theme-elevation-600);
+  font: inherit;
+  font-size: 11px;
+  line-height: 18px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.jz-changes li:hover .jz-change-undo,
+.jz-change-undo:focus-visible {
+  opacity: 1;
+}
+
+.jz-change-undo:hover {
+  border-color: var(--jz-bad);
+  color: var(--jz-bad);
+}
+
+@media (hover: none) {
+  .jz-change-undo {
+    opacity: 1;
+  }
+}
+
 .jz-briefing {
   font-size: 13px;
 }

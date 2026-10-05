@@ -19,9 +19,8 @@ const SECRET_FIELDS = ["apiKey", "voiceApiKey"] as const;
 const MODEL_PICKER = { path: "/cms/admin/agent/ModelPicker#ModelPicker", clientProps: { purpose: "text" } };
 const VOICE_MODEL_PICKER = { path: "/cms/admin/agent/ModelPicker#ModelPicker", clientProps: { purpose: "voice" } };
 
-/** The voice the old site's Chaka used, and the model it runs on. */
+/** The model the old site's Chaka used for live voice. */
 export const DEFAULT_VOICE_MODEL = "gemini-3.1-flash-live-preview";
-export const VOICES = ["Kore", "Puck", "Charon", "Fenrir", "Aoede", "Leda", "Orus", "Zephyr"];
 
 /*
  * A key field: stored encrypted, stripped from every read (the agent's own
@@ -173,7 +172,8 @@ export const AgentSettings: GlobalConfig = {
                   defaultValue: "Kore",
                   admin: {
                     width: "25%",
-                    description: `e.g. ${VOICES.join(", ")}`,
+                    description: "Choose one to hear the difference in your next conversation.",
+                    components: { afterInput: ["/cms/admin/agent/VoicePicker#VoicePicker"] },
                   },
                 },
                 {

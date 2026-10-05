@@ -79,7 +79,11 @@ Press the microphone next to *Send* and talk. It answers out loud, and it acts w
   - **Gemini key for voice**: only needed if neither of these applies: the main provider is Google, or `GEMINI_API_KEY` is set.
 - Your key never reaches the browser. Each conversation gets a single-use pass from Google that expires within minutes and is locked to that conversation's model, voice, instructions and actions.
 - The same rules apply as for typed requests. Anything that needs your approval shows as a card on screen; it tells you so, and carries on when you click **Approve** or **Decline**. Every change is recorded and can be undone.
-- It does what it says it will: it doesn't announce an action and then wait for you to say "go ahead". It also checks its work: an edit that didn't change anything (say, the wrong field) is reported as a failure, never as done.
+- It works like a person at the next desk. "Hold on, let me check" is followed by the check, and then it comes back with what it found; you never have to say "go ahead". It finds the exact spot, changes it, looks at the result and only then tells you.
+- It's honest about results. An edit that didn't land (wrong field, wrong page) is a failure, never "done". If it ever says something worked when it didn't, it's corrected on the spot and has to tell you.
+- It keeps track of the page it's working on, so "publish it" means that page, and it notices if an edit lands on a different one.
+- It starts every conversation knowing where things stand: what's waiting for your approval, what's saved but not live, new inbox messages, and what you asked for in recent conversations.
+- **Its voice**: *Agent settings → Voice → Choose a voice* lists Gemini's voices and how each sounds.
 - **Talk over it** to interrupt. **Mute** stops it hearing you. The box under the controls lets you type a name or address mid-conversation.
 - What you both say is transcribed as you speak and saved as a conversation (◉ in the console). When you press **End**, it opens there: undo its changes, or keep going by typing.
 - Long conversations carry on: Google moves a live session to a fresh connection every few minutes, and that happens between sentences, with the conversation intact.
@@ -97,7 +101,7 @@ Press the microphone next to *Send* and talk. It answers out loud, and it acts w
 
 - An approval card shows the exact change (before → after, field by field) with **Approve** and **Decline**. Decline with a reason and it remembers the lesson.
 - It acts with the permissions of the person who asked (a routine: whoever set it up). It can never manage the team or passwords, change its own settings, or see API keys.
-- Every change is recorded with a snapshot of what was there before. **Undo all** in the console puts everything from a conversation back.
+- Every change is recorded with a snapshot of what was there before. In the console, **Undo** next to a change reverses that step, and **Undo all** puts everything from a conversation back.
 - **Stop** halts it mid-task; *The agent is on* in settings stops everything at once. Daily limits cap tasks and tokens.
 
 **On its own, and you're always told.**

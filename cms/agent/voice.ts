@@ -6,6 +6,7 @@ import { Engine, type Recorded } from "./docs";
 import { fold, type AgentEvent, type TranscriptItem } from "./events";
 import { decide, type Risk } from "./policy";
 import { buildInstructions } from "./prompt";
+import { situation } from "./situation";
 import { buildModel, missingSetup } from "./providers";
 import { loadConfig, rememberLesson, usageToday, voiceKey, type AgentConfig } from "./run";
 import { targetsOf } from "./schema";
@@ -26,19 +27,20 @@ import { makeTools, type ToolMeta } from "./tools";
 const VOICE_RULES = `
 
 # Speaking
-You are talking with the owner out loud, in real time, while working in the jomiez.com admin beside them. Keep every reply short and natural: one to three sentences, plain spoken words, no lists, no Markdown, never read out links, IDs or field paths.
+You are talking with the owner out loud, in real time, working in the jomiez.com admin beside them, like a site manager at the next desk. Talk like a person: short, warm, natural sentences, plain spoken words, no lists, no Markdown, never read out links, IDs or field paths.
 
-# Doing, not announcing
-- When you say you'll do something, do it in the same breath: call the action right away, in the same turn. A few words first are fine ("publishing it now"), then the call.
-- Never end your turn on a promise. Don't say "hold on", "bear with me", "one moment" or "I'll go ahead and…" and then stop: the owner should never have to say "go ahead" for something you already said you'd do.
-- Only stop and wait when you've asked a real question, or an approval is on their screen.
-- Multi-step jobs: run the steps one after another without stopping to narrate each one, then say what happened.
-
-# Knowing what actually happened
-- Believe the results, not your intentions. Say something is done only when an action's result shows it changed.
-- A result that says "Nothing was saved", "Nothing changed" or "Nothing new to publish" means it did NOT work. Say so plainly, find out why (search for the exact words to get the exact field path), fix it, and then confirm.
-- To change words visitors see, search for them first: the search result gives the exact field path to edit. Text in a section's group (like "custom.title") must be edited at that full path.
-- After changing what visitors see, check it once (view the page or read it back) before telling the owner it's live.
+# How a good manager works out loud
+- It's natural to say "hold on, let me check" or "give me a second". Then actually do it, straight away in the same turn, and come back on your own with what you found. Never leave them waiting for you to continue; they should never have to say "go ahead" or "proceed" for something you already said you'd do.
+- Work in the real order, and only say each step once it has happened:
+  1. find the exact place (search for the words; read the document if needed);
+  2. make the change (update);
+  3. look at the result: it says which page and exactly what changed;
+  4. only then tell them, e.g. "Done, the heading now reads …";
+  5. publish when they want it live, then look at the live page and confirm what visitors see.
+- Never say "saved", "changed", "published", "done" or "live" before the result in front of you shows it. If you're about to do it, say "I'll…", not "I've…".
+- Keep track of which page you're on. If a result names a different page from the one you meant, say so at once and fix it.
+- When something fails, say it honestly and briefly, the way a person would ("That didn't take, I had the wrong spot. Let me fix it."), then fix it and confirm.
+- Be the one who knows the site. Mention things they should know (something waiting for approval, a draft not live yet, new messages) when it's relevant, and suggest what you'd do next.
 - If you didn't catch something, ask. If they interrupt, stop and listen.
 
 # Approvals
@@ -208,8 +210,10 @@ export async function startVoice(opts: {
 
   const { tools, meta } = await toolkit(payload, user, cfg, origin, threadId, () => {}, () => {});
   const { docs: memory } = await payload.find({ collection: "agent-memory", sort: "-updatedAt", limit: 60, depth: 0, overrideAccess: true });
+  const now = await situation(payload, user, { exclude: threadId, timeZone: process.env.AGENT_TIMEZONE || "Africa/Lagos" }).catch(() => undefined);
   const instructions =
     buildInstructions({
+      situation: now,
       name: cfg.name,
       persona: cfg.persona,
       memory: memory.map((m) => ({ id: m.id, kind: String(m.kind ?? "fact"), content: String(m.content ?? "") })),
@@ -372,7 +376,11 @@ export async function runVoiceCalls(opts: {
         responses.push({ id: call.id, name: call.name, response: { output: output as Record<string, unknown> } });
       } catch (err) {
         emit({ t: "tool-result", id: call.id, ok: false, summary: (err as Error).message.slice(0, 300) });
-        responses.push({ id: call.id, name: call.name, response: { error: (err as Error).message.slice(0, 500) } });
+        responses.push({
+          id: call.id,
+          name: call.name,
+          response: { error: (err as Error).message.slice(0, 500), done: false, note: "This did not happen: nothing changed. Don't say it's done; fix it first." },
+        });
       }
     }
 

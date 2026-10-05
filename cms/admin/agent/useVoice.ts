@@ -43,7 +43,12 @@ const GREETING = "[The owner just opened a voice conversation with you. Greet th
 /* "Hold on", "bear with me", "I'll go ahead and publish it": a promise to act. */
 const PROMISE =
   /\b(hold on|hang on|bear with me|one moment|just a moment|give me a (second|sec|moment|minute)|let me (try|do|check|publish|update|fix|change|look|make|redo|re-?apply|go)|i'?ll (go ahead|now|try|publish|update|fix|change|check|do|make|redo|re-?apply|get)|i will (now|try|publish|update|fix|change|check|do|make)|i'?m going to|going to (publish|update|change|try|check|fix|make|do)|right away|on it)\b/i;
-const FOLLOW_THROUGH = "[You said you'd do it but stopped. Do it now: call the action in this turn. Don't wait for the owner to say go ahead.]";
+const FOLLOW_THROUGH = "[You said you'd do that, then stopped. Carry on now: do it, then tell them what happened. Don't wait to be told to go ahead.]";
+
+/* "Saved", "published", "I've updated it": a claim that something worked… */
+const CLAIM = /\b(saved|published|done|updated|changed|it'?s live|is live|now live|i'?ve (made|applied|updated|changed|set|sent|saved|published|re-?applied|fixed))\b/i;
+/* …unless it's owning up that it didn't. */
+const ADMIT = /\b(didn'?t|did not|couldn'?t|could not|failed|wasn'?t|not saved|error|wrong|problem|mistake|hasn'?t|haven'?t|not yet)\b/i;
 
 /* Runs on the audio thread: averages the microphone down to 16 kHz, 16-bit, in 40 ms chunks. */
 const WORKLET = `
@@ -139,6 +144,7 @@ class VoiceEngine {
   /** What it said this turn, whether it acted, and whether it was already nudged to follow through. */
   private turnSaid = "";
   private turnActed = false;
+  private turnFailures: string[] = [];
   private nudged = false;
 
   subscribe = (fn: () => void) => {
@@ -180,6 +186,7 @@ class VoiceEngine {
     this.cancelled.clear();
     this.turnSaid = "";
     this.turnActed = false;
+    this.turnFailures = [];
     this.nudged = false;
     this.set({ ...INITIAL, phase: "starting" });
     try {
@@ -451,8 +458,17 @@ class VoiceEngine {
   private followThrough() {
     const said = this.turnSaid.trim();
     const acted = this.turnActed;
+    const failures = this.turnFailures;
     this.turnSaid = "";
     this.turnActed = false;
+    this.turnFailures = [];
+    // It said something worked when the result says it didn't: correct it before the owner is misled.
+    if (failures.length && CLAIM.test(said) && !ADMIT.test(said)) {
+      this.nudgeWhenQuiet(
+        `[Correction: that did not work, nothing changed. ${failures.join(" ")} Tell them honestly in a few words, then fix it and check the result before saying it's done.]`,
+      );
+      return;
+    }
     if (acted) {
       this.nudged = false;
       return;
@@ -460,6 +476,11 @@ class VoiceEngine {
     const last = said.split(/(?<=[.!?])\s+/).slice(-2).join(" ");
     const waitingOnOwner = this.state.items.some((i) => i.kind === "approval" && !i.decided);
     if (this.nudged || !said || waitingOnOwner || /\?\s*$/.test(said) || !PROMISE.test(last)) return;
+    this.nudgeWhenQuiet(FOLLOW_THROUGH);
+  }
+
+  /** Says something to the model once it has finished speaking and the owner isn't talking. */
+  private nudgeWhenQuiet(text: string) {
     const check = (tries: number) => {
       // They started talking, or it carried on by itself: leave it be.
       if (this.state.phase === "off" || this.state.you || this.turnSaid || this.turnActed) return;
@@ -470,7 +491,7 @@ class VoiceEngine {
       }
       if (this.state.phase !== "listening") return;
       this.nudged = true;
-      this.say(FOLLOW_THROUGH, false);
+      this.say(text, false);
     };
     window.setTimeout(() => check(0), 700);
   }
@@ -487,9 +508,14 @@ class VoiceEngine {
     let responses: { id: string; name: string; response: Record<string, unknown> }[];
     try {
       const out = await post<{ responses: typeof responses; events: AgentEvent[] }>("voice-tool", { threadId: this.state.threadId, calls: list });
+      const titles = new Map<string, string>();
       for (const e of out.events) {
         this.push(e);
-        if (e.t === "tool") this.set({ doing: e.title });
+        if (e.t === "tool") {
+          titles.set(e.id, e.title);
+          this.set({ doing: e.title });
+        }
+        if (e.t === "tool-result" && !e.ok) this.turnFailures.push(`“${titles.get(e.id) ?? "That action"}” failed: ${e.summary.slice(0, 200)}`);
       }
       responses = out.responses;
     } catch (err) {

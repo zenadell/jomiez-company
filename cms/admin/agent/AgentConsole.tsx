@@ -297,6 +297,20 @@ export function AgentConsole() {
                 {api.changes.map((c, i) => (
                   <li key={i} className={c.undone ? "is-undone" : ""}>
                     <span>{c.action === "update" ? "changed" : c.action}</span> {c.title}
+                    {!c.undone && (
+                      <button
+                        type="button"
+                        className="jz-change-undo"
+                        disabled={api.busy}
+                        title="Undo this step (and anything else done in the same step)"
+                        onClick={async () => {
+                          if (!window.confirm(`Undo “${c.action === "update" ? "changed" : c.action} ${c.title}”?`)) return;
+                          setUndoResult(await api.undo(c.runId));
+                        }}
+                      >
+                        Undo
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
