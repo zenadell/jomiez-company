@@ -23,10 +23,14 @@ import { doc, h, list, p, quote } from "./lexical";
 const ctx = { skipRevalidate: true };
 const publicDir = path.resolve(process.cwd(), "public");
 
-export async function seedIfEmpty(payload: Payload) {
+export async function isEmpty(payload: Payload) {
   const { totalDocs } = await payload.count({ collection: "projects", overrideAccess: true });
   const site = await payload.findGlobal({ slug: "site", overrideAccess: true, depth: 0 });
-  if (totalDocs > 0 || site?.name) return false;
+  return totalDocs === 0 && !site?.name;
+}
+
+export async function seedIfEmpty(payload: Payload) {
+  if (!(await isEmpty(payload))) return false;
   await seed(payload);
   return true;
 }

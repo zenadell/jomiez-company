@@ -96,7 +96,8 @@ export async function sendInquiry(_prev: InquiryState, form: FormData): Promise<
         const body = fill(site.notifications.autoReplyBody, { name: name.split(" ")[0] });
         await payload.sendEmail({
           to: email,
-          replyTo: to,
+          // Replies from visitors go to the team (or LEAD_REPLY_TO, as on the old site).
+          replyTo: process.env.LEAD_REPLY_TO || to,
           subject: site.notifications.autoReplySubject || `Thank you for contacting ${site.name}`,
           text: body,
           html: `<p style="white-space:pre-wrap">${escapeHtml(body)}</p>`,

@@ -11,6 +11,11 @@ import { nextRunAt } from "./schedule";
  * run (see notify.ts).
  */
 
+async function firstAdmin(payload: Payload): Promise<TypedUser | null> {
+  const { docs } = await payload.find({ collection: "users", where: { roles: { contains: "admin" } }, sort: "createdAt", limit: 1, depth: 0, overrideAccess: true });
+  return docs[0] ? ({ ...docs[0], collection: "users" } as TypedUser) : null;
+}
+
 export async function userById(payload: Payload, id: unknown): Promise<TypedUser | null> {
   if (id == null) return null;
   try {
@@ -48,8 +53,9 @@ export async function tickRoutines(payload: Payload, origin: string, max = 3): P
         context: { keepSchedule: true },
         overrideAccess: true,
       });
-      // A routine acts with the permissions of the person who set it up.
-      const owner = await userById(payload, r.owner);
+      // A routine acts with the permissions of the person who set it up. One with no owner
+      // (brought over from another admin before anyone signed in) runs as the first admin.
+      const owner = r.owner ? await userById(payload, r.owner) : await firstAdmin(payload);
       let status = "error";
       let threadId: number | null = null;
       if (owner) {

@@ -15,7 +15,9 @@
     "seed:fresh": "payload run cms/seed/run.ts -- --fresh",
     "payload": "payload",
     "generate:types": "payload generate:types",
-    "generate:importmap": "payload generate:importmap"
+    "generate:importmap": "payload generate:importmap",
+    "content:save": "payload run cms/snapshot-run.ts",
+    "content:load": "payload run cms/snapshot-run.ts -- --load"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "4.0.68",

@@ -66,6 +66,20 @@ const livePreviewGlobals = [
   "effects",
 ];
 
+/*
+ * Who emails come from. The old portfolio's LEAD_FROM_EMAIL works as is, whether
+ * it's an address or "Name <address>"; EMAIL_FROM wins if both are set. It must
+ * be on a domain verified in Resend.
+ */
+const sender = (() => {
+  const raw = (process.env.EMAIL_FROM || process.env.LEAD_FROM_EMAIL || "hello@jomiez.com").trim();
+  const named = /^\s*"?([^"<]*?)"?\s*<([^>]+)>\s*$/.exec(raw);
+  return {
+    address: named ? named[2].trim() : raw,
+    name: process.env.EMAIL_FROM_NAME || (named && named[1].trim()) || "Jomiez",
+  };
+})();
+
 export default buildConfig({
   secret: secret || "local-development-secret-change-me",
   // Only pinned when NEXT_PUBLIC_SERVER_URL is set; otherwise the admin trusts
@@ -126,8 +140,8 @@ export default buildConfig({
   email: process.env.RESEND_API_KEY
     ? resendAdapter({
         apiKey: process.env.RESEND_API_KEY,
-        defaultFromAddress: process.env.EMAIL_FROM || process.env.LEAD_FROM_EMAIL || "hello@jomiez.com",
-        defaultFromName: process.env.EMAIL_FROM_NAME || "Jomiez",
+        defaultFromAddress: sender.address,
+        defaultFromName: sender.name,
       })
     : undefined,
   plugins: [
@@ -179,8 +193,10 @@ export default buildConfig({
     const g = globalThis as { __jomiezPrepare?: Promise<void> };
     g.__jomiezPrepare ??= (async () => {
       await payload.db.migrate({ migrations: migrations as Migration[] });
-      const { seedIfEmpty } = await import("./cms/seed");
-      await seedIfEmpty(payload);
+      const { isEmpty, seedIfEmpty } = await import("./cms/seed");
+      const { applySnapshot, hasSnapshot } = await import("./cms/snapshot");
+      if (hasSnapshot() && (await isEmpty(payload))) await applySnapshot(payload);
+      else await seedIfEmpty(payload);
     })();
     await g.__jomiezPrepare;
   },

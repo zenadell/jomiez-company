@@ -258,6 +258,22 @@ export async function POST(req: Request, { params }: Params) {
         return json({ error: (err as Error).message }, 400);
       }
     }
+    case "test-email": {
+      if (!isAdmin(user)) return json({ ok: false, message: "Admins only." }, 403);
+      const to = (user as { email?: string }).email;
+      if (!to) return json({ ok: false, message: "Your account has no email address." });
+      if (!process.env.RESEND_API_KEY) return json({ ok: false, message: "Email isn't set up: add RESEND_API_KEY and LEAD_FROM_EMAIL." });
+      try {
+        await payload.sendEmail({
+          to,
+          subject: "Test email from the jomiez.com admin",
+          text: `This is a test from ${origin}. If you're reading it, the site can send email: contact-form notifications, automatic replies and the agent's reports will arrive.`,
+        });
+        return json({ ok: true, message: `Sent to ${to}. Check your inbox (and spam).` });
+      } catch (err) {
+        return json({ ok: false, message: `Resend refused it: ${(err as Error).message.slice(0, 300)}` });
+      }
+    }
     case "seen":
       await markNoticesRead(payload);
       return json({ ok: true });

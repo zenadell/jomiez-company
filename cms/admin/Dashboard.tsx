@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { DashboardAgent } from "./agent/DashboardAgent";
 import type { Payload } from "payload";
+import { SetupStatus } from "./SetupStatus";
 
-type Props = { payload: Payload; user?: { name?: string | null } | null };
+type Props = { payload: Payload; user?: { name?: string | null; roles?: string[] | null } | null };
 
 const QUICK = [
   { href: "/admin/globals/home", title: "Home page", text: "Every section, top to bottom" },
@@ -30,6 +31,7 @@ export async function Dashboard({ payload, user }: Props) {
   return (
     <div className="jomiez-dash">
       <DashboardAgent />
+      {user?.roles?.includes("admin") && <SetupStatus payload={payload} />}
       <p className="jomiez-dash__hello">{first ? `Welcome back, ${first}.` : "Welcome back."}</p>
       <p className="jomiez-dash__sub">
         Every word, image and link on jomiez.com lives here. Publish a change and the site updates within seconds.
