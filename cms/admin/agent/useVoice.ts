@@ -40,6 +40,11 @@ type ChangeEvent = Extract<AgentEvent, { t: "change" }>;
 
 const GREETING = "[The owner just opened a voice conversation with you. Greet them in a few words and ask what they'd like done.]";
 
+/* "Hold on", "bear with me", "I'll go ahead and publish it": a promise to act. */
+const PROMISE =
+  /\b(hold on|hang on|bear with me|one moment|just a moment|give me a (second|sec|moment|minute)|let me (try|do|check|publish|update|fix|change|look|make|redo|re-?apply|go)|i'?ll (go ahead|now|try|publish|update|fix|change|check|do|make|redo|re-?apply|get)|i will (now|try|publish|update|fix|change|check|do|make)|i'?m going to|going to (publish|update|change|try|check|fix|make|do)|right away|on it)\b/i;
+const FOLLOW_THROUGH = "[You said you'd do it but stopped. Do it now: call the action in this turn. Don't wait for the owner to say go ahead.]";
+
 /* Runs on the audio thread: averages the microphone down to 16 kHz, 16-bit, in 40 ms chunks. */
 const WORKLET = `
 class JzMic extends AudioWorkletProcessor {
@@ -131,6 +136,10 @@ class VoiceEngine {
   private rotateDue = false;
   private rotating = false;
   private rotateTimer = 0;
+  /** What it said this turn, whether it acted, and whether it was already nudged to follow through. */
+  private turnSaid = "";
+  private turnActed = false;
+  private nudged = false;
 
   subscribe = (fn: () => void) => {
     this.listeners.add(fn);
@@ -169,6 +178,9 @@ class VoiceEngine {
     this.tokens = 0;
     this.lines = [];
     this.cancelled.clear();
+    this.turnSaid = "";
+    this.turnActed = false;
+    this.nudged = false;
     this.set({ ...INITIAL, phase: "starting" });
     try {
       // Created inside the click, so the browser lets it play sound.
@@ -413,12 +425,17 @@ class VoiceEngine {
       if (sc.inputTranscription?.text) this.set({ you: this.state.you + sc.inputTranscription.text });
       const audio = (sc.modelTurn?.parts ?? []).filter((p) => p.inlineData?.data && p.inlineData.mimeType?.startsWith("audio/"));
       if (sc.outputTranscription?.text || audio.length) this.commit("you");
-      if (sc.outputTranscription?.text) this.set({ agent: this.state.agent + sc.outputTranscription.text });
+      if (sc.outputTranscription?.text) {
+        this.turnSaid += sc.outputTranscription.text;
+        this.set({ agent: this.state.agent + sc.outputTranscription.text });
+      }
+      if (sc.inputTranscription?.text) this.nudged = false;
       for (const p of audio) this.play(p.inlineData!.data!, rateOf(p.inlineData!.mimeType));
       if (sc.turnComplete) {
         this.retries = 0;
         this.commit("you");
         this.commit("agent");
+        this.followThrough();
         if (this.rotateDue) window.setTimeout(() => void this.rotateNow(), 400);
       }
     }
@@ -426,7 +443,41 @@ class VoiceEngine {
     if (m.toolCall?.functionCalls?.length) void this.onToolCall(m.toolCall.functionCalls);
   }
 
+  /**
+   * Live models sometimes say "hold on, I'll publish it" and then end their turn
+   * without acting. If a turn ends on a promise with no action, and the owner
+   * hasn't started talking, it's told once to do it now.
+   */
+  private followThrough() {
+    const said = this.turnSaid.trim();
+    const acted = this.turnActed;
+    this.turnSaid = "";
+    this.turnActed = false;
+    if (acted) {
+      this.nudged = false;
+      return;
+    }
+    const last = said.split(/(?<=[.!?])\s+/).slice(-2).join(" ");
+    const waitingOnOwner = this.state.items.some((i) => i.kind === "approval" && !i.decided);
+    if (this.nudged || !said || waitingOnOwner || /\?\s*$/.test(said) || !PROMISE.test(last)) return;
+    const check = (tries: number) => {
+      // They started talking, or it carried on by itself: leave it be.
+      if (this.state.phase === "off" || this.state.you || this.turnSaid || this.turnActed) return;
+      // Let it finish saying the promise out loud first.
+      if (this.state.phase === "speaking" && tries < 40) {
+        window.setTimeout(() => check(tries + 1), 300);
+        return;
+      }
+      if (this.state.phase !== "listening") return;
+      this.nudged = true;
+      this.say(FOLLOW_THROUGH, false);
+    };
+    window.setTimeout(() => check(0), 700);
+  }
+
   private async onToolCall(calls: { id?: string; name?: string; args?: Record<string, unknown> }[]) {
+    this.turnActed = true;
+    this.nudged = false;
     this.commit("you");
     this.commit("agent");
     const list = calls.map((c, i) => ({ id: c.id || `call-${Date.now()}-${i}`, name: c.name ?? "", args: c.args ?? {} }));

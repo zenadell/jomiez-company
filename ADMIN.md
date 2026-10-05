@@ -79,6 +79,7 @@ Press the microphone next to *Send* and talk. It answers out loud, and it acts w
   - **Gemini key for voice**: only needed if neither of these applies: the main provider is Google, or `GEMINI_API_KEY` is set.
 - Your key never reaches the browser. Each conversation gets a single-use pass from Google that expires within minutes and is locked to that conversation's model, voice, instructions and actions.
 - The same rules apply as for typed requests. Anything that needs your approval shows as a card on screen; it tells you so, and carries on when you click **Approve** or **Decline**. Every change is recorded and can be undone.
+- It does what it says it will: it doesn't announce an action and then wait for you to say "go ahead". It also checks its work: an edit that didn't change anything (say, the wrong field) is reported as a failure, never as done.
 - **Talk over it** to interrupt. **Mute** stops it hearing you. The box under the controls lets you type a name or address mid-conversation.
 - What you both say is transcribed as you speak and saved as a conversation (◉ in the console). When you press **End**, it opens there: undo its changes, or keep going by typing.
 - Long conversations carry on: Google moves a live session to a fresh connection every few minutes, and that happens between sentences, with the conversation intact.

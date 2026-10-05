@@ -194,6 +194,49 @@ export function fieldAt(fields: FlattenedField[], path: (string | number)[], dat
   return found ? { field: found, labels } : null;
 }
 
+/**
+ * Why a path can't be edited, or null if it can. A path that names no field
+ * would be silently dropped on save, so it's refused with the names that do exist there.
+ */
+export function checkPath(fields: FlattenedField[], data: unknown, path: string): string | null {
+  const segs = parsePath(path);
+  let current: FlattenedField[] = fields;
+  let node: unknown = data;
+  let found: FlattenedField | null = null;
+  const names = (list: FlattenedField[]) =>
+    list
+      .filter((f) => "name" in f && f.name !== "id" && f.type !== "join" && !(f as { admin?: { hidden?: boolean } }).admin?.hidden)
+      .map((f) => (f as { name: string }).name)
+      .join(", ");
+  for (let i = 0; i < segs.length; i++) {
+    const seg = segs[i];
+    const at = segs.slice(0, i).join(".") || "the top level";
+    if (typeof seg === "number") {
+      if (!found || (found.type !== "array" && found.type !== "blocks")) return `"${path}": ${at} isn't a list.`;
+      const length = Array.isArray(node) ? node.length : 0;
+      if (seg < 0 || seg >= length) return `"${path}": ${at} has ${length} item${length === 1 ? "" : "s"}${length ? ` (0 to ${length - 1})` : ""}.`;
+      node = (node as unknown[])[seg];
+      if (found.type === "blocks") {
+        const type = (node as { blockType?: string } | undefined)?.blockType;
+        const block = found.blocks.find((b) => b.slug === type);
+        if (!block) return `"${path}": item ${seg} of ${at} has an unknown section type.`;
+        current = block.flattenedFields;
+      } else {
+        current = found.flattenedFields;
+      }
+      found = null;
+      continue;
+    }
+    if (found && (found.type === "array" || found.type === "blocks")) return `"${path}": ${at} is a list; give an item number after it (e.g. ${at}.0.${seg}).`;
+    const f = current.find((x) => "name" in x && x.name === seg);
+    if (!f) return `"${path}": there's no field "${seg}" at ${at}. Fields there: ${names(current) || "none"}.`;
+    found = f;
+    node = node && typeof node === "object" ? (node as Record<string, unknown>)[seg] : undefined;
+    if (f.type === "group" || f.type === "tab") current = f.flattenedFields;
+  }
+  return null;
+}
+
 /* ---------- Rich text as Markdown ---------- */
 
 const editorCache = new WeakMap<object, Promise<unknown>>();

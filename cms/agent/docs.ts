@@ -1,6 +1,6 @@
 import type { CollectionSlug, GlobalSlug, Payload, TypedUser } from "payload";
 import { diff, type Change } from "./diff";
-import { fromModel, getAt, parsePath, setAt, type Target } from "./schema";
+import { checkPath, fromModel, getAt, parsePath, setAt, type Target } from "./schema";
 
 /*
  * How the agent reads and changes documents: always on top of the latest draft
@@ -176,8 +176,22 @@ export class Engine {
 
   async update(t: Target, id: string | number | null, edits: Edits, publish: boolean) {
     const [before, beforeLive] = await Promise.all([readLatest(this.actor, t, id), this.live(t, id)]);
+    // A path that names no field would be dropped on save while looking like success: refuse it.
+    const paths = [
+      ...Object.keys(edits.set ?? {}),
+      ...(edits.insert ?? []).map((o) => o.path),
+      ...(edits.remove ?? []).map((o) => o.path),
+      ...(edits.move ?? []).map((o) => o.path),
+    ];
+    const problems = paths.map((p) => checkPath(t.fields, before, p)).filter(Boolean);
+    if (problems.length) throw new Error(`Nothing was saved. ${problems.join(" ")} Use search to find the exact path of the text, or read the document.`);
     const after = applyEdits(before, edits);
     const changes = diff(t.fields, before, after);
+    if (!changes.length && !publish) {
+      throw new Error(
+        "Nothing changed: those fields already hold these values. If the page still shows the old text, that text is in another field (or on another page): use search to find exactly where.",
+      );
+    }
     const saved = await this.save(t, id, after, publish);
     this.record({ action: publish ? "publish" : "update", target: t.slug, kind: t.kind, id, title: titleOf(t, saved), before, beforeLive });
     return { saved, changes };

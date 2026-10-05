@@ -278,13 +278,7 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
       emit({ t: "decision", approvalId: d.approvalId, approved: d.approved, note: d.note });
       // A decline with a reason is a lesson worth keeping.
       const p = known.get(d.approvalId)!;
-      if (!d.approved && d.note && d.note.trim().length > 3) {
-        await payload.create({
-          collection: "agent-memory",
-          data: { content: `Declined “${p.title}”: ${d.note.trim()}`, kind: "lesson", source: "correction" } as never,
-          overrideAccess: true,
-        });
-      }
+      if (!d.approved && d.note && d.note.trim().length > 3) await rememberLesson(payload, `Declined “${p.title}”: ${d.note.trim()}`);
     }
     pending = pending.filter((p) => !valid.some((d) => d.approvalId === p.approvalId));
   } else if (input.message) {
@@ -365,7 +359,7 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
     draftReplies: cfg.triageDraft,
   });
 
-  const toolApproval = ({ toolCall }: { toolCall: { toolName: string; input: unknown } }): ToolApprovalStatus => {
+  const toolApproval = async ({ toolCall }: { toolCall: { toolName: string; input: unknown } }): Promise<ToolApprovalStatus> => {
     const m = meta[toolCall.toolName];
     if (!m) return "not-applicable";
     let risk: Risk;
@@ -377,6 +371,7 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
     const d = decide(risk, perms);
     if (d === "auto") return "not-applicable";
     if (d === "deny") return { type: "denied", reason: `The owner's settings don't allow this (${REASONS[risk].toLowerCase()}).` };
+    if (await m.skipApproval?.((toolCall.input ?? {}) as Record<string, unknown>)) return "not-applicable";
     return { type: "user-approval", reason: REASONS[risk] };
   };
 
@@ -566,6 +561,13 @@ export async function undoThread(payload: Payload, user: TypedUser | null, threa
   events = fold(events, { t: "notice", text: `Undone: ${results.join("; ")}` });
   await payload.update({ collection: "agent-threads", id: thread.id, data: { changes: all, events } as never, overrideAccess: true });
   return { results };
+}
+
+/** Keeps a lesson from a declined change (once: the same lesson twice adds nothing). */
+export async function rememberLesson(payload: Payload, content: string) {
+  const { totalDocs } = await payload.count({ collection: "agent-memory", where: { content: { equals: content } }, overrideAccess: true });
+  if (totalDocs) return;
+  await payload.create({ collection: "agent-memory", data: { content, kind: "lesson", source: "correction" } as never, overrideAccess: true });
 }
 
 /** The Gemini key for voice: its own, else the main key when the main provider is Google, else the environment. */

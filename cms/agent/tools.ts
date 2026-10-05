@@ -39,6 +39,8 @@ export type ToolMeta = {
   risk: (input: Record<string, unknown>) => Risk;
   title: (input: Record<string, unknown>) => string;
   preview?: (input: Record<string, unknown>) => Promise<{ changes?: ChangeRow[]; detail?: string }>;
+  /** True when there's nothing for the owner to approve (e.g. publishing with nothing new). */
+  skipApproval?: (input: Record<string, unknown>) => Promise<boolean>;
 };
 
 const UNTRUSTED =
@@ -100,10 +102,24 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
 
   function add<S extends z.ZodTypeAny>(
     name: string,
-    def: { description: string; input: S; risk: ToolMeta["risk"]; title: ToolMeta["title"]; preview?: ToolMeta["preview"] },
+    def: {
+      description: string;
+      input: S;
+      risk: ToolMeta["risk"];
+      title: ToolMeta["title"];
+      preview?: ToolMeta["preview"];
+      skipApproval?: ToolMeta["skipApproval"];
+    },
     run: (input: z.infer<S>) => Promise<unknown>,
   ) {
-    meta[name] = { schema: def.input, description: def.description, risk: def.risk, title: def.title, preview: def.preview };
+    meta[name] = {
+      schema: def.input,
+      description: def.description,
+      risk: def.risk,
+      title: def.title,
+      preview: def.preview,
+      skipApproval: def.skipApproval,
+    };
     tools[name] = tool({ description: def.description, inputSchema: def.input, execute: async (input: z.infer<S>) => run(input) });
   }
 
@@ -436,11 +452,28 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
         const t = target(i.target);
         return { changes: await engine.previewPublish(t, await idOf(t, i.id)) };
       },
+      // Nothing new to make live: no card to approve, it just says so.
+      skipApproval: async (i) => {
+        try {
+          const t = target(i.target);
+          return !t.drafts || !(await engine.previewPublish(t, await idOf(t, i.id))).length;
+        } catch {
+          return false;
+        }
+      },
     },
     async ({ target: name, id }) => {
       const t = target(name);
       if (!t.drafts) return { ok: true, note: `${t.label} has no drafts; changes are already live.` };
       const docId = await idOf(t, id);
+      if (!(await engine.previewPublish(t, docId)).length) {
+        // Not an error, but never a success to report: nothing visitors see would change.
+        return {
+          ok: true,
+          published: "Nothing new to publish: the live version already matches the newest draft.",
+          note: "If you expected an edit to show, it never saved. Use search to find where that text really is, change it there, then publish.",
+        };
+      }
       const { saved, changes } = await engine.publish(t, docId);
       recordChange(t, saved, "published", changes);
       return { ok: true, published: describeChanges(changes), onSite: siteUrl(t, saved) };
