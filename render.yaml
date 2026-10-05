@@ -6,13 +6,18 @@ services:
   - type: web
     name: jomiez-site
     runtime: node
-    # Always on: the agent's routines run on the server's own clock, and the
-    # free plan sleeps when idle. Pick the region nearest the Supabase project.
-    # The agent's screenshots run a browser (about 300 MB): choose Standard for
-    # them, or keep Starter and set BROWSER_WS_ENDPOINT to a browser service.
-    plan: starter
+    # Free: 512 MB and a tenth of a CPU, asleep after 15 minutes without
+    # visitors (keep it awake with the scheduler in ADMIN.md → Going live).
+    # The site uses about 330 MB at its busiest. Starter ($7) has the same
+    # memory, five times the CPU and never sleeps; Standard (2 GB) also runs
+    # the agent's screenshot browser on the server. Builds run on Render's own
+    # build machines, whatever the plan. Pick the region nearest the Supabase project.
+    plan: free
     buildCommand: npm ci && npm run build
-    startCommand: npm start
+    # Started directly (npm would sit in memory beside it), with the JavaScript
+    # heap capped so memory is reclaimed well before the 512 MB limit. On a
+    # 2 GB plan, raise the cap to 1536.
+    startCommand: node --max-old-space-size=320 node_modules/next/dist/bin/next start
     healthCheckPath: /
     autoDeploy: true
     envVars:
@@ -52,6 +57,11 @@ services:
       # Optional: free photos from Pexels for the agent (public-domain images work without it).
       - key: PEXELS_API_KEY
         sync: false
-      # For an outside scheduler calling /api/agent/tick, if you ever use one.
+      # Lets an outside scheduler call /api/agent/tick: it keeps a free service
+      # awake and runs the agent's routines on time (ADMIN.md → Going live).
       - key: CRON_SECRET
         generateValue: true
+      # Optional: a browser service for the agent's screenshots on plans under 2 GB
+      # (e.g. Browserless: wss://production-sfo.browserless.io?token=…).
+      - key: BROWSER_WS_ENDPOINT
+        sync: false

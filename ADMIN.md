@@ -73,7 +73,7 @@ It won't put images from Pinterest, Google Images or other people's sites on the
 
 Seeing and making images use the Gemini key from the Voice tab (or `GEMINI_API_KEY`). It picks the newest suitable Gemini models on your key; *Agent settings → Sight & images* can pin others. The browser is a fresh, empty one each time (never signed in), and it refuses private and internal addresses.
 
-On a Linux server the browser (about 60 MB) is downloaded the first time a screenshot is needed, not at install. It needs about 300 MB of memory on top of the site. Render's Standard plan (2 GB) is comfortable; on Starter, point `BROWSER_WS_ENDPOINT` at a browser service (e.g. Browserless) instead. On your Mac it uses Google Chrome (or set `BROWSER_EXECUTABLE_PATH`).
+On a Linux server the browser (about 60 MB) is downloaded the first time a screenshot is needed, not at install. It needs about 300 MB of memory on top of the site, so on a server with less than 1.5 GB (Render's Free and Starter plans) it doesn't start: the agent says screenshots aren't available there, and the site carries on. Point `BROWSER_WS_ENDPOINT` at a browser service (Browserless has a free plan) to have them anyway, or use Render's Standard plan (2 GB). Seeing images, finding free photos and making images work on any plan. On your Mac it uses Google Chrome (or set `BROWSER_EXECUTABLE_PATH`).
 
 **Any model.** In *Agent settings → Model*, pick a provider and model: Anthropic (Claude), OpenAI, Google (Gemini), OpenRouter (hundreds of models), Groq, DeepSeek, xAI, Mistral, Together, Ollama on your own machine, or any OpenAI-compatible service.
 
@@ -124,7 +124,7 @@ Press the microphone next to *Send* and talk. It answers out loud, and it acts w
 - **Routines** run on their schedule, in their own time zone.
 - **Every** automatic run leaves a notice under the bell and sends you an email: what it did, what it changed, and anything waiting for approval, with a link straight to it (*Agent settings → Automation*; the address falls back to `ADMIN_NOTIFY_EMAIL`, then Site settings). Emails need Resend set up.
 
-Routines need the server's clock: on Render (always-on plan) or any long-running server it checks every minute. On a host that sleeps or on Vercel, have a scheduler call `GET /api/agent/tick` with the header `Authorization: Bearer <CRON_SECRET>`; while anyone has the admin open, due routines also get their chance.
+Routines need the server's clock: while the server is running it checks every minute. A server that sleeps (Render's free plan) or Vercel needs a scheduler calling `GET /api/agent/tick` with the header `Authorization: Bearer <CRON_SECRET>` (set up in *Going live → On the free plan*); while anyone has the admin open, due routines also get their chance.
 
 ## Email (contact form)
 
@@ -143,7 +143,7 @@ The site runs on the same services as the old portfolio. `render.yaml` describes
 
 | What | Service | Settings |
 | --- | --- | --- |
-| Hosting | Render (web service, always-on plan) | from `render.yaml` |
+| Hosting | Render (web service, free plan) | from `render.yaml` |
 | Database | Supabase (Postgres) | `SUPABASE_DATABASE_URL` |
 | Images | Cloudinary | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` |
 | Email | Resend (jomiez.com already verified there) | `RESEND_API_KEY`, `LEAD_FROM_EMAIL` (the sender, as on the old site), `LEAD_REPLY_TO` (optional) |
@@ -178,7 +178,22 @@ git push
 
 **Replace the old Gemini and Groq keys.** The old portfolio's public `/api/chaka/voice-token` address hands its saved Gemini and Groq keys to anyone who asks, so treat them as exposed: create new keys in Google AI Studio (and Groq), use the new ones here, and delete the old ones once the old service is off. The new site never sends a key to the browser.
 
-If the build runs out of memory on the smallest plan, give the service a larger plan for the build (Next.js builds need about 1.5 GB), or turn on Render's larger build machines.
+### On the free plan
+
+`render.yaml` creates the service on Render's free plan: 512 MB of memory and a tenth of a CPU. The site fits (about 330 MB at its busiest, with the admin, live preview and the agent all in use), and builds run on Render's own build machines (8 GB), whatever the plan. What free means:
+
+- **It sleeps after 15 minutes without visitors**, and the next visitor waits about a minute while it wakes. While asleep, the agent's routines don't run. The fix is a free scheduler that calls the site every 10 minutes, which keeps it awake and runs routines on time:
+  1. Make a free account at [cron-job.org](https://cron-job.org) → **Create cronjob**.
+  2. URL: `https://jomiez.com/api/agent/tick` (or the `.onrender.com` address until the domain moves). Schedule: every 10 minutes.
+  3. Under **Advanced → Headers**, add `Authorization` with the value `Bearer ` followed by the `CRON_SECRET` from Render → the service → Environment.
+  4. Save, then **Test run**: it should answer `200` with `{"ok":true}` (due routines then run in the background). A `401` means the header's secret doesn't match.
+- **Free hours.** Render gives each workspace 750 free hours a month, enough for one service awake all month. If the old portfolio is also a free service in the same workspace, suspend it once the domain has moved (step 8 above): two always-on free services run out of hours and Render pauses both until the next month.
+- **Restarts.** Render may restart a free service at any time, and its disk starts over each time. Nothing is lost: content is in Supabase, images in Cloudinary, and each page is rebuilt from the database on its first visit after a start, so what you published is what visitors see.
+- **Speed.** Pages visitors see are cached and fast; the first visit to each page after a restart takes a few seconds while it's built. Photos are resized by Cloudinary, not the server. The admin is usable but slower than on your computer (a few seconds per screen), most of all just after it wakes.
+- **Screenshots** need a browser service on this plan (see *Sight and images*).
+- **Build minutes.** The free workspace includes 500 build minutes a month; each deploy takes a few, so dozens of deploys a month are fine.
+
+**When to upgrade.** Starter ($7 a month) has the same memory but five times the CPU and never sleeps (no scheduler needed for that, though routines still benefit from it). Standard (2 GB) also runs the screenshot browser on the server: there, change the start command's `--max-old-space-size=320` to `1536`. Change the plan under the service's Settings → Instance type.
 
 **Elsewhere.** The site also runs on Vercel (`BLOB_READ_WRITE_TOKEN` for images, a Turso or Supabase database, and a Vercel Cron calling `/api/agent/tick` for routines).
 

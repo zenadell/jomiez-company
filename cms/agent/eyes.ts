@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import { GoogleGenAI } from "@google/genai";
 import { generateText } from "ai";
 import type { Browser, Page } from "playwright-core";
@@ -31,6 +32,20 @@ const WINDOWS_BROWSERS = [
 
 /** The Chromium build matching @sparticuz/chromium-min's version. */
 const CHROMIUM = "153.0.0";
+/** The browser takes about 300 MB on top of the site: below this, starting one would crash the site. */
+const BROWSER_NEEDS_MB = 1500;
+
+/** The memory this server may use: its container's limit when it has one, else the machine's. */
+function memoryMB() {
+  let limit = os.totalmem();
+  for (const file of ["/sys/fs/cgroup/memory.max", "/sys/fs/cgroup/memory/memory.limit_in_bytes"]) {
+    try {
+      const n = Number(fs.readFileSync(file, "utf8").trim());
+      if (Number.isFinite(n) && n > 0) limit = Math.min(limit, n);
+    } catch {}
+  }
+  return Math.round(limit / 2 ** 20);
+}
 
 async function launch(): Promise<Browser> {
   const { chromium } = await import("playwright-core");
@@ -39,6 +54,12 @@ async function launch(): Promise<Browser> {
   const local = process.env.BROWSER_EXECUTABLE_PATH || [...MAC_BROWSERS, ...WINDOWS_BROWSERS].find((p) => fs.existsSync(p));
   if (local) return chromium.launch({ executablePath: local, headless: true });
   if (process.platform !== "linux") throw new Error("No browser found. Install Google Chrome, or set BROWSER_EXECUTABLE_PATH.");
+  if (memoryMB() < BROWSER_NEEDS_MB) {
+    throw new Error(
+      `Screenshots and reading pages in a browser aren't available on this server: it has ${memoryMB()} MB of memory, and the browser needs about 300 MB more than the site uses. ` +
+        "Set BROWSER_WS_ENDPOINT to a browser service (Browserless has a free plan), or move to a plan with 2 GB. Seeing images, finding free photos and making images still work.",
+    );
+  }
   // On Linux servers (Render): a self-contained Chromium, fetched the first time it's
   // needed and kept in /tmp (so computers that never take screenshots never download it).
   const { default: bundled } = await import("@sparticuz/chromium-min");

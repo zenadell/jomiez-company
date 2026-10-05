@@ -31,7 +31,7 @@ import { getShot } from "@/cms/agent/eyes";
  *   GET  threads   the conversation list
  *   GET  notices   what it did on its own
  *   GET  shot      a screenshot it took
- *   GET  tick      run due routines
+ *   GET  tick      run due routines (answers at once; they run in the background)
  */
 
 export const dynamic = "force-dynamic";
@@ -299,7 +299,10 @@ export async function GET(req: Request, { params }: Params) {
       const { user } = await payload.auth({ headers: req.headers });
       if (!user) return json({ error: "Not allowed." }, 401);
     }
-    return json(await tickRoutines(payload, origin));
+    // Answers at once and runs due routines afterwards: a routine can take minutes,
+    // longer than a scheduler waits for an answer.
+    after(() => tickRoutines(payload, origin).catch((err) => payload.logger.error({ err, msg: "Routine tick" })));
+    return json({ ok: true });
   }
 
   const { user } = await payload.auth({ headers: req.headers });

@@ -61,4 +61,4 @@ Sign in at `/admin`. Every page, section, image, product, journal post, the nav 
 
 ## Deploy
 
-Deploys to Render with the old portfolio's services: Supabase (Postgres, in its own `jomiez_site` schema), Cloudinary for images, Resend for email. `render.yaml` describes the service; the step-by-step, including moving jomiez.com across and the redirects from the old site's addresses, is in [ADMIN.md → Going live](ADMIN.md#going-live-render-with-supabase-cloudinary-and-resend). Vercel works too (Vercel Blob for images, Turso or Supabase for the database).
+Deploys to Render with the old portfolio's services: Supabase (Postgres, in its own `jomiez_site` schema), Cloudinary for images, Resend for email. `render.yaml` describes the service, on Render's free plan (what that means, and keeping it awake: [ADMIN.md → On the free plan](ADMIN.md#on-the-free-plan)); the step-by-step, including moving jomiez.com across and the redirects from the old site's addresses, is in [ADMIN.md → Going live](ADMIN.md#going-live-render-with-supabase-cloudinary-and-resend). Vercel works too (Vercel Blob for images, Turso or Supabase for the database).
