@@ -1,0 +1,186 @@
+/* Sizes and colours from the Framer component "AuyE7Fhf6" (Primary, Secondary, Variant 5, Primary small, Secondary small). */
+.btn {
+  position: relative;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 3px 24px 3px 3px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  isolation: isolate;
+}
+
+/* The label and arrow move between the tile and the pill on hover. Keeping them
+   out of hit-testing means a press always lands on the button itself, so a quick
+   click still counts even when the label is swapped out mid-press. */
+.btn * {
+  pointer-events: none;
+}
+
+.btn[data-hovered="true"] {
+  gap: 0;
+  padding: 3px;
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex: none;
+  width: 65px;
+  height: 59px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.btn[data-hovered="true"] .tile {
+  flex: 1 0 0;
+  width: auto;
+}
+
+.icon {
+  display: block;
+  flex: none;
+}
+
+.label {
+  display: block;
+  flex: none;
+  padding: 0 4px;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* Primary: dark pill, white tile, white label that turns dark inside the tile. */
+.primary {
+  background: var(--ink);
+}
+
+.primary .tile {
+  background: var(--white);
+  color: var(--dark-2);
+}
+
+.primary .label {
+  color: var(--white);
+}
+
+.primary .labelInTile {
+  color: var(--ink);
+}
+
+/* Secondary (dark sections): #242424 pill, #1A1A1A tile (rendered values from the live site). */
+.secondary {
+  background: var(--dark-3);
+}
+
+.secondary .tile {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.secondary .label,
+.secondary .labelInTile {
+  color: var(--white);
+}
+
+/* Light ("Variant 5"): white pill, dark tile. */
+.light {
+  background: var(--white);
+}
+
+.light .tile {
+  background: var(--dark-2);
+  color: var(--white);
+}
+
+.light .label {
+  color: var(--ink);
+}
+
+.light .labelInTile {
+  color: var(--white);
+}
+
+/* Small sizes: 42px tall, 40x36 tile, 16px arrow window. */
+.primarySmall,
+.secondarySmall {
+  gap: 6px;
+  padding: 3px 10px 3px 3px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+}
+
+.primarySmall[data-hovered="true"],
+.secondarySmall[data-hovered="true"] {
+  gap: 0;
+  padding: 3px;
+}
+
+.primarySmall .tile,
+.secondarySmall .tile {
+  width: 40px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.primarySmall[data-hovered="true"] .tile,
+.secondarySmall[data-hovered="true"] .tile {
+  gap: 13px;
+}
+
+.primarySmall .label,
+.secondarySmall .label {
+  font-size: 14px;
+  line-height: 19.6px;
+  letter-spacing: 0.02em;
+  padding: 0 6px;
+}
+
+.primarySmall {
+  background: var(--white);
+  border-color: var(--ink-10);
+}
+
+.primarySmall .tile {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.primarySmall .label {
+  color: var(--ink);
+}
+
+.primarySmall .labelInTile {
+  color: var(--white);
+}
+
+.secondarySmall {
+  background: var(--dark-4);
+  border-color: var(--white-20);
+}
+
+.secondarySmall .tile {
+  background: var(--dark-2);
+  color: var(--white);
+}
+
+.secondarySmall .label,
+.secondarySmall .labelInTile {
+  color: var(--white);
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

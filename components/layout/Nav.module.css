@@ -1,0 +1,212 @@
+.topBlur {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 90px;
+  z-index: 7;
+}
+
+.pill {
+  position: fixed;
+  top: 30px;
+  left: 30px;
+  z-index: 10;
+  background: var(--white);
+  border-radius: 100px;
+  padding: 5px 26px 5px 5px;
+  overflow: hidden;
+  transition: background 0.5s ease;
+}
+
+/* Liquid glass behind the pill's content, with just a whisper of tint. */
+.glass {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.4s ease;
+  animation: glass-in 0.6s ease both;
+}
+
+
+@keyframes glass-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.pill[data-glass] {
+  background: rgba(255, 255, 255, 0);
+  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.08);
+}
+
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  padding: 7px 16px;
+  font-size: 14px;
+  line-height: 19.6px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  opacity: 0.7;
+  transition:
+    opacity 0.25s ease,
+    color 0.3s ease,
+    text-shadow 0.3s ease;
+}
+
+.link:hover,
+.link[data-active="true"] {
+  opacity: 1;
+}
+
+/*
+ * On clear glass the labels are cut from the backdrop (GlassText), so they are
+ * drawn at full strength: any opacity below 1 would cut them off from the page.
+ * A small dot, cut the same way, marks the current page and the hovered link.
+ */
+.pill[data-glass] .link {
+  position: relative;
+  opacity: 1;
+}
+
+.pill[data-glass] .link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  backdrop-filter: blur(1.5px) grayscale(1) brightness(1.12) contrast(10) invert(1);
+  transform: scale(0);
+  transition: transform 0.25s ease;
+}
+
+.pill[data-glass] .link:hover::after,
+.pill[data-glass] .link[data-active="true"]::after {
+  transform: scale(1);
+}
+
+.burger {
+  display: none;
+  position: relative;
+  width: 40px;
+  height: 33px;
+  flex: none;
+}
+
+.bar {
+  position: absolute;
+  left: 0;
+  width: 40px;
+  height: 6px;
+  border-radius: 100px;
+  background: var(--ink);
+}
+
+.pill[data-glass] .bar {
+  background: transparent;
+  backdrop-filter: blur(1.5px) grayscale(1) brightness(1.12) contrast(10) invert(1);
+}
+
+.bar:first-child {
+  top: 8px;
+}
+
+.bar:last-child {
+  top: 19px;
+}
+
+.hire {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  z-index: 10;
+  border-radius: 12px;
+}
+
+.hire[data-glass] {
+  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.08);
+}
+
+.hire .hireBtn {
+  position: relative;
+  transition: background 0.5s ease, border-color 0.5s ease;
+}
+
+.hire[data-glass] .hireBtn {
+  background: rgba(255, 255, 255, 0);
+  border-color: transparent;
+}
+
+
+.mobileMenu {
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 810px) {
+  .mobileMenu {
+    display: none;
+  }
+}
+
+.mobileMenu ul {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 11px 8px;
+}
+
+.mobileLink {
+  display: block;
+  padding: 10px 0;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.mobileCta {
+  padding: 12px 6px 11px;
+}
+
+@media (max-width: 809px) {
+  .pill {
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    border-radius: 20px;
+    padding: 5px 16px 5px 5px;
+  }
+
+  .row {
+    justify-content: space-between;
+  }
+
+  .links {
+    display: none;
+  }
+
+  .burger {
+    display: block;
+  }
+
+  .hire {
+    display: none;
+  }
+}

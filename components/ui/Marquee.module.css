@@ -1,0 +1,42 @@
+.viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.fade {
+  mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  gap: var(--marquee-gap);
+  animation: marquee var(--marquee-duration) linear infinite;
+  will-change: transform;
+}
+
+.reverse {
+  animation-direction: reverse;
+}
+
+.pausable:hover .track {
+  animation-play-state: paused;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: var(--marquee-gap);
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(-50% - var(--marquee-gap) / 2), 0, 0);
+  }
+}

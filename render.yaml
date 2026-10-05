@@ -1,0 +1,67 @@
+# Render blueprint for jomiez.com (Render → New → Blueprint → this repository).
+# Step by step, including moving the domain from the old portfolio, in ADMIN.md → Going live.
+# Values marked `sync: false` are asked for when the blueprint is created; they
+# use the same names as the old portfolio, so they can be copied across from it.
+services:
+  - type: web
+    name: jomiez-site
+    runtime: node
+    # Free: 512 MB and a tenth of a CPU, asleep after 15 minutes without
+    # visitors (keep it awake with the scheduler in ADMIN.md → Going live).
+    # The site uses about 330 MB at its busiest. Starter ($7) has the same
+    # memory, five times the CPU and never sleeps; Standard (2 GB) also runs
+    # the agent's screenshot browser on the server. Builds run on Render's own
+    # build machines, whatever the plan. Pick the region nearest the Supabase project.
+    plan: free
+    buildCommand: npm ci && npm run build
+    # Started directly (npm would sit in memory beside it), with the JavaScript
+    # heap capped so memory is reclaimed well before the 512 MB limit. On a
+    # 2 GB plan, raise the cap to 1536.
+    startCommand: node --max-old-space-size=320 node_modules/next/dist/bin/next start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Signs admin logins and encrypts the agent's API keys. Generated once; never change it.
+      - key: PAYLOAD_SECRET
+        generateValue: true
+      # Supabase → Project settings → Database → Connection string (URI). The site
+      # keeps its tables in their own schema, jomiez_site.
+      - key: SUPABASE_DATABASE_URL
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      # The sender, on a domain verified in Resend: copy the old service's value.
+      - key: LEAD_FROM_EMAIL
+        sync: false
+      # Optional: where visitors' replies to the automatic answer go.
+      - key: LEAD_REPLY_TO
+        sync: false
+      # Where the agent's "what I did on my own" emails go (can also be set in Agent settings).
+      - key: ADMIN_NOTIFY_EMAIL
+        sync: false
+      # Lets the agent run on Gemini straight away, and powers its live voice conversations
+      # (choose any model later in Agent settings).
+      - key: GEMINI_API_KEY
+        sync: false
+      # Optional: the agent on DeepSeek (or save the key in Agent settings).
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      # Optional: free photos from Pexels for the agent (public-domain images work without it).
+      - key: PEXELS_API_KEY
+        sync: false
+      # Lets an outside scheduler call /api/agent/tick: it keeps a free service
+      # awake and runs the agent's routines on time (ADMIN.md → Going live).
+      - key: CRON_SECRET
+        generateValue: true
+      # Optional: a browser service for the agent's screenshots on plans under 2 GB
+      # (e.g. Browserless: wss://production-sfo.browserless.io?token=…).
+      - key: BROWSER_WS_ENDPOINT
+        sync: false

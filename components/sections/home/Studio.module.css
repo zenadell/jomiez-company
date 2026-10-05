@@ -1,0 +1,197 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  color: var(--white);
+}
+
+.statement {
+  max-width: 1200px;
+  font-size: 100px;
+  line-height: 100px;
+  font-weight: 500;
+  letter-spacing: -4px;
+}
+
+.introRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+.introText {
+  max-width: 380px;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 300;
+  letter-spacing: 0.32px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 0 20px 20px;
+  overflow: hidden;
+}
+
+.media {
+  position: relative;
+  height: 402px;
+  border-radius: 0 20px 20px;
+  overflow: hidden;
+  background: var(--dark-3);
+}
+
+.img {
+  object-fit: cover;
+  object-position: 12% top;
+  filter: grayscale(0.2);
+  transition: transform 0.9s var(--spring);
+}
+
+.card:hover .img {
+  transform: scale(1.05);
+}
+
+.mark {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: var(--white);
+  mix-blend-mode: difference;
+}
+
+.caption {
+  display: flex;
+  gap: 10px;
+  padding: 10px 10px 20px;
+}
+
+.bar {
+  width: 3px;
+  border-radius: 10px;
+  background: var(--white-10);
+}
+
+.name {
+  font-family: var(--font-plex-mono);
+  font-size: 13px;
+  line-height: 20.8px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.role {
+  font-size: 12px;
+  line-height: 16.8px;
+  font-weight: 300;
+  letter-spacing: 0.12px;
+  color: var(--white-50);
+}
+
+.reveal {
+  position: absolute;
+  inset: 0;
+  width: 91%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 24px 20px 40px;
+  border-radius: 0 20px 20px;
+  background: var(--white);
+  color: var(--ink);
+  transform: translateX(-110%);
+  transition: transform 0.6s var(--spring);
+}
+
+.card:hover .reveal,
+.card:focus-within .reveal {
+  transform: translateX(0);
+}
+
+.revealText {
+  font-size: 18px;
+  line-height: 25.2px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.revealFoot {
+  display: flex;
+  gap: 10px;
+}
+
+.revealBar {
+  width: 3px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.revealName {
+  font-family: var(--font-plex-mono);
+  font-size: 13px;
+  line-height: 20.8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.81);
+}
+
+.revealLink {
+  font-family: var(--font-plex-mono);
+  font-size: 11px;
+  line-height: 16.5px;
+  letter-spacing: -0.33px;
+  color: rgba(0, 0, 0, 0.7);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 1199px) {
+  .statement {
+    font-size: 64px;
+    line-height: 66px;
+    letter-spacing: -2.5px;
+  }
+
+  .introRow {
+    grid-template-columns: 1fr;
+  }
+
+  .introRow > span {
+    display: none;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 809px) {
+  .statement {
+    font-size: 40px;
+    line-height: 42px;
+    letter-spacing: -1.6px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .media {
+    height: 340px;
+  }
+}
