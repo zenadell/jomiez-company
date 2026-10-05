@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
-import { useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { useMenus, useSiteData } from "@/components/cms/SiteData";
 import { fill, src } from "@/lib/media";
 import { JomiezIcon } from "@/components/ui/JomiezMark";
@@ -19,6 +19,8 @@ import styles from "./Footer.module.css";
  * On phones it flows after the content instead (the spacer is hidden).
  */
 const FLOWING = "(max-width: 809px)";
+/** Clear space between the end of the page and the top of the footer's content. */
+const BREATHING_ROOM = 96;
 
 const watchFlowing = (cb: () => void) => {
   const mq = window.matchMedia(FLOWING);
@@ -33,6 +35,7 @@ export function Footer() {
   const bg = src(footer.background, "/media/footer-cube.webp");
   const spacer = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: spacer, offset: ["start end", "end end"] });
   const wordY = useTransform(scrollYProgress, [0, 1], ["45%", "0%"]);
   const contentY = useTransform(scrollYProgress, [0, 1], [80, 0]);
@@ -43,6 +46,27 @@ export function Footer() {
   const revealed = useInView(spacer);
   const onScreen = useInView(footerRef);
   const glassActive = effects.footerGlass !== false && (flowing ? onScreen : revealed);
+  // The page lifts away exactly far enough to show the whole footer, column titles
+  // included, with room to breathe; never more than the screen.
+  useEffect(() => {
+    const inner = innerRef.current;
+    const footerEl = footerRef.current;
+    const gap = spacer.current;
+    if (!inner || !footerEl || !gap) return;
+    const fit = () => {
+      if (window.matchMedia(FLOWING).matches) return gap.style.removeProperty("height");
+      const bottomPad = parseFloat(getComputedStyle(footerEl).paddingBottom) || 0;
+      gap.style.height = `${Math.min(inner.offsetHeight + bottomPad + BREATHING_ROOM, window.innerHeight)}px`;
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(inner);
+    window.addEventListener("resize", fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", fit);
+    };
+  }, []);
   const fillTokens = (t: string | null | undefined) =>
     fill(t, { legalName: site.legalName, year: new Date().getFullYear(), name: site.name });
 
@@ -51,7 +75,7 @@ export function Footer() {
       <div ref={spacer} className={styles.spacer} aria-hidden="true" />
       <footer ref={footerRef} className={styles.footer}>
         <Image src={bg} alt="" fill sizes="100vw" className={styles.bg} />
-        <motion.div className={styles.inner} style={{ y: contentY }}>
+        <motion.div ref={innerRef} className={styles.inner} style={{ y: contentY }}>
           <div className={styles.brand}>
             <Link href="/" className={styles.logo} aria-label={`${site.name} home`}>
               <JomiezIcon size={44} />
