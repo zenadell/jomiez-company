@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     inquiries: Inquiry;
+    leads: Lead;
     'agent-threads': AgentThread;
     'agent-routines': AgentRoutine;
     'agent-memory': AgentMemory;
@@ -85,6 +86,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
+    leads: LeadsSelect<false> | LeadsSelect<true>;
     'agent-threads': AgentThreadsSelect<false> | AgentThreadsSelect<true>;
     'agent-routines': AgentRoutinesSelect<false> | AgentRoutinesSelect<true>;
     'agent-memory': AgentMemorySelect<false> | AgentMemorySelect<true>;
@@ -117,6 +119,7 @@ export interface Config {
     privacy: Privacy;
     terms: Term;
     agent: Agent;
+    outreach: Outreach;
   };
   globalsSelect: {
     home: HomeSelect<false> | HomeSelect<true>;
@@ -132,6 +135,7 @@ export interface Config {
     privacy: PrivacySelect<false> | PrivacySelect<true>;
     terms: TermsSelect<false> | TermsSelect<true>;
     agent: AgentSelect<false> | AgentSelect<true>;
+    outreach: OutreachSelect<false> | OutreachSelect<true>;
   };
   locale: null;
   widgets: {
@@ -183,6 +187,104 @@ export interface Inquiry {
     page?: string | null;
     userAgent?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Businesses that could use a better website. Keeper finds and checks them; you send the messages (from the phone app, or here).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads".
+ */
+export interface Lead {
+  id: number;
+  name: string;
+  /**
+   * e.g. hair salon
+   */
+  kind?: string | null;
+  area?: string | null;
+  country?: ('NG' | 'GH' | 'KE' | 'ZA' | 'GB' | 'IE' | 'US' | 'CA') | null;
+  /**
+   * International form, e.g. +2348031234567
+   */
+  phone?: string | null;
+  email?: string | null;
+  website?: string | null;
+  address?: string | null;
+  /**
+   * Instagram, Facebook… (space-separated)
+   */
+  socials?: string | null;
+  status: 'new' | 'checked' | 'ready' | 'contacted' | 'replied' | 'won' | 'lost' | 'skipped' | 'stopped';
+  /**
+   * 0–100: how much a new site would help and how easy they are to reach.
+   */
+  score?: number | null;
+  /**
+   * From the website check: what's wrong, in plain words.
+   */
+  summary?: string | null;
+  /**
+   * Keeper's notes from a phone-sized screenshot of their site.
+   */
+  review?: string | null;
+  /**
+   * Written by Keeper from what it found. Edit anything before sending.
+   */
+  messages?: {
+    whatsapp?: string | null;
+    sms?: string | null;
+    emailSubject?: string | null;
+    emailBody?: string | null;
+    followUp?: boolean | null;
+    writtenAt?: string | null;
+  };
+  /**
+   * A free sample homepage made for them, at jomiez.com/preview/…
+   */
+  preview?: {
+    slug?: string | null;
+    content?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    madeAt?: string | null;
+    /**
+     * Times someone (not a link-preview robot) opened it.
+     */
+    views?: number | null;
+    lastViewedAt?: string | null;
+  };
+  log?:
+    | {
+        at?: string | null;
+        what?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  contactedAt?: string | null;
+  followUps?: number | null;
+  notes?: string | null;
+  source?: ('openstreetmap' | 'manual' | 'keeper') | null;
+  sourceId?: string | null;
+  domain?: string | null;
+  check?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  shot?: string | null;
+  stopToken?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -807,6 +909,10 @@ export interface PayloadLockedDocument {
         value: number | Inquiry;
       } | null)
     | ({
+        relationTo: 'leads';
+        value: number | Lead;
+      } | null)
+    | ({
         relationTo: 'agent-threads';
         value: number | AgentThread;
       } | null)
@@ -902,6 +1008,62 @@ export interface InquiriesSelect<T extends boolean = true> {
         page?: T;
         userAgent?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads_select".
+ */
+export interface LeadsSelect<T extends boolean = true> {
+  name?: T;
+  kind?: T;
+  area?: T;
+  country?: T;
+  phone?: T;
+  email?: T;
+  website?: T;
+  address?: T;
+  socials?: T;
+  status?: T;
+  score?: T;
+  summary?: T;
+  review?: T;
+  messages?:
+    | T
+    | {
+        whatsapp?: T;
+        sms?: T;
+        emailSubject?: T;
+        emailBody?: T;
+        followUp?: T;
+        writtenAt?: T;
+      };
+  preview?:
+    | T
+    | {
+        slug?: T;
+        content?: T;
+        madeAt?: T;
+        views?: T;
+        lastViewedAt?: T;
+      };
+  log?:
+    | T
+    | {
+        at?: T;
+        what?: T;
+        id?: T;
+      };
+  contactedAt?: T;
+  followUps?: T;
+  notes?: T;
+  source?: T;
+  sourceId?: T;
+  domain?: T;
+  check?: T;
+  shot?: T;
+  stopToken?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2349,6 +2511,98 @@ export interface Agent {
   createdAt?: string | null;
 }
 /**
+ * Where Keeper looks for businesses that need a website, what you offer them, and how messages are sent. Nothing is sent without you: every message waits for you in the phone app.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "outreach".
+ */
+export interface Outreach {
+  id: number;
+  /**
+   * Each morning Keeper finds new businesses in the areas below, checks their websites and writes messages for the best ones. You get a notification when they're ready.
+   */
+  enabled?: boolean | null;
+  /**
+   * A town, city or neighbourhood (e.g. “Lekki, Lagos”, “Wuse, Abuja”, “Peckham, London”). Areas take turns, a few businesses at a time.
+   */
+  searches?:
+    | {
+        area: string;
+        country: 'NG' | 'GH' | 'KE' | 'ZA' | 'GB' | 'IE' | 'US' | 'CA';
+        on?: boolean | null;
+        kinds: (
+          | 'food'
+          | 'beauty'
+          | 'health'
+          | 'education'
+          | 'stay'
+          | 'shops'
+          | 'property'
+          | 'professional'
+          | 'fitness'
+          | 'auto'
+          | 'events'
+          | 'trades'
+        )[];
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Found and checked each morning.
+   */
+  dailyNew?: number | null;
+  /**
+   * Written for the best of them, for you to send.
+   */
+  dailyReady?: number | null;
+  /**
+   * In your words, with a starting price if you like. Keeper only promises what's written here.
+   */
+  offer?: string | null;
+  /**
+   * How messages are signed.
+   */
+  senderName?: string | null;
+  /**
+   * For the “Get this website” button on previews.
+   */
+  senderPhone?: string | null;
+  /**
+   * Put at the end of emails (required by law in the UK and US).
+   */
+  address?: string | null;
+  /**
+   * A free sample homepage for the most promising businesses, linked in the message.
+   */
+  previews?: boolean | null;
+  previewScore?: number | null;
+  followUp?: boolean | null;
+  followUpDays?: number | null;
+  gmail?: string | null;
+  /**
+   * Keep it low: a new Gmail sending many emails to strangers gets flagged.
+   */
+  dailyEmails?: number | null;
+  /**
+   * 16 letters from Google. Stored encrypted and never shown again.
+   */
+  gmailPassword?: string | null;
+  gmailPasswordHint?: string | null;
+  /**
+   * Free: 25,000 checks a day. Or set PAGESPEED_API_KEY in the environment.
+   */
+  pagespeedKey?: string | null;
+  pagespeedKeyHint?: string | null;
+  /**
+   * Every Monday Keeper drafts a post on something business owners search for, so people find you on Google. It waits for you to publish it.
+   */
+  weeklyPost?: boolean | null;
+  findRoutine?: (number | null) | AgentRoutine;
+  postRoutine?: (number | null) | AgentRoutine;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "home_select".
  */
@@ -3151,6 +3405,44 @@ export interface AgentSelect<T extends boolean = true> {
   maxSteps?: T;
   dailyRuns?: T;
   dailyTokens?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "outreach_select".
+ */
+export interface OutreachSelect<T extends boolean = true> {
+  enabled?: T;
+  searches?:
+    | T
+    | {
+        area?: T;
+        country?: T;
+        on?: T;
+        kinds?: T;
+        id?: T;
+      };
+  dailyNew?: T;
+  dailyReady?: T;
+  offer?: T;
+  senderName?: T;
+  senderPhone?: T;
+  address?: T;
+  previews?: T;
+  previewScore?: T;
+  followUp?: T;
+  followUpDays?: T;
+  gmail?: T;
+  dailyEmails?: T;
+  gmailPassword?: T;
+  gmailPasswordHint?: T;
+  pagespeedKey?: T;
+  pagespeedKeyHint?: T;
+  weeklyPost?: T;
+  findRoutine?: T;
+  postRoutine?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

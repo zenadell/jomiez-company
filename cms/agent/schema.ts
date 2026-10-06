@@ -13,6 +13,9 @@ export const OFF_LIMITS = new Set([
   "users",
   "agent",
   "agent-threads",
+  // Finding clients has its own tools (cms/outreach/tools.ts): leads hold strangers' contact details and screenshots.
+  "leads",
+  "outreach",
   "payload-preferences",
   "payload-migrations",
   "payload-locked-documents",

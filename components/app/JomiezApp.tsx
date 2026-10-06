@@ -7,6 +7,7 @@ import { useVoice } from "@/cms/admin/agent/useVoice";
 import { ChatContent } from "./ChatContent";
 import { Composer } from "./Composer";
 import { Droplet } from "./Droplet";
+import { ClientsSheet, fetchClientsSummary, type ClientsSummary } from "./Clients";
 import { HomeContent } from "./Home";
 import { currentEndpoint, isIOS, isStandalone, post, registerWorker, setBadge, STATUS_TEXT, type AppUser, type Me, type ThreadRow } from "./lib";
 import { LiquidGlass, relayout, Wallpaper, WallpaperFrame } from "./LiquidGlass";
@@ -176,7 +177,7 @@ function Materialize({ children, delay = 0 }: { children: ReactNode; delay?: num
   );
 }
 
-type Sheet = null | "settings" | "model" | "notices" | "thread";
+type Sheet = null | "settings" | "model" | "notices" | "thread" | "clients";
 
 function Main({ me, onSignOut, onMeChanged }: { me: Me; onSignOut: () => void; onMeChanged: () => void }) {
   const { status, refresh } = useAgentStatus(20_000);
@@ -184,10 +185,14 @@ function Main({ me, onSignOut, onMeChanged }: { me: Me; onSignOut: () => void; o
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"home" | "chat">("home");
   const [sheet, setSheet] = useState<Sheet>(null);
+  const [clients, setClients] = useState<ClientsSummary | null>(null);
+  const [clientFocus, setClientFocus] = useState<number | null>(null);
   const loadThreads = useCallback(async () => {
     const res = await fetch("/api/agent/threads", { credentials: "include", cache: "no-store" }).catch(() => null);
     if (res?.ok) setThreads((await res.json()).docs ?? []);
     setLoading(false);
+    // Clients (businesses that need a website) ride along with every refresh of the list.
+    setClients(await fetchClientsSummary());
   }, []);
   const api = useThread({
     onDone: () => {
@@ -249,8 +254,13 @@ function Main({ me, onSignOut, onMeChanged }: { me: Me; onSignOut: () => void; o
   useEffect(() => {
     const q = new URLSearchParams(location.search);
     const thread = q.get("thread");
+    const lead = Number(q.get("lead")) || null;
     history.replaceState({ ja: "home" }, "", "/app");
     const t = setTimeout(() => {
+      if (lead) {
+        setClientFocus(lead);
+        setSheet("clients");
+      }
       if (thread) openThread(thread);
       else if (q.has("new")) newTask();
       else if (q.has("talk")) startTalk();
@@ -274,8 +284,13 @@ function Main({ me, onSignOut, onMeChanged }: { me: Me; onSignOut: () => void; o
     const onMessage = (e: MessageEvent) => {
       const data = e.data as { type?: string; url?: string };
       if (data?.type === "open" && data.url) {
-        const thread = new URL(data.url, location.origin).searchParams.get("thread");
+        const q = new URL(data.url, location.origin).searchParams;
+        const thread = q.get("thread");
         if (thread) openThread(thread);
+        else if (Number(q.get("lead"))) {
+          setClientFocus(Number(q.get("lead")));
+          setSheet("clients");
+        }
       }
       if (data?.type === "pushed") {
         void refresh();
@@ -402,6 +417,8 @@ function Main({ me, onSignOut, onMeChanged }: { me: Me; onSignOut: () => void; o
             }}
             onModel={() => setSheet("model")}
             install={install}
+            clients={clients}
+            onClients={() => (setClientFocus(null), setSheet("clients"))}
           />
         </motion.div>
 
@@ -514,6 +531,7 @@ function Main({ me, onSignOut, onMeChanged }: { me: Me; onSignOut: () => void; o
       <ModelSheet open={sheet === "model"} onClose={() => setSheet(null)} status={status} onSwitched={() => void refresh()} />
       <NoticesSheet open={sheet === "notices"} onClose={() => (setSheet(null), void refresh())} onOpenThread={openThread} />
       <ThreadSheet open={sheet === "thread"} onClose={() => setSheet(null)} api={api} />
+      <ClientsSheet open={sheet === "clients"} onClose={() => setSheet(null)} focus={clientFocus} onChanged={() => void fetchClientsSummary().then(setClients)} />
     </>
   );
 }

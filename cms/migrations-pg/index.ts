@@ -3,6 +3,7 @@ import * as migration_20261005_080208_voice from './20261005_080208_voice';
 import * as migration_20261005_115109_sight from './20261005_115109_sight';
 import * as migration_20261005_135321_cloudinary_fields from './20261005_135321_cloudinary_fields';
 import * as migration_20261005_165409_agent_providers from './20261005_165409_agent_providers';
+import * as migration_20261006_002154_outreach from './20261006_002154_outreach';
 
 export const migrations = [
   {
@@ -28,6 +29,11 @@ export const migrations = [
   {
     up: migration_20261005_165409_agent_providers.up,
     down: migration_20261005_165409_agent_providers.down,
-    name: '20261005_165409_agent_providers'
+    name: '20261005_165409_agent_providers',
+  },
+  {
+    up: migration_20261006_002154_outreach.up,
+    down: migration_20261006_002154_outreach.down,
+    name: '20261006_002154_outreach'
   },
 ];

@@ -15,6 +15,7 @@ import { Media } from "./cms/collections/Media";
 import { Pages } from "./cms/collections/Pages";
 import { Projects } from "./cms/collections/Projects";
 import { Users } from "./cms/collections/Users";
+import { ClientSettings, Leads } from "./cms/outreach/config";
 import { Effects } from "./cms/globals/Effects";
 import { HomePage } from "./cms/globals/HomePage";
 import {
@@ -116,8 +117,8 @@ export default buildConfig({
       ],
     },
   },
-  // Order sets the admin's sidebar: Inbox, Agent, Pages, Content, Settings, Legal.
-  collections: [Inquiries, AgentThreads, AgentRoutines, AgentMemory, Pages, Projects, Articles, Media, Users],
+  // Order sets the admin's sidebar: Inbox, Clients, Agent, Pages, Content, Settings, Legal.
+  collections: [Inquiries, Leads, AgentThreads, AgentRoutines, AgentMemory, Pages, Projects, Articles, Media, Users],
   globals: [
     HomePage,
     AboutPage,
@@ -132,6 +133,7 @@ export default buildConfig({
     PrivacyPage,
     TermsPage,
     AgentSettings,
+    ClientSettings,
   ],
   editor: lexicalEditor(),
   // Postgres (Supabase) in production, SQLite locally: see cms/db.ts.
