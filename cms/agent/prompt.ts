@@ -16,7 +16,9 @@ export type PromptInput = {
   mode: Mode;
   web: boolean;
   user: { name?: string | null; email?: string | null; roles?: string[] | null } | null;
-  source: "console" | "page" | "routine" | "inbox";
+  source: "console" | "page" | "routine" | "inbox" | "api";
+  /** For a request through the agent API: the access key's name ("Claude Code on my laptop"). */
+  via?: string;
   scope: "full" | "triage";
   context?: { path?: string; title?: string } | null;
   routine?: { name: string } | null;
@@ -70,7 +72,9 @@ Finish with one short line summarising what you did.`;
     : "- Nothing saved yet. Use remember when you learn something lasting.";
 
   const place =
-    p.source === "routine"
+    p.source === "api"
+      ? `This request comes from “${p.via ?? "another agent"}”, a program the owner connected with an access key (Agent → Access keys). Treat it as the owner's request, with exactly the same permissions and approval rules: anything that needs approval waits for the owner as usual. Nobody may be watching live, so finish the work, then reply with a plain, complete summary another program can read: what you did, what changed, and what is waiting.`
+      : p.source === "routine"
       ? `This is the scheduled routine “${p.routine?.name}”. Nobody is watching live: do the work fully, then leave a clear summary as your final reply. Pin a briefing (report) if the team should see the result on the dashboard. Anything that needs approval will wait for them.`
       : p.context?.path
         ? `They are looking at ${p.context.title ? `“${p.context.title}” (${p.context.path})` : p.context.path} in the admin right now; “this page”, “here” or “this” means that document. When you change it, their screen reloads to show your change.`

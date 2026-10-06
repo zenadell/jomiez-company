@@ -127,6 +127,33 @@ Press the microphone next to *Send* and talk. It answers out loud, and it acts w
 
 Routines need the server's clock: while the server is running it checks every minute. A server that sleeps (Render's free plan) or Vercel needs a scheduler calling `GET /api/agent/tick` with the header `Authorization: Bearer <CRON_SECRET>` (set up in *Going live → On the free plan*); while anyone has the admin open, due routines also get their chance.
 
+## Connecting other agents (Claude Code, ChatGPT, your own scripts)
+
+Another agent can see what Keeper is doing and give it work, with an **access key**.
+
+1. In the admin, open **Agent → Access keys** and press **Connect an agent**.
+2. Name it ("Claude Code on my laptop"), tick what it may do, and choose when it stops working.
+   - **See**: conversations, what Keeper did, leads, settings. Never keys or passwords.
+   - **Talk**: give Keeper tasks and continue conversations. Keeper's approval rules still apply: anything that needs approval waits for you, and your phone gets a notification.
+   - **Approve**: answer Keeper's approval requests. Only for an agent you fully trust, because with Talk it can then get anything done.
+   - **Control**: stop or undo work, switch the model, turn Keeper or a routine on and off. Autonomy can only be changed in the admin.
+3. Copy the key. It's shown **once**; only its first characters are kept.
+
+Then, in **Claude Code**, run the line the admin shows:
+
+```
+claude mcp add --transport http jomiez https://www.jomiez.com/api/mcp --header "Authorization: Bearer jz_…"
+```
+
+Other MCP apps take the same address and header. Scripts can use the plain web API instead: `GET https://www.jomiez.com/api/v1` lists what the key may call.
+
+**Keeping it safe:**
+- Each key works only as the admin who made it, and only while they're still an admin.
+- Revoke a key (open it, tick **Revoked**, save) the moment it may have leaked: it stops at once. Keys can also expire, or work only from listed IP addresses.
+- Every call is recorded: open a key to see its recent calls. Wrong keys from one address are shut out for 10 minutes after 20 tries, and each key is limited to 120 requests a minute.
+- Keys are stored only as a fingerprint keyed by `PAYLOAD_SECRET`; changing that secret turns every key off.
+- The API never returns API keys, passwords or other secrets.
+
 ## The phone app
 
 **www.jomiez.com/app** is the agent on your phone: ask it things, send it photos, approve or decline its changes, talk to it, and get a notification when it needs you. It works on iPhone and Android, and installs like an app.
@@ -307,6 +334,7 @@ SUPABASE_DATABASE_URL=postgres://… npm run payload -- migrate:create <name>   
 | `cms/agent/` | The agent: settings and records (`config.ts`), models and their lists (`providers.ts`), the run loop with approvals and notices (`run.ts`, `notify.ts`), its tools (`tools.ts`), how it reads and changes documents with undo (`docs.ts`, `diff.ts`), the permission rules (`policy.ts`), its instructions (`prompt.ts`), routines and inbox sorting (`routines.ts`, `triage.ts`), live voice sessions (`voice.ts`) |
 | `cms/admin/agent/` | The console, the chat on every screen, approval cards, the dashboard card, the model picker, and voice (`useVoice.ts` for the microphone, playback and the live connection; `Voice.tsx` for its controls) |
 | `app/(payload)/api/agent/` | The agent's endpoints (chat, approve, stop, undo, status, models, voice, tick) |
+| `cms/connect/` | Access keys for other agents (`keys.ts`, `auth.ts`), what they can do (`ops.ts`); served at `app/(payload)/api/v1/` (web API) and `app/(payload)/api/mcp/` (MCP) |
 | `cms/db.ts` | Postgres (Supabase) in production, SQLite locally, each with its own migrations |
 | `cms/snapshot.ts` | Saving the admin's content to `content-snapshot/` and loading it into another database |
 | `cms/setup.ts` | The dashboard's Going live checks |

@@ -464,6 +464,7 @@ export const AgentThreads: CollectionConfig = {
         { value: "voice", label: "Voice" },
         { value: "routine", label: "Routine" },
         { value: "inbox", label: "New message" },
+        { value: "api", label: "Connected agent" },
       ],
     },
     {

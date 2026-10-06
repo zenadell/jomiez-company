@@ -5,6 +5,7 @@ import * as migration_20261005_135321_cloudinary_fields from './20261005_135321_
 import * as migration_20261005_165409_agent_providers from './20261005_165409_agent_providers';
 import * as migration_20261006_002154_outreach from './20261006_002154_outreach';
 import * as migration_20261006_113120_gmail_script from './20261006_113120_gmail_script';
+import * as migration_20261006_185731_access_keys from './20261006_185731_access_keys';
 
 export const migrations = [
   {
@@ -40,6 +41,11 @@ export const migrations = [
   {
     up: migration_20261006_113120_gmail_script.up,
     down: migration_20261006_113120_gmail_script.down,
-    name: '20261006_113120_gmail_script'
+    name: '20261006_113120_gmail_script',
+  },
+  {
+    up: migration_20261006_185731_access_keys.up,
+    down: migration_20261006_185731_access_keys.down,
+    name: '20261006_185731_access_keys'
   },
 ];

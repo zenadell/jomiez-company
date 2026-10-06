@@ -1620,3 +1620,144 @@
   color: var(--theme-elevation-500);
   font-weight: 400;
 }
+
+/* ---------- Access keys (cms/admin/connect) ---------- */
+
+.jz-connect {
+  display: grid;
+  gap: 14px;
+  margin-bottom: calc(var(--base) * 1);
+  padding: 18px 20px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--jz-radius);
+  background: var(--theme-elevation-50);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.jz-connect h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.jz-connect__field {
+  display: grid;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.jz-connect__field span,
+.jz-connect__scopes legend {
+  font-weight: 600;
+}
+
+.jz-connect__field input,
+.jz-connect__field select {
+  padding: 8px 10px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 8px;
+  background: var(--theme-input-bg, var(--theme-bg));
+  color: var(--theme-text);
+  font: inherit;
+}
+
+.jz-connect__scopes {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.jz-connect__scopes legend {
+  margin-bottom: 6px;
+}
+
+.jz-connect__scopes label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.jz-connect__scopes input {
+  margin-top: 4px;
+}
+
+.jz-connect__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.jz-connect__error {
+  margin: 0;
+  color: var(--jz-bad);
+}
+
+.jz-connect__warn {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgb(255 122 47 / 0.1);
+}
+
+.jz-connect__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.jz-connect__key code {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--theme-elevation-100);
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.jz-connect__snippet pre {
+  overflow-x: auto;
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--theme-elevation-100);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.jz-connect__snippet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.jz-connect__log {
+  margin: 8px 0 20px;
+  font-size: 13px;
+}
+
+.jz-connect__log h4 {
+  margin: 0 0 8px;
+}
+
+.jz-connect__log table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.jz-connect__log td {
+  padding: 6px 8px;
+  border-top: 1px solid var(--theme-elevation-100);
+  vertical-align: top;
+}
+
+.jz-connect__log tr.is-bad td {
+  color: var(--jz-bad);
+}
+
+/* Above the list, lined up with the page's own gutters. */
+.jz-connect-wrap {
+  padding-inline: var(--gutter-h, 60px);
+}

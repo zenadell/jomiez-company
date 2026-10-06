@@ -9,6 +9,7 @@ import { buildConfig, type Migration } from "payload";
 import sharp from "sharp";
 import { signedIn } from "./cms/access";
 import { AgentMemory, AgentRoutines, AgentSettings, AgentThreads } from "./cms/agent/config";
+import { AccessKeys } from "./cms/connect/keys";
 import { Articles } from "./cms/collections/Articles";
 import { Inquiries } from "./cms/collections/Inquiries";
 import { Media } from "./cms/collections/Media";
@@ -118,7 +119,7 @@ export default buildConfig({
     },
   },
   // Order sets the admin's sidebar: Inbox, Clients, Agent, Pages, Content, Settings, Legal.
-  collections: [Inquiries, Leads, AgentThreads, AgentRoutines, AgentMemory, Pages, Projects, Articles, Media, Users],
+  collections: [Inquiries, Leads, AgentThreads, AgentRoutines, AgentMemory, AccessKeys, Pages, Projects, Articles, Media, Users],
   globals: [
     HomePage,
     AboutPage,

@@ -29,7 +29,7 @@ export type RunInput = {
   message?: string;
   decisions?: Decision[];
   context?: { path?: string; title?: string } | null;
-  source: "console" | "page" | "routine" | "inbox";
+  source: "console" | "page" | "routine" | "inbox" | "api";
   scope?: "full" | "triage";
   routine?: { id: number | string; name: string; mode?: string | null } | null;
   /** Triage: the only message it may touch. */
@@ -434,6 +434,7 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
     web: perms.web,
     user: input.user as never,
     source: input.source,
+    via: input.source === "api" ? input.label : undefined,
     scope,
     context: input.context,
     routine: input.routine,
