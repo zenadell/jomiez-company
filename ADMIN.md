@@ -151,6 +151,42 @@ Routines need the server's clock: while the server is running it checks every mi
 
 The app opens instantly and offline (it keeps its own copy); conversations always come fresh from the site. On the free plan, the first open after a quiet spell takes up to a minute while the server wakes.
 
+## Finding clients
+
+Keeper looks for businesses that could use a better website, checks their sites, and writes a message to each. **You send every message yourself**, from the phone app. Everything here is free.
+
+**Set it up (once):** Admin → Clients → **Finding clients**.
+1. Under **Where to look**, list areas (“Lekki, Lagos”, “Wuse, Abuja”, “Peckham, London”, “Houston, Texas”) and the kinds of business for each. Areas take turns.
+2. Write **What you offer** in your words (a starting price if you like). Keeper only promises what's written there.
+3. Fill in your name, WhatsApp number (for the “Get this website” button on previews) and business address (it goes at the end of emails).
+4. Tick **Look for new clients every day**, and **Write a journal post every week** if you want the weekly SEO post. Save. Both show up under Agent → Routines.
+5. Optional but recommended:
+   - **Website checks**: a free Google PageSpeed key ([get one](https://developers.google.com/speed/docs/insights/v5/get-started), 25,000 checks a day) adds speed scores and a screenshot of each site. Without it, Keeper does a simpler check of its own.
+   - **Email**: your Gmail address and an app password ([myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), needs 2-Step Verification). The site's own email service (Resend) doesn't allow messages people didn't ask for, so emails go from your Gmail, 20 a day at most.
+
+**Each morning** Keeper:
+- finds new businesses on OpenStreetMap (named businesses with a phone or email; chains are left out);
+- checks each website on a phone: does it open, is it secure, is it made for phones, can Google read it, is it dated, can you call or WhatsApp from it;
+- gives each a score;
+- writes a WhatsApp message, a text and an email for the best ones, using only what it actually found;
+- makes a free **homepage preview** for the most promising ones, at jomiez.com/preview/…;
+- writes one follow-up for anyone who hasn't replied after a few days.
+
+**In the phone app**, the home screen shows “N messages to send”.
+- Tap it to read each message, edit it or ask for a rewrite.
+- Then tap **WhatsApp** or **Text**: your phone opens with the message filled in, and you press send. **Email** sends from your Gmail.
+- Under **Sent** and **Replied**, keep track: replied, won, not interested.
+- When a business opens its preview, you get a notification: a good moment to follow up.
+
+**Asking Keeper:** you can also ask it directly, e.g. “Find 10 salons in Lekki that need a website”, “Rewrite the message to Mama Put Kitchen, shorter”, “Add Glow Studio, 0809 555 1212, to leads”.
+
+**People who say no:**
+- Every message ends with a way to opt out (reply “stop”; emails also have a link).
+- Mark it with **They asked not to be contacted**, or they use the email or preview link themselves.
+- Either way, that business is never contacted again, even if its lead is deleted.
+
+Keep volumes human: a few personal messages a day get replies and keep your WhatsApp and Gmail in good standing.
+
 ## Email (contact form)
 
 Every message is saved to the Inbox. To also get an email for each one, and to send visitors the automatic reply:

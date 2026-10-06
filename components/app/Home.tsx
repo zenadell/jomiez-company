@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRef, useState, type ReactNode } from "react";
 import type { AgentStatus } from "@/cms/admin/agent/useAgent";
 import { Markdown } from "@/cms/admin/agent/Markdown";
+import type { ClientsSummary } from "./Clients";
 import { STATUS_TEXT, ago, modeText, type ThreadRow } from "./lib";
 
 /*
@@ -53,6 +54,8 @@ export function HomeContent({
   onRefresh,
   onModel,
   install,
+  clients,
+  onClients,
 }: {
   status: AgentStatus | null;
   threads: ThreadRow[];
@@ -61,6 +64,8 @@ export function HomeContent({
   onRefresh: () => Promise<void>;
   onModel: () => void;
   install: ReactNode;
+  clients: ClientsSummary | null;
+  onClients: () => void;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
   const [briefingOpen, setBriefingOpen] = useState(false);
@@ -162,6 +167,39 @@ export function HomeContent({
           </motion.button>
         )}
       </AnimatePresence>
+
+      {clients && (clients.ready > 0 || clients.enabled || clients.contacted + clients.replied + clients.won > 0) ? (
+        <motion.button type="button" className={`ja-card ja-platter ja-card--clients${clients.ready ? " is-ready" : ""}`} onClick={onClients} {...RISE(1)}>
+          <span className="ja-card__icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 21V9l9-6 9 6v12M9 21v-6h6v6" />
+            </svg>
+          </span>
+          <span className="ja-card__text">
+            <strong>{clients.ready ? `${clients.ready} ${clients.ready === 1 ? "message" : "messages"} to send` : "Clients"}</strong>
+            <small>
+              {[clients.contacted && `${clients.contacted} sent`, clients.replied && `${clients.replied} replied`, clients.won && `${clients.won} won`].filter(Boolean).join(" · ") ||
+                "Businesses that need a website, and what to say to them"}
+            </small>
+          </span>
+          <span className="ja-chevron" aria-hidden="true">
+            ›
+          </span>
+        </motion.button>
+      ) : (
+        clients &&
+        status?.canConfigure && (
+          <motion.div className="ja-card ja-platter" {...RISE(1)}>
+            <span className="ja-card__text">
+              <strong>Find clients</strong>
+              <p>Every morning {name} can find businesses near you (or in the UK and US) that need a website, check their sites and write to each one for you to send.</p>
+            </span>
+            <Link className="ja-btn ja-btn--primary ja-btn--small" href="/admin/globals/outreach" style={{ marginTop: 12 }}>
+              Choose areas
+            </Link>
+          </motion.div>
+        )
+      )}
 
       {status?.briefing && (
         <motion.div className={`ja-card ja-platter ja-card--briefing${briefingOpen ? " is-open" : ""}`} {...RISE(2)}>

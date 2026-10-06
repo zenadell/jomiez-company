@@ -1588,6 +1588,357 @@ a {
   }
 }
 
+/* ---------- Clients (businesses that need a website) ---------- */
+
+.ja-card--clients {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.45s var(--ja-spring);
+}
+
+.ja-card--clients:active {
+  transform: scale(0.97);
+  transition-duration: 0.12s;
+}
+
+.ja-card--clients.is-ready {
+  background: linear-gradient(135deg, rgba(95, 216, 146, 0.3), rgba(40, 150, 90, 0.16)), var(--ja-platter);
+  box-shadow:
+    inset 0 0 0 0.5px rgba(140, 240, 180, 0.45),
+    inset 0 0.5px 0 rgba(200, 255, 220, 0.4);
+}
+
+.ja-card--clients .ja-card__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ja-card__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ja-card--clients.is-ready .ja-card__icon {
+  background: linear-gradient(180deg, #7ee6a7, #3fbf74);
+  color: #03190b;
+}
+
+.ja-clients {
+  padding-bottom: 72px;
+}
+
+.ja-segments--sheet {
+  margin-top: 0;
+  background: rgba(118, 118, 128, 0.24);
+}
+
+.ja-leads {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ja-lead {
+  padding: 14px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+}
+
+.ja-lead.is-focus {
+  box-shadow: inset 0 0 0 1.5px var(--ja-accent);
+}
+
+.ja-lead.is-skeleton {
+  height: 180px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+  background-size: 200% 100%;
+  animation: ja-shimmer 1.4s linear infinite;
+}
+
+.ja-lead__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ja-lead__shot {
+  flex: none;
+  width: 46px;
+  height: 84px;
+  border-radius: 9px;
+  object-fit: cover;
+  object-position: top;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.2);
+}
+
+.ja-lead__shot.is-none {
+  display: grid;
+  place-items: center;
+  color: var(--ja-ink-3);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.ja-lead__who {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ja-lead__who strong {
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.ja-lead__who small {
+  color: var(--ja-ink-2);
+  font-size: 14px;
+  text-transform: capitalize;
+}
+
+.ja-lead__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.ja-tag {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--ja-ink-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ja-tag.is-hot {
+  background: rgba(255, 138, 61, 0.2);
+  color: #ffb27d;
+}
+
+.ja-tag.is-seen {
+  background: rgba(95, 216, 146, 0.2);
+  color: #8ff0b5;
+}
+
+.ja-lead__score {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ja-lead__found {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ja-ink-2);
+  font-size: 14.5px;
+  line-height: 1.4;
+}
+
+.ja-lead__found li {
+  position: relative;
+  padding-left: 16px;
+}
+
+.ja-lead__found li + li {
+  margin-top: 5px;
+}
+
+.ja-lead__found li::before {
+  content: "";
+  position: absolute;
+  top: 0.55em;
+  left: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ja-accent);
+}
+
+.ja-lead__found .ja-lead__more::before,
+.ja-lead__found .ja-lead__review::before {
+  display: none;
+}
+
+.ja-lead__more button {
+  color: var(--ja-accent);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ja-lead__review {
+  font-style: italic;
+  white-space: pre-line;
+}
+
+.ja-lead__msg {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 16px 16px 16px 6px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.ja-lead__msg p {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.ja-lead__msg textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  resize: vertical;
+  background: transparent;
+  color: var(--ja-ink);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.ja-lead__msgbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.ja-lead__msgbar button {
+  color: var(--ja-ink-2);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ja-lead__msgbar button.is-strong {
+  color: var(--ja-accent);
+}
+
+.ja-lead__ask {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ja-lead__ask input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 11px;
+  outline: none;
+  background: rgba(118, 118, 128, 0.3);
+  font-size: 16px;
+}
+
+.ja-lead__busy {
+  margin: 8px 0 0;
+  color: var(--ja-ink-3);
+  font-size: 13.5px;
+}
+
+.ja-lead__send {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ja-lead__send .ja-btn {
+  flex: 1;
+  height: 46px;
+  padding: 0 12px;
+  border-radius: 14px;
+  font-size: 16px;
+}
+
+.ja-lead__quiet {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 18px;
+  margin-top: 10px;
+}
+
+.ja-lead__quiet button {
+  padding: 4px 0;
+  color: var(--ja-ink-3);
+  font-size: 13.5px;
+}
+
+.ja-lead__line,
+.ja-lead__note {
+  margin: 10px 0 0;
+  color: var(--ja-ink-2);
+  font-size: 14px;
+}
+
+.ja-lead__problem {
+  margin: 10px 0 0;
+  color: #ff9c92;
+  font-size: 14px;
+}
+
+.ja-clients__empty {
+  padding: 28px 12px;
+  color: var(--ja-ink-2);
+  text-align: center;
+}
+
+.ja-clients__empty p {
+  margin: 0 0 14px;
+  font-size: 15px;
+}
+
+.ja-toast {
+  position: sticky;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 14px 12px 16px;
+  border-radius: 18px;
+  background: rgba(20, 30, 24, 0.92);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  font-size: 14.5px;
+}
+
+.ja-toast span {
+  flex: 1;
+}
+
+.ja-toast button {
+  color: var(--ja-accent);
+  font-size: 15px;
+  font-weight: 700;
+}
+
 /* ---------- Sheets (thick glass) ---------- */
 
 .ja-sheet-layer {

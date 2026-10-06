@@ -27,7 +27,7 @@ export const DEFAULT_VOICE_MODEL = "gemini-3.1-flash-live-preview";
  * server-side read asks for it with the revealAgentKey context flag), with a
  * hidden "last four characters" hint for the settings screen.
  */
-function secret(name: string, label: string, description: string, hidden = false): Field[] {
+export function secret(name: string, label: string, description: string, hidden = false): Field[] {
   return [
     {
       name,
@@ -38,6 +38,25 @@ function secret(name: string, label: string, description: string, hidden = false
     },
     { name: `${name}Hint`, type: "text", admin: { hidden: true, readOnly: true } },
   ];
+}
+
+/**
+ * Saving a key field: a new key is encrypted (with its hint), the clear signal
+ * removes it, and an untouched box (which comes back empty, since the browser
+ * never has the key) keeps what was stored.
+ */
+export function settleSecret(target: Record<string, unknown>, name: string, prev: Record<string, unknown> | null | undefined) {
+  const incoming = target[name] as string | null | undefined;
+  if (incoming === CLEAR_KEY) {
+    target[name] = null;
+    target[`${name}Hint`] = null;
+  } else if (typeof incoming === "string" && incoming.trim() && !isEncrypted(incoming)) {
+    target[name] = encrypt(incoming.trim());
+    target[`${name}Hint`] = hint(incoming.trim());
+  } else {
+    target[name] = prev?.[name] ?? null;
+    target[`${name}Hint`] = prev?.[`${name}Hint`] ?? null;
+  }
 }
 
 const PROVIDER_OPTIONS = Object.entries(PROVIDERS).map(([value, p]) => ({ value, label: p.label }));
@@ -397,19 +416,7 @@ export const AgentSettings: GlobalConfig = {
         // what's stored. Read it from the database itself, since every normal read leaves keys out.
         let stored: Record<string, unknown> | null | undefined;
         const fromDb = async () => (stored ??= (await req.payload.db.findGlobal({ slug: "agent", req })) as Record<string, unknown> | null);
-        const settle = (target: Record<string, unknown>, name: string, prev: Record<string, unknown> | null | undefined) => {
-          const incoming = target[name] as string | null | undefined;
-          if (incoming === CLEAR_KEY) {
-            target[name] = null;
-            target[`${name}Hint`] = null;
-          } else if (typeof incoming === "string" && incoming.trim() && !isEncrypted(incoming)) {
-            target[name] = encrypt(incoming.trim());
-            target[`${name}Hint`] = hint(incoming.trim());
-          } else {
-            target[name] = prev?.[name] ?? null;
-            target[`${name}Hint`] = prev?.[`${name}Hint`] ?? null;
-          }
-        };
+        const settle = settleSecret;
         for (const name of SECRET_FIELDS) settle(next, name, await fromDb());
         if (Array.isArray(next.providers)) {
           const before = ((await fromDb())?.providers as Record<string, unknown>[] | undefined) ?? [];

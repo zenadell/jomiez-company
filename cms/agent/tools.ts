@@ -9,6 +9,7 @@ import type { Permissions, Risk } from "./policy";
 import { adminUrl, describeFields, siteUrl, targetsOf, toModel, walk, type Target } from "./schema";
 import { browserAvailable, canSee, findPhotos, getShot, imagesInHtml, imagesOn, keepShot, loadImage, makeImage, see, serviceShot, wake, withPage, DEVICES, type Sight } from "./eyes";
 import { outline, safeFetch } from "./web";
+import { addOutreachTools } from "../outreach/tools";
 
 /*
  * Everything the agent can do, as tools the model calls. Each tool declares its
@@ -51,6 +52,13 @@ const UNTRUSTED =
 
 const idSchema = z.union([z.string(), z.number()]).optional().describe("The document's id, or its address (slug). Not needed for single pages (globals).");
 const reason = z.string().describe("One short sentence, shown to the owner, on why this change is being made.");
+
+/** Registers one tool (see makeTools). Shared with the tools that live next to their feature (cms/outreach/tools.ts). */
+export type AddTool = <S extends z.ZodTypeAny>(
+  name: string,
+  def: { description: string; input: S; risk: ToolMeta["risk"]; title: ToolMeta["title"]; preview?: ToolMeta["preview"]; skipApproval?: ToolMeta["skipApproval"] },
+  run: (input: z.infer<S>) => Promise<unknown>,
+) => void;
 
 /** Words too common to require when searching by words. */
 const SMALL_WORDS = new Set(["a", "an", "the", "of", "to", "in", "on", "and", "or", "for", "with", "at", "by", "is", "it"]);
@@ -1021,6 +1029,9 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
       return { ok: true, mediaId: doc.id, url: doc.url, model: made.model, note: "Look at it before using it, and say so if it isn't right." };
     },
   );
+
+  // Finding clients: leads, website checks, messages (cms/outreach).
+  addOutreachTools(add, env);
 
   // Triage reads a stranger's words: no memory, no email, no web, no other documents.
   if (env.scope === "triage") {
