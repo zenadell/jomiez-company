@@ -22,7 +22,7 @@ export const KINDS = {
   property: { label: "Real estate", osm: [["office", "estate_agent|property_management"], ["shop", "estate_agent"]] },
   professional: {
     label: "Lawyers, accountants and consultants",
-    osm: [["office", "lawyer|accountant|consulting|insurance|financial|financial_advisor|architect|engineer|tax_advisor|notary|advertising_agency|it|logistics|travel_agent"]],
+    osm: [["office", "lawyer|accountant|consulting|insurance|financial_advisor|architect|engineer|tax_advisor|notary|advertising_agency|it|logistics|travel_agent"]],
   },
   fitness: { label: "Gyms and sports", osm: [["leisure", "fitness_centre|sports_centre|dance|yoga"], ["amenity", "gym"]] },
   auto: { label: "Car dealers and repairs", osm: [["shop", "car|car_repair|car_parts|tyres|motorcycle"], ["amenity", "car_wash|car_rental"]] },

@@ -156,13 +156,18 @@ The app opens instantly and offline (it keeps its own copy); conversations alway
 Keeper looks for businesses that could use a better website, checks their sites, and writes a message to each. **You send every message yourself**, from the phone app. Everything here is free.
 
 **Set it up (once):** Admin → Clients → **Finding clients**.
-1. Under **Where to look**, list areas (“Lekki, Lagos”, “Wuse, Abuja”, “Peckham, London”, “Houston, Texas”) and the kinds of business for each. Areas take turns.
+1. Under **Where to look**, list areas (“Lekki Phase I, Lagos”, “Wuse, Abuja”, “Peckham, London”, “Houston, Texas”) and the kinds of business for each. Areas take turns. Name a neighbourhood rather than a whole county: “Lekki, Lagos” matches Ibeju-Lekki, a huge and mostly rural area, and only its middle gets searched.
 2. Write **What you offer** in your words (a starting price if you like). Keeper only promises what's written there.
 3. Fill in your name, WhatsApp number (for the “Get this website” button on previews) and business address (it goes at the end of emails).
 4. Tick **Look for new clients every day**, and **Write a journal post every week** if you want the weekly SEO post. Save. Both show up under Agent → Routines.
 5. Optional but recommended:
    - **Website checks**: a free Google PageSpeed key ([get one](https://developers.google.com/speed/docs/insights/v5/get-started), 25,000 checks a day) adds speed scores and a screenshot of each site. Without it, Keeper does a simpler check of its own.
-   - **Email**: your Gmail address and an app password ([myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), needs 2-Step Verification). The site's own email service (Resend) doesn't allow messages people didn't ask for, so emails go from your Gmail, 20 a day at most.
+   - **Email** goes from your own Gmail, 20 a day at most. The site's own email service (Resend) doesn't allow messages people didn't ask for. Render's free plan blocks the ports a Gmail password needs, so use the small Google Script shown in **Email**:
+     1. Paste it into [script.google.com](https://script.google.com/home/projects/create).
+     2. Set a password in it and type the same password in Jomiez.
+     3. Deploy it as a Web app (Execute as: Me, Who has access: Anyone), paste the /exec address, save, and press **Send me a test email**.
+
+     On a host with email ports open, a Gmail app password ([myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)) works too.
 
 **Each morning** Keeper:
 - finds new businesses on OpenStreetMap (named businesses with a phone or email; chains are left out);

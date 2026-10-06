@@ -7,9 +7,11 @@ import { loadOutreach } from "./settings";
  * Sending, always by the owner's hand:
  * - WhatsApp and texts open on the owner's own phone with the message filled in
  *   (wa.me and sms: links); they press send. Free, and it's their own number.
- * - Email goes from the owner's Gmail (an app password), a few a day, with
- *   their address and a one-tap "don't email me again" link, as the UK and US
- *   rules for business email ask.
+ * - Email goes from the owner's Gmail, a few a day, with their address and a
+ *   one-tap "don't email me again" link, as the UK and US rules for business
+ *   email ask. Either through a small Google Script of theirs (an ordinary web
+ *   address, so it works on hosts that block email ports, like Render's free
+ *   plan) or with a Gmail app password where those ports are open.
  * Whoever asks not to be contacted is never contacted again, even if their
  * lead is deleted later (find.ts keeps a list).
  */
@@ -105,13 +107,80 @@ const today = () => new Date().toISOString().slice(0, 10);
 export async function emailsLeftToday(payload: Payload) {
   const s = await loadOutreach(payload);
   const sent = (await payload.kv.get<number>(`outreach:emails:${today()}`)) ?? 0;
-  return { left: Math.max(0, s.dailyEmails - sent), ready: Boolean(s.gmail && s.gmailPassword) };
+  return { left: Math.max(0, s.dailyEmails - sent), ready: Boolean((s.gmailScriptUrl && s.gmailScriptSecret) || (s.gmail && s.gmailPassword)) };
+}
+
+type Mail = { to: string; subject: string; text: string; html: string; name: string; headers?: Record<string, string> };
+
+/** Through the owner's Google Script (cms/admin/GmailScript.tsx). Returns the sending address. */
+async function viaScript(url: string, password: string, mail: Mail | null): Promise<{ from?: string; left?: number }> {
+  const res = await fetch(url, {
+    method: "POST",
+    redirect: "follow",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(mail ? { password, to: mail.to, subject: mail.subject, text: mail.text, html: mail.html, name: mail.name } : { password, test: true }),
+    signal: AbortSignal.timeout(45_000),
+  });
+  const raw = await res.text();
+  let out: { ok?: boolean; error?: string; from?: string; left?: number } | null = null;
+  try {
+    out = JSON.parse(raw);
+  } catch {
+    out = null;
+  }
+  if (!out) {
+    throw new Error(
+      res.status === 404 || /not found/i.test(raw)
+        ? "Google says that script address doesn't exist: copy the Web app URL again from Deploy → Manage deployments."
+        : "Google answered with a sign-in page instead of the script: in Deploy → Manage deployments, set Who has access to Anyone.",
+    );
+  }
+  if (!out.ok) throw new Error(/wrong password/.test(out.error ?? "") ? "The script's password doesn't match the one saved in Clients → Finding clients → Email." : `The Gmail script couldn't send it: ${(out.error ?? "unknown error").slice(0, 200)}`);
+  return { from: out.from, left: out.left };
+}
+
+/** Through Gmail's mail server with an app password (hosts that allow email ports). */
+async function viaSmtp(user: string, pass: string, mail: Mail) {
+  const transport = nodemailer.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user, pass: pass.replace(/\s+/g, "") }, connectionTimeout: 15_000 });
+  try {
+    await transport.sendMail({ from: mail.name ? `"${mail.name.replace(/"/g, "")}" <${user}>` : user, to: mail.to, subject: mail.subject, text: mail.text, html: mail.html, headers: mail.headers });
+  } catch (err) {
+    const msg = (err as Error).message || String(err);
+    if (/535|Username and Password not accepted|BadCredentials/i.test(msg)) throw new Error("Gmail didn't accept the address and app password. Make a new app password at myaccount.google.com/apppasswords and paste it in Clients → Finding clients → Email.");
+    if (/ENETUNREACH|ETIMEDOUT|timeout|ECONNREFUSED|EHOSTUNREACH/i.test(msg)) {
+      throw new Error("This server can't reach Gmail's mail server: the host blocks email ports (Render's free plan does). Set up the Google Script in Clients → Finding clients → Email instead; it takes two minutes.");
+    }
+    throw new Error(`Gmail didn't send it: ${msg.slice(0, 200)}`);
+  }
+}
+
+async function deliver(payload: Payload, mail: Mail) {
+  const s = await loadOutreach(payload);
+  if (s.gmailScriptUrl && s.gmailScriptSecret) return viaScript(s.gmailScriptUrl, s.gmailScriptSecret, mail);
+  if (s.gmail && s.gmailPassword) return viaSmtp(s.gmail, s.gmailPassword, mail);
+  throw new Error("Email isn't set up yet: add the Google Script (or a Gmail app password) in Clients → Finding clients → Email.");
+}
+
+/** A test email to the sending Gmail itself, from the settings screen. */
+export async function sendTestEmail(payload: Payload) {
+  const s = await loadOutreach(payload);
+  let to = s.gmail;
+  if (s.gmailScriptUrl && s.gmailScriptSecret) to = (await viaScript(s.gmailScriptUrl, s.gmailScriptSecret, null)).from || to;
+  if (!to) throw new Error("Add your Gmail address first.");
+  await deliver(payload, {
+    to,
+    subject: "Jomiez: email to leads works",
+    text: "This is a test from Clients → Finding clients. Emails to leads will go from this Gmail.",
+    html: "<p>This is a test from Clients → Finding clients. Emails to leads will go from this Gmail.</p>",
+    name: s.senderName ? `${s.senderName} · Jomiez` : "Jomiez",
+  });
+  return to;
 }
 
 /** Sends the lead's email from the owner's Gmail. */
 export async function sendLeadEmail(payload: Payload, id: number | string) {
   const s = await loadOutreach(payload);
-  if (!s.gmail || !s.gmailPassword) throw new Error("Email isn't set up yet: add your Gmail address and an app password in Clients → Finding clients → Email.");
+  if (!(s.gmailScriptUrl && s.gmailScriptSecret) && !(s.gmail && s.gmailPassword)) throw new Error("Email isn't set up yet: add the Google Script in Clients → Finding clients → Email.");
   const lead = await get(payload, id);
   if (lead.status === "stopped") throw new Error(`${lead.name} asked not to be contacted.`);
   const to = typeof lead.email === "string" ? lead.email : "";
@@ -130,21 +199,14 @@ export async function sendLeadEmail(payload: Payload, id: number | string) {
     .split(/\n{2,}/)
     .map((p) => `<p>${esc(p).replace(/\n/g, "<br>").replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1">$1</a>')}</p>`)
     .join("")}<p style="margin-top:28px;font-size:12px;color:#777">${esc([s.senderName || "Jomiez", "Jomiez", s.address].filter(Boolean).join(" · "))}<br><a href="${stop}" style="color:#777">Don't email me again</a></p></div>`;
-  const transport = nodemailer.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user: s.gmail, pass: s.gmailPassword.replace(/\s+/g, "") } });
-  try {
-    await transport.sendMail({
-      from: s.senderName ? `"${s.senderName.replace(/"/g, "")} · Jomiez" <${s.gmail}>` : s.gmail,
-      to,
-      subject: m.emailSubject.trim(),
-      text,
-      html,
-      headers: { "List-Unsubscribe": `<${stop}>, <mailto:${s.gmail}?subject=unsubscribe>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
-    });
-  } catch (err) {
-    const msg = (err as Error).message || String(err);
-    if (/535|Username and Password not accepted|BadCredentials/i.test(msg)) throw new Error("Gmail didn't accept the address and app password. Make a new app password at myaccount.google.com/apppasswords and paste it in Clients → Finding clients → Email.");
-    throw new Error(`Gmail didn't send it: ${msg.slice(0, 200)}`);
-  }
+  await deliver(payload, {
+    to,
+    subject: m.emailSubject.trim(),
+    text,
+    html,
+    name: s.senderName ? `${s.senderName} · Jomiez` : "Jomiez",
+    headers: { "List-Unsubscribe": `<${stop}>${s.gmail ? `, <mailto:${s.gmail}?subject=unsubscribe>` : ""}`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+  });
   await payload.kv.set(key, sent + 1);
   return markSent(payload, id, "email");
 }

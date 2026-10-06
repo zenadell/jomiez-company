@@ -1,7 +1,7 @@
 import type { Payload } from "payload";
 import sharp from "sharp";
 import { canSee, see, serviceShot, type Sight } from "../agent/eyes";
-import { outline, safeFetch } from "../agent/web";
+import { PHONE_UA, outline, safeFetch } from "../agent/web";
 import { looksMobile } from "./kinds";
 
 /*
@@ -19,7 +19,8 @@ export type Finding = { id: string; text: string; weight: 1 | 2 | 3 };
 
 export type CheckResult = {
   at: string;
-  kind: "none" | "broken" | "basic" | "pagespeed";
+  /** unreachable: it turned the check away (a bot shield, or no answer), so nothing is known. */
+  kind: "none" | "broken" | "unreachable" | "basic" | "pagespeed";
   url?: string;
   scores?: { performance?: number; seo?: number; accessibility?: number; bestPractices?: number };
   metrics?: { lcpMs?: number; loadMs?: number };
@@ -33,18 +34,42 @@ export type CheckResult = {
 
 const year = () => new Date().getFullYear();
 
-const PARKED = /domain (is )?for sale|buy this domain|this domain (name )?(is|may be) (for sale|parked)|parked (free|domain)|coming soon|under construction|account (has been )?suspended|default (web )?(site|server) page|index of \/|website is (currently )?(down|unavailable)|future home of/i;
+const PARKED = /domain (is )?for sale|buy this domain|this domain (name )?(is|may be) (for sale|parked)|parked (free|domain)|coming soon|under construction|under maintenance|maintenance mode|we.?ll be back soon|be right back|account (has been )?suspended|default (web )?(site|server) page|index of \/|website is (currently )?(down|unavailable)|future home of/i;
 
-/** The quick check: one request for the homepage, read like a careful person would. */
+/**
+ * The quick check: one request for the homepage, as a phone's browser, read
+ * like a careful person would. A site is only called broken when that's
+ * certain (its address doesn't exist, it refuses connections, or it answers
+ * with an error twice). A site that turns automated visitors away (a bot
+ * shield, or no answer in time) is "couldn't check": nothing is claimed.
+ */
 export async function basicCheck(address: string): Promise<{ result: Omit<CheckResult, "at" | "facts">; html?: string }> {
+  const get = () => safeFetch(address, { timeoutMs: 20_000, maxBytes: 2_500_000, userAgent: PHONE_UA });
   const started = Date.now();
-  let res: Awaited<ReturnType<typeof safeFetch>>;
-  try {
-    res = await safeFetch(address, { timeoutMs: 20_000, maxBytes: 2_500_000 });
-  } catch (err) {
-    const msg = (err as Error).message || "";
-    const why = /timeout|aborted/i.test(msg) ? "didn't open within 20 seconds" : /ENOTFOUND|EAI_AGAIN|getaddrinfo/i.test(msg) ? "address doesn't work any more" : "couldn't be opened";
-    return { result: { kind: "broken", url: address, findings: [{ id: "down", text: `Their website ${why}, so anyone who searches for them finds nothing.`, weight: 3 }] } };
+  let res: Awaited<ReturnType<typeof safeFetch>> | null = null;
+  let problem = "";
+  for (let attempt = 0; attempt < 2 && !res; attempt++) {
+    if (attempt) await new Promise((r) => setTimeout(r, 3000));
+    try {
+      res = await get();
+      if (res.status >= 500 || res.status === 404 || res.status === 410) {
+        problem = `error ${res.status}`;
+        if (attempt === 0) res = null; // once more, in case it was a blip
+      }
+    } catch (err) {
+      problem = (err as Error).message || "error";
+      // A name that doesn't exist or a refused connection won't change in three seconds.
+      if (/ENOTFOUND|ECONNREFUSED/i.test(problem)) break;
+    }
+  }
+  if (!res) {
+    if (/ENOTFOUND/i.test(problem)) return { result: { kind: "broken", url: address, findings: [{ id: "down", text: "Their website's address doesn't work any more, so anyone who searches for them finds nothing.", weight: 3 }] } };
+    if (/ECONNREFUSED/i.test(problem)) return { result: { kind: "broken", url: address, findings: [{ id: "down", text: "Their website couldn't be opened (the server refuses visitors), so anyone who searches for them finds nothing.", weight: 3 }] } };
+    return { result: { kind: "unreachable", url: address, findings: [] } };
+  }
+  if (res.shield || [401, 403, 406, 429, 503].includes(res.status)) return { result: { kind: "unreachable", url: res.url, findings: [] } };
+  if (res.status >= 400) {
+    return { result: { kind: "broken", url: res.url, findings: [{ id: "down", text: `Their website shows an error page (${res.status}) instead of the business.`, weight: 3 }] } };
   }
   const loadMs = Date.now() - started;
   const html = res.body.toString("utf8");
@@ -55,7 +80,7 @@ export async function basicCheck(address: string): Promise<{ result: Omit<CheckR
   const findings: Finding[] = [];
   const add = (f: Finding) => findings.push(f);
   if (PARKED.test(`${page.title} ${page.text.slice(0, 800)}`) && page.text.length < 3000) {
-    add({ id: "parked", text: "Their website address shows a holding page (parked or “coming soon”), not the business.", weight: 3 });
+    add({ id: "parked", text: "Their website shows only a holding page (“under maintenance”, “coming soon” or parked), not the business.", weight: 3 });
     return { result: { kind: "broken", url: res.url, findings, site: { title: page.title, description: page.description, headings: page.headings.slice(0, 10), text: page.text.slice(0, 1500) } } };
   }
   if (new URL(res.url).protocol === "http:") add({ id: "https", text: "The site isn't secure (no padlock), so phones warn visitors it's “Not secure”.", weight: 2 });
@@ -138,7 +163,7 @@ export function scoreOf(check: Pick<CheckResult, "kind" | "findings" | "scores">
 
 /** A small phone-sized picture of their site, kept with the lead (≈15 KB). */
 async function thumb(img: Buffer) {
-  const small = await sharp(img).resize({ width: 360, height: 780, fit: "cover", position: "top" }).jpeg({ quality: 62 }).toBuffer();
+  const small = await sharp(img).resize({ width: 300, height: 650, fit: "cover", position: "top" }).jpeg({ quality: 58 }).toBuffer();
   return `data:image/jpeg;base64,${small.toString("base64")}`;
 }
 
@@ -172,6 +197,7 @@ export async function checkLead(payload: Payload, id: number | string, env: Chec
   } else {
     const { result: basic } = await basicCheck(website);
     result = { ...basic, at: new Date().toISOString(), facts };
+    // PageSpeed visits from Google, so it often gets through where our own visit was turned away.
     if (basic.kind !== "broken" && env.pagespeedKey) {
       try {
         const ps = await pagespeed(basic.url ?? website, env.pagespeedKey);
@@ -195,7 +221,7 @@ export async function checkLead(payload: Payload, id: number | string, env: Chec
       }
     }
     // Without PageSpeed's screenshot, the free screenshot service (a small daily allowance).
-    if (!shot && result.kind !== "broken") {
+    if (!shot && result.kind !== "broken" && result.kind !== "unreachable") {
       shot = await serviceShot(basic.url ?? website, { device: "phone", ownOrigin: env.ownOrigin }).catch(() => null);
     }
     if (shot && env.sight && canSee(env.sight)) {
@@ -205,7 +231,8 @@ export async function checkLead(payload: Payload, id: number | string, env: Chec
           [{ data: shot, type: "image/jpeg" }],
           `This is the top of ${String(lead.name)}'s website (a ${String(lead.kind || "business")}) on a phone. You're a web designer deciding whether a new website would help them. In at most three short lines, name the clearest problems a customer would notice (for example text too small, cluttered or dated look, no clear button to call, book or order, broken images, a pop-up covering the page). If it looks modern and works well, say “Looks good:” and why, in one line.`,
         );
-        review = review.replace(/\n{2,}/g, "\n").trim().slice(0, 700);
+        // Without the note on which model looked (that's for the console, not for a lead's card).
+        review = review.replace(/\n*\(Seen with [\s\S]*$/, "").replace(/\n{2,}/g, "\n").trim().slice(0, 700);
       } catch {
         review = "";
       }
@@ -213,8 +240,21 @@ export async function checkLead(payload: Payload, id: number | string, env: Chec
   }
 
   const score = scoreOf(result, { phone: lead.phone as string | null, email: lead.email as string | null });
-  const summary = result.findings.length ? result.findings.map((f) => `• ${f.text}`).join("\n") : "• Nothing obviously wrong: the site works on phones and Google can read it.";
-  const what = result.kind === "none" ? "No website" : result.kind === "broken" ? "Website not working" : `Website checked${result.kind === "pagespeed" ? " with Google PageSpeed" : ""}: ${result.findings.length} problem${result.findings.length === 1 ? "" : "s"}`;
+  const summary =
+    result.kind === "unreachable"
+      ? "• Couldn't check their site: it turned the check away (a security shield, or no answer in time). Nothing is claimed about it; look at it yourself before writing."
+      : result.findings.length
+        ? result.findings.map((f) => `• ${f.text}`).join("\n")
+        : "• Nothing obviously wrong: the site works on phones and Google can read it.";
+  const what =
+    result.kind === "none"
+      ? "No website"
+      : result.kind === "broken"
+        ? "Website not working"
+        : result.kind === "unreachable"
+          ? "Couldn't check the website (it turned the check away)"
+          : `Website checked${result.kind === "pagespeed" ? " with Google PageSpeed" : ""}: ${result.findings.length} problem${result.findings.length === 1 ? "" : "s"}`;
+  const small = shot ? await thumb(shot).catch(() => null) : null;
   await payload.update({
     collection: "leads",
     id,
@@ -222,7 +262,7 @@ export async function checkLead(payload: Payload, id: number | string, env: Chec
       check: result,
       summary,
       review: review || null,
-      shot: shot ? await thumb(shot).catch(() => null) : null,
+      shot: small && small.length < 120_000 ? small : null,
       score,
       status: lead.status === "new" ? "checked" : lead.status,
       log: [...((lead.log as unknown[]) ?? []), { at: new Date().toISOString(), what: `${what} (score ${score})` }],

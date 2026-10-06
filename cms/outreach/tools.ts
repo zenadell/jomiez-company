@@ -41,9 +41,9 @@ export function addOutreachTools(add: AddTool, env: ToolEnv) {
     "outreach_today",
     {
       description:
-        "Finding clients, the whole morning's job: finds new businesses in the areas set in Clients → Finding clients (or the area you give), checks their websites, and writes messages (with a free homepage preview for the best) for the owner to send from the phone app. Takes a few minutes. Nothing is sent.",
+        "Finding clients, the whole morning's job: finds new businesses in the areas set in Clients → Finding clients (or the area you give), checks their websites, and writes messages (with a free homepage preview for the best) for the owner to send from the phone app. Takes a few minutes. Nothing is sent. If it stops for time or the map service is busy, call it again rather than checking and writing to leads one by one: it does the same work for a fraction of the cost.",
       input: z.object({
-        area: z.string().optional().describe("Only this area this time, e.g. “Lekki, Lagos”. Leave out to use the saved areas in turn."),
+        area: z.string().optional().describe("Only this area this time, e.g. “Lekki Phase I, Lagos”. Leave out to use the saved areas in turn."),
         country: countryEnum.optional(),
         kinds: z.array(kindEnum).optional().describe(`With area: kinds of business. ${Object.entries(KINDS).map(([k, v]) => `${k} = ${v.label}`).join("; ")}`),
         newLeads: z.number().int().min(1).max(40).optional().describe("How many new businesses to find and check (default: the setting)."),
@@ -70,7 +70,7 @@ export function addOutreachTools(add: AddTool, env: ToolEnv) {
     },
     async ({ area, country, kinds, limit }) => {
       const res = await findLeads(payload, { area, country, kinds }, limit);
-      return { area: res.area, onTheMap: res.seen, added: res.added };
+      return { area: res.area, onTheMap: res.seen, added: res.added, notes: res.notes.length ? res.notes : undefined };
     },
   );
 
@@ -174,15 +174,18 @@ export function addOutreachTools(add: AddTool, env: ToolEnv) {
   add(
     "make_preview",
     {
-      description: "Makes (or remakes) the free sample homepage for a lead, at jomiez.com/preview/…, using only facts about the business. Then rewrite the message so it links to it.",
+      description: "Makes (or remakes) the free sample homepage for a lead, at jomiez.com/preview/…, using only facts about the business, and rewrites its messages so they link to it.",
       input: z.object({ id: leadId }),
       risk: () => "draft",
       title: () => "Making a homepage preview",
     },
     async ({ id }) => {
-      const res = await makePreview(payload, id, { model: await writerModel(payload) });
+      const model = await writerModel(payload);
+      const res = await makePreview(payload, id, { model });
+      // The messages always point at the preview, so it's never made and then forgotten.
+      const written = await writeLead(payload, id, { model, settings: await loadOutreach(payload), previewUrl: res.url });
       env.emit({ t: "change", title: res.name, action: "made a preview for", admin: `/admin/collections/leads/${id}`, site: res.url });
-      return res;
+      return { ...res, whatsapp: written.whatsapp, emailSubject: written.emailSubject };
     },
   );
 

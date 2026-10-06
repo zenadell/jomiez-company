@@ -359,14 +359,14 @@ function LeadCard({
                 type="button"
                 className={`ja-btn ${lead.links.whatsapp || lead.links.sms ? "ja-btn--plain" : "ja-btn--approve"}`}
                 disabled={busy !== null || !email?.ready || !email.left}
-                title={!email?.ready ? "Add your Gmail in Clients settings first" : !email.left ? "Today's emails have gone out" : undefined}
+                title={!email?.ready ? "Set up your Gmail in Clients settings first" : !email.left ? "Today's emails have gone out" : undefined}
                 onClick={() => void run("email", { do: "email" })}
               >
                 {busy === "email" ? "Sending…" : "Email"}
               </button>
             )}
           </div>
-          {lead.email && lead.messages.emailBody && email && !email.ready && <p className="ja-lead__note">To email, add your Gmail and an app password in Clients → Finding clients.</p>}
+          {lead.email && lead.messages.emailBody && email && !email.ready && <p className="ja-lead__note">To email, set up your Gmail in Clients → Finding clients → Email (a two-minute Google Script).</p>}
           <div className="ja-lead__quiet">
             <button type="button" disabled={busy !== null} onClick={() => void run("skip", { do: "status", status: "skipped" })}>
               Skip

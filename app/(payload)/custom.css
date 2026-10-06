@@ -326,3 +326,41 @@
     grid-column: 2;
   }
 }
+
+/* Clients → Finding clients → Email: the Gmail script and how to set it up. */
+.jz-gscript {
+  margin: 4px 0 18px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.jz-gscript ol {
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
+
+.jz-gscript li + li {
+  margin-top: 4px;
+}
+
+.jz-gscript__code {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.jz-gscript__code pre {
+  overflow-x: auto;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--theme-elevation-50);
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre;
+}
+
+.jz-gscript__code button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}

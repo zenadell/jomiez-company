@@ -1,6 +1,6 @@
 import config from "@payload-config";
 import { getPayload, type Where } from "payload";
-import { emailsLeftToday, markSent, sendLeadEmail, setStatus, smsLink, stopLead, unmarkSent, whatsappLink, type Channel } from "@/cms/outreach/send";
+import { emailsLeftToday, markSent, sendLeadEmail, sendTestEmail, setStatus, smsLink, stopLead, unmarkSent, whatsappLink, type Channel } from "@/cms/outreach/send";
 import { loadOutreach } from "@/cms/outreach/settings";
 import { makePreview, previewLink, writeLead, writerModel } from "@/cms/outreach/write";
 import { originOf } from "@/cms/preview";
@@ -14,6 +14,7 @@ import { originOf } from "@/cms/preview";
  *   GET  summary     counts for the home screen
  *   GET  shot?id=…   the small screenshot of a lead's current website
  *   POST lead        { id, do: sent|unsent|status|save|email|rewrite|preview, … }
+ *   POST test-email  a test email to the sending Gmail (from the settings screen)
  */
 
 export const dynamic = "force-dynamic";
@@ -147,6 +148,14 @@ export async function POST(req: Request, { params }: Params) {
   if (!sameOrigin(req)) return json({ error: "Wrong origin." }, 403);
   const { user } = await payload.auth({ headers: req.headers });
   if (!user) return json({ error: "Sign in first." }, 401);
+  if (action === "test-email") {
+    try {
+      const to = await sendTestEmail(payload);
+      return json({ ok: true, message: `Sent to ${to}. Check that inbox.` });
+    } catch (err) {
+      return json({ ok: false, message: (err as Error).message });
+    }
+  }
   if (action !== "lead") return json({ error: "Unknown action." }, 404);
 
   const body = (await req.json().catch(() => ({}))) as {

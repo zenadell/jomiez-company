@@ -118,7 +118,7 @@ export const Leads: CollectionConfig = {
     { name: "domain", type: "text", index: true, admin: { hidden: true } },
     // The website check in full, and a small phone-sized screenshot of their site (both for Keeper and the app).
     { name: "check", type: "json", admin: { hidden: true } },
-    { name: "shot", type: "textarea", admin: { hidden: true } },
+    { name: "shot", type: "textarea", maxLength: 200_000, admin: { hidden: true } },
     // The secret in their "don't contact me again" link.
     { name: "stopToken", type: "text", index: true, admin: { hidden: true } },
   ],
@@ -142,7 +142,7 @@ export const Leads: CollectionConfig = {
   },
 };
 
-export const OUTREACH_SECRETS = ["gmailPassword", "pagespeedKey"] as const;
+export const OUTREACH_SECRETS = ["gmailPassword", "gmailScriptSecret", "pagespeedKey"] as const;
 
 export const ClientSettings: GlobalConfig = {
   slug: "outreach",
@@ -167,13 +167,13 @@ export const ClientSettings: GlobalConfig = {
       type: "array",
       labels: { singular: "Area", plural: "Areas" },
       defaultValue: [
-        { area: "Lekki, Lagos", country: "NG", kinds: ["food", "beauty", "health", "education", "stay"], on: true },
+        { area: "Lekki Phase I, Lagos", country: "NG", kinds: ["food", "beauty", "health", "education", "stay"], on: true },
         { area: "Ikeja, Lagos", country: "NG", kinds: ["food", "beauty", "health", "professional", "shops"], on: true },
         { area: "Wuse, Abuja", country: "NG", kinds: ["food", "beauty", "health", "property", "stay"], on: true },
         { area: "London", country: "GB", kinds: ["food", "beauty", "trades", "professional"], on: true },
         { area: "Houston, Texas", country: "US", kinds: ["food", "beauty", "trades", "auto"], on: true },
       ],
-      admin: { description: "A town, city or neighbourhood (e.g. “Lekki, Lagos”, “Wuse, Abuja”, “Peckham, London”). Areas take turns, a few businesses at a time." },
+      admin: { description: "A neighbourhood or town with its city (e.g. “Lekki Phase I, Lagos”, “Wuse, Abuja”, “Peckham, London”), not a whole county. Areas take turns, a few businesses at a time." },
       fields: [
         {
           type: "row",
@@ -228,7 +228,7 @@ export const ClientSettings: GlobalConfig = {
       admin: {
         initCollapsed: true,
         description:
-          "Emails go from your own Gmail, not the site's address (Resend, which sends the site's emails, doesn't allow messages people didn't ask for). In your Google account turn on 2-Step Verification, then make an app password (myaccount.google.com/apppasswords) and paste it here.",
+          "Emails go from your own Gmail, not the site's address (Resend, which sends the site's emails, doesn't allow messages people didn't ask for). On Render's free plan, use the Google Script: the plan blocks the ports a Gmail password needs.",
       },
       fields: [
         {
@@ -238,7 +238,16 @@ export const ClientSettings: GlobalConfig = {
             { name: "dailyEmails", label: "Emails a day, at most", type: "number", defaultValue: 20, min: 1, max: 50, admin: { width: "50%", description: "Keep it low: a new Gmail sending many emails to strangers gets flagged." } },
           ],
         },
-        ...secret("gmailPassword", "Gmail app password", "16 letters from Google. Stored encrypted and never shown again."),
+        { name: "gmailScriptHelp", type: "ui", admin: { components: { Field: "/cms/admin/GmailScript#GmailScript" } } },
+        {
+          name: "gmailScriptUrl",
+          label: "Google Script web app URL",
+          type: "text",
+          admin: { description: "https://script.google.com/macros/s/…/exec" },
+          validate: (v: unknown) => (!v || /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(String(v).trim()) ? true : "Paste the Web app URL from Deploy (it starts https://script.google.com/macros/s/ and ends /exec)."),
+        },
+        ...secret("gmailScriptSecret", "Script password", "The password you set in the script. Stored encrypted."),
+        ...secret("gmailPassword", "Or: Gmail app password", "Only on hosts that allow email ports (not Render's free plan): myaccount.google.com/apppasswords, with 2-Step Verification on."),
       ],
     },
     {

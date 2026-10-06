@@ -44,7 +44,11 @@ async function ask<T>(model: LanguageModel, instructions: string, prompt: string
 
 type Lead = Record<string, unknown> & { id: number | string; name: string };
 
-const firstName = (s: Settings) => s.senderName.trim().split(/\s+/)[0] || "the Jomiez team";
+/** Who the messages are from: the name in Clients → Finding clients, or the team (never a made-up person). */
+const sender = (s: Settings) => {
+  const first = s.senderName.trim().split(/\s+/)[0];
+  return first ? { intro: `${first} from Jomiez`, signOff: `${first}\nJomiez` } : { intro: "the Jomiez team", signOff: "The Jomiez team" };
+};
 
 function context(lead: Lead, s: Settings, previewUrl: string | null) {
   const check = (lead.check ?? {}) as CheckResult;
@@ -57,7 +61,7 @@ function context(lead: Lead, s: Settings, previewUrl: string | null) {
     lead.review ? `HOW THEIR SITE LOOKS ON A PHONE (seen in a screenshot): ${String(lead.review)}` : "",
     `PREVIEW: ${previewUrl ? `${previewUrl} (a free sample homepage made for them; no obligation)` : "none"}`,
     `OFFER: ${s.offer}`,
-    `FROM: ${s.senderName || "the Jomiez team"} at Jomiez (jomiez.com)${s.senderPhone ? `, ${s.senderPhone}` : ""}. How we found them: ${lead.source === "openstreetmap" ? `looking at businesses in ${lead.area ?? "their area"} on the map` : "researching local businesses"}.`,
+    `FROM: ${s.senderName.trim() ? `${s.senderName.trim()}, at Jomiez (jomiez.com)` : "the Jomiez team, a small studio (jomiez.com). No person's name is set: write as \"we\", never as a named person"}${s.senderPhone ? `, ${s.senderPhone}` : ""}. How we found them: ${lead.source === "openstreetmap" ? `looking at businesses in ${lead.area ?? "their area"} on the map` : "researching local businesses"}.`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -66,7 +70,7 @@ function context(lead: Lead, s: Settings, previewUrl: string | null) {
 const RULES = `You write short, honest first messages from Jomiez, a small web design studio, to owners of local businesses.
 Rules:
 - Mention only the problems under FINDINGS (they were measured) and what's under HOW THEIR SITE LOOKS. Never invent problems, numbers, results, customers, reviews or awards. Never pretend to be a customer.
-- Say who you are in the first line (first name, from Jomiez) and how you came across them (see FROM). Be warm and human, like a person writing one message, not a template.
+- Say who you are in the first line exactly as FROM gives it, and how you came across them. Never make up a person's name, and never leave placeholders like [Your Name]. Be warm and human, like a person writing one message, not a template.
 - No hype, pressure or false urgency; no ALL CAPS; no emojis.
 - Promise only what's in OFFER. Mention a price only if OFFER gives one.
 - One small ask: a reply. If there's a PREVIEW, include its link once and say it's a free sample made for them, with no obligation.
@@ -85,7 +89,7 @@ const FORMATS = (s: Settings) => `Write four versions:
 - whatsapp: 45–85 words in 2–4 short paragraphs. End with: If you'd rather not get messages like this, just reply "stop" and I won't message again.
 - sms: at most 300 characters including any link. End with: Reply STOP to opt out.
 - emailSubject: under 55 characters, specific and plain (e.g. "A quick idea for ${"{Business}"}'s website"), not clickbait.
-- emailBody: 70–130 words, starting "Hi" or "Good day" with the business name. Sign off with ${firstName(s)}, Jomiez${s.senderPhone ? `, ${s.senderPhone}` : ""}. Don't add an address or unsubscribe line (they're added when it's sent).`;
+- emailBody: 70–130 words, starting "Hi" or "Good day" with the business name. Sign off as: ${sender(s).signOff.replace("\n", ", ")}${s.senderPhone ? `, ${s.senderPhone}` : ""}. Don't add an address or unsubscribe line (they're added when it's sent).`;
 
 /** The first message (or the one follow-up), saved on the lead, which becomes "Message ready". */
 export async function writeLead(payload: Payload, id: number | string, opts: { model: LanguageModel; settings: Settings; previewUrl?: string | null; followUp?: boolean; extra?: string }) {
@@ -104,6 +108,8 @@ export async function writeLead(payload: Payload, id: number | string, opts: { m
     .filter(Boolean)
     .join("\n\n");
   const out = await ask(opts.model, RULES, prompt, MessagesSchema);
+  // A placeholder the model left is filled in with who's really writing.
+  for (const k of Object.keys(out) as (keyof Messages)[]) out[k] = out[k].replace(/\[\s*(your|my|sender'?s?)\s+name\s*\]/gi, opts.settings.senderName.trim() || "the Jomiez team");
   // The opt-out lines are not optional, whatever the model did.
   if (!/\bstop\b/i.test(out.whatsapp)) out.whatsapp = `${out.whatsapp.trim()}\n\nIf you'd rather not get messages like this, just reply "stop" and I won't message again.`;
   if (!/\bstop\b/i.test(out.sms)) out.sms = `${out.sms.trim()} Reply STOP to opt out.`;
