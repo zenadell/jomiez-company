@@ -72,6 +72,7 @@ export interface Config {
     'agent-threads': AgentThread;
     'agent-routines': AgentRoutine;
     'agent-memory': AgentMemory;
+    'access-keys': AccessKey;
     pages: Page;
     projects: Project;
     articles: Article;
@@ -90,6 +91,7 @@ export interface Config {
     'agent-threads': AgentThreadsSelect<false> | AgentThreadsSelect<true>;
     'agent-routines': AgentRoutinesSelect<false> | AgentRoutinesSelect<true>;
     'agent-memory': AgentMemorySelect<false> | AgentMemorySelect<true>;
+    'access-keys': AccessKeysSelect<false> | AccessKeysSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
@@ -298,7 +300,7 @@ export interface AgentThread {
   id: number;
   title: string;
   owner?: (number | null) | User;
-  source?: ('console' | 'page' | 'voice' | 'routine' | 'inbox') | null;
+  source?: ('console' | 'page' | 'voice' | 'routine' | 'inbox' | 'api') | null;
   status?: ('idle' | 'running' | 'waiting' | 'stopped' | 'error') | null;
   context?:
     | {
@@ -438,6 +440,39 @@ export interface AgentMemory {
   content: string;
   kind?: ('fact' | 'preference' | 'voice' | 'lesson' | 'contact') | null;
   source?: ('you' | 'agent' | 'correction') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Keys that let another agent (Claude Code, ChatGPT, your own scripts) see what Keeper is doing and give it work. Each key is shown once, when it's made. Revoke one the moment you stop trusting where it is.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-keys".
+ */
+export interface AccessKey {
+  id: number;
+  /**
+   * e.g. “Claude Code on my laptop”
+   */
+  name: string;
+  scopes: ('read' | 'chat' | 'approve' | 'control')[];
+  /**
+   * Empty: never.
+   */
+  expiresAt?: string | null;
+  /**
+   * Stops it at once.
+   */
+  revoked?: boolean | null;
+  /**
+   * Optional. One IP address per line (as this site's host sees it). Empty: from anywhere.
+   */
+  allowedIps?: string | null;
+  prefix?: string | null;
+  owner?: (number | null) | User;
+  lastUsedAt?: string | null;
+  lastUsedIp?: string | null;
+  hash?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -925,6 +960,10 @@ export interface PayloadLockedDocument {
         value: number | AgentMemory;
       } | null)
     | ({
+        relationTo: 'access-keys';
+        value: number | AccessKey;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: number | Page;
       } | null)
@@ -1123,6 +1162,24 @@ export interface AgentMemorySelect<T extends boolean = true> {
   content?: T;
   kind?: T;
   source?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-keys_select".
+ */
+export interface AccessKeysSelect<T extends boolean = true> {
+  name?: T;
+  scopes?: T;
+  expiresAt?: T;
+  revoked?: T;
+  allowedIps?: T;
+  prefix?: T;
+  owner?: T;
+  lastUsedAt?: T;
+  lastUsedIp?: T;
+  hash?: T;
   updatedAt?: T;
   createdAt?: T;
 }

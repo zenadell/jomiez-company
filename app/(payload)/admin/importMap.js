@@ -1,4 +1,6 @@
 import { OpenConsole as OpenConsole_a801ef8d3bb9e0c49b2cd7efd4ab0862 } from '../../../cms/admin/agent/OpenConsole'
+import { KeyActivity as KeyActivity_1b15f1f8890d00958acabfdbfc5c71cb } from '../../../cms/admin/connect/KeyActivity'
+import { NewAccessKey as NewAccessKey_d6394baa4d02ed8038b8e03ff500ed94 } from '../../../cms/admin/connect/NewAccessKey'
 import { PagePicker as PagePicker_e1da0b76e0f80bbf9425ab500ab2952c } from '../../../cms/admin/PagePicker'
 import { BlockLabel as BlockLabel_cd76889bbf3a150766585388be60a820 } from '../../../cms/admin/BlockLabel'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -51,6 +53,8 @@ import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e
 /** @type import('payload').ImportMap */
 export const importMap = {
   "/cms/admin/agent/OpenConsole#OpenConsole": OpenConsole_a801ef8d3bb9e0c49b2cd7efd4ab0862,
+  "/cms/admin/connect/KeyActivity#KeyActivity": KeyActivity_1b15f1f8890d00958acabfdbfc5c71cb,
+  "/cms/admin/connect/NewAccessKey#NewAccessKey": NewAccessKey_d6394baa4d02ed8038b8e03ff500ed94,
   "/cms/admin/PagePicker#PagePicker": PagePicker_e1da0b76e0f80bbf9425ab500ab2952c,
   "/cms/admin/BlockLabel#BlockLabel": BlockLabel_cd76889bbf3a150766585388be60a820,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
