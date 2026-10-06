@@ -107,6 +107,8 @@ export function tidyPhone(raw: string | null | undefined, country: string): stri
 }
 
 /** Nigerian, Ghanaian, Kenyan and South African mobiles, and UK 07…: the numbers WhatsApp is likely to be on. */
-export function looksMobile(phone: string): boolean {
+export function looksMobile(raw: string): boolean {
+  // Numbers typed in by hand keep their spaces and dashes.
+  const phone = raw.replace(/[\s().-]/g, "");
   return /^\+234[789][01]\d{8}$/.test(phone) || /^\+233[25]\d{8}$/.test(phone) || /^\+254[17]\d{8}$/.test(phone) || /^\+27[6-8]\d{8}$/.test(phone) || /^\+447\d{9}$/.test(phone) || /^\+1\d{10}$/.test(phone);
 }

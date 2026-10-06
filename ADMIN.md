@@ -177,6 +177,14 @@ Keeper looks for businesses that could use a better website, checks their sites,
 - makes a free **homepage preview** for the most promising ones, at jomiez.com/preview/…;
 - writes one follow-up for anyone who hasn't replied after a few days.
 
+**What a preview is made of.** Each one is built from the business's own things, so it looks like theirs, not a template:
+- their **logo** and **brand colours** (read from the logo), their **photos**, and, for shops, their **products with names and prices**, each with an "Ask about this" WhatsApp button;
+- a **street map** with a pin in their colour (only when their map listing or address agrees on where they are), their **opening hours** and an "Open now" badge in their time zone;
+- every button uses **their** number: WhatsApp when it's a mobile, a call otherwise.
+- Keeper writes the words from what their listing and website say; it never invents reviews, awards, years or prices. Free stock photos (credited at the bottom) fill in only when they have fewer than two photos of their own.
+- One of three looks fits the kind of business: warm and elegant (shops, food, beauty), dark and bold (gyms, cars, events, trades), or light and calm (clinics, schools, professionals).
+- With Cloudinary set up, the pictures and map are copied there; otherwise the site fetches and shrinks them itself. Maps are drawn from OpenStreetMap and credited on the map.
+
 **In the phone app**, the home screen shows “N messages to send”.
 - Tap it to read each message, edit it or ask for a rewrite.
 - Then tap **WhatsApp** or **Text**: your phone opens with the message filled in, and you press send. **Email** sends from your Gmail.
