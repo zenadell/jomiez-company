@@ -22,7 +22,7 @@ export const KINDS = {
   property: { label: "Real estate", osm: [["office", "estate_agent|property_management"], ["shop", "estate_agent"]] },
   professional: {
     label: "Lawyers, accountants and consultants",
-    osm: [["office", "lawyer|accountant|consulting|insurance|financial|financial_advisor|architect|engineer|tax_advisor|notary|advertising_agency|it|logistics|travel_agent"]],
+    osm: [["office", "lawyer|accountant|consulting|insurance|financial_advisor|architect|engineer|tax_advisor|notary|advertising_agency|it|logistics|travel_agent"]],
   },
   fitness: { label: "Gyms and sports", osm: [["leisure", "fitness_centre|sports_centre|dance|yoga"], ["amenity", "gym"]] },
   auto: { label: "Car dealers and repairs", osm: [["shop", "car|car_repair|car_parts|tyres|motorcycle"], ["amenity", "car_wash|car_rental"]] },
@@ -107,6 +107,8 @@ export function tidyPhone(raw: string | null | undefined, country: string): stri
 }
 
 /** Nigerian, Ghanaian, Kenyan and South African mobiles, and UK 07…: the numbers WhatsApp is likely to be on. */
-export function looksMobile(phone: string): boolean {
+export function looksMobile(raw: string): boolean {
+  // Numbers typed in by hand keep their spaces and dashes.
+  const phone = raw.replace(/[\s().-]/g, "");
   return /^\+234[789][01]\d{8}$/.test(phone) || /^\+233[25]\d{8}$/.test(phone) || /^\+254[17]\d{8}$/.test(phone) || /^\+27[6-8]\d{8}$/.test(phone) || /^\+447\d{9}$/.test(phone) || /^\+1\d{10}$/.test(phone);
 }

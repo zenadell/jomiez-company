@@ -58,6 +58,7 @@ export async function outreachToday(
         const res = await findLeads(payload, search, need);
         out.found += res.added.length;
         need -= res.added.length;
+        out.notes.push(...res.notes.map((n) => `${search.area}: ${n}`));
         if (!res.added.length) out.notes.push(`${search.area}: every business the map lists for those kinds is already in your leads (${res.seen} seen). Add kinds or another area.`);
       } catch (err) {
         out.notes.push(`${search.area}: ${(err as Error).message}`);

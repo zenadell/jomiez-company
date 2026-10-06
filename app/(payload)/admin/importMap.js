@@ -37,6 +37,7 @@ import { SecretField as SecretField_68ba7bcb8c607790274b0bc4919b9738 } from '../
 import { ProviderRowLabel as ProviderRowLabel_d145fc135ac95d9e261c61119d896d96 } from '../../../cms/admin/agent/ProviderRowLabel'
 import { VoicePicker as VoicePicker_ee1d30fe681e43b1c0a84567235e83e1 } from '../../../cms/admin/agent/VoicePicker'
 import { PermissionsNote as PermissionsNote_26c03031cad2ac0ce11b33a1667590d4 } from '../../../cms/admin/agent/PermissionsNote'
+import { GmailScript as GmailScript_7ef87efba1fb2e8d98a28cfdfcfc4cc5 } from '../../../cms/admin/GmailScript'
 import { Icon as Icon_4c7444b93dbccf84094c9864fd2f1234 } from '../../../cms/admin/Icon'
 import { Logo as Logo_67b5933b1125a92daeb072b605fa27b4 } from '../../../cms/admin/Logo'
 import { AgentNavLink as AgentNavLink_3f26179e5640f81f3da5e43277498979 } from '../../../cms/admin/agent/AgentNavLink'
@@ -88,6 +89,7 @@ export const importMap = {
   "/cms/admin/agent/ProviderRowLabel#ProviderRowLabel": ProviderRowLabel_d145fc135ac95d9e261c61119d896d96,
   "/cms/admin/agent/VoicePicker#VoicePicker": VoicePicker_ee1d30fe681e43b1c0a84567235e83e1,
   "/cms/admin/agent/PermissionsNote#PermissionsNote": PermissionsNote_26c03031cad2ac0ce11b33a1667590d4,
+  "/cms/admin/GmailScript#GmailScript": GmailScript_7ef87efba1fb2e8d98a28cfdfcfc4cc5,
   "/cms/admin/Icon#Icon": Icon_4c7444b93dbccf84094c9864fd2f1234,
   "/cms/admin/Logo#Logo": Logo_67b5933b1125a92daeb072b605fa27b4,
   "/cms/admin/agent/AgentNavLink#AgentNavLink": AgentNavLink_3f26179e5640f81f3da5e43277498979,

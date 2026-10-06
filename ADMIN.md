@@ -156,13 +156,18 @@ The app opens instantly and offline (it keeps its own copy); conversations alway
 Keeper looks for businesses that could use a better website, checks their sites, and writes a message to each. **You send every message yourself**, from the phone app. Everything here is free.
 
 **Set it up (once):** Admin → Clients → **Finding clients**.
-1. Under **Where to look**, list areas (“Lekki, Lagos”, “Wuse, Abuja”, “Peckham, London”, “Houston, Texas”) and the kinds of business for each. Areas take turns.
+1. Under **Where to look**, list areas (“Lekki Phase I, Lagos”, “Wuse, Abuja”, “Peckham, London”, “Houston, Texas”) and the kinds of business for each. Areas take turns. Name a neighbourhood rather than a whole county: “Lekki, Lagos” matches Ibeju-Lekki, a huge and mostly rural area, and only its middle gets searched.
 2. Write **What you offer** in your words (a starting price if you like). Keeper only promises what's written there.
 3. Fill in your name, WhatsApp number (for the “Get this website” button on previews) and business address (it goes at the end of emails).
 4. Tick **Look for new clients every day**, and **Write a journal post every week** if you want the weekly SEO post. Save. Both show up under Agent → Routines.
 5. Optional but recommended:
    - **Website checks**: a free Google PageSpeed key ([get one](https://developers.google.com/speed/docs/insights/v5/get-started), 25,000 checks a day) adds speed scores and a screenshot of each site. Without it, Keeper does a simpler check of its own.
-   - **Email**: your Gmail address and an app password ([myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), needs 2-Step Verification). The site's own email service (Resend) doesn't allow messages people didn't ask for, so emails go from your Gmail, 20 a day at most.
+   - **Email** goes from your own Gmail, 20 a day at most. The site's own email service (Resend) doesn't allow messages people didn't ask for. Render's free plan blocks the ports a Gmail password needs, so use the small Google Script shown in **Email**:
+     1. Paste it into [script.google.com](https://script.google.com/home/projects/create).
+     2. Set a password in it and type the same password in Jomiez.
+     3. Deploy it as a Web app (Execute as: Me, Who has access: Anyone), paste the /exec address, save, and press **Send me a test email**.
+
+     On a host with email ports open, a Gmail app password ([myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)) works too.
 
 **Each morning** Keeper:
 - finds new businesses on OpenStreetMap (named businesses with a phone or email; chains are left out);
@@ -171,6 +176,14 @@ Keeper looks for businesses that could use a better website, checks their sites,
 - writes a WhatsApp message, a text and an email for the best ones, using only what it actually found;
 - makes a free **homepage preview** for the most promising ones, at jomiez.com/preview/…;
 - writes one follow-up for anyone who hasn't replied after a few days.
+
+**What a preview is made of.** Each one is built from the business's own things, so it looks like theirs, not a template:
+- their **logo** and **brand colours** (read from the logo), their **photos**, and, for shops, their **products with names and prices**, each with an "Ask about this" WhatsApp button;
+- a **street map** with a pin in their colour (only when their map listing or address agrees on where they are), their **opening hours** and an "Open now" badge in their time zone;
+- every button uses **their** number: WhatsApp when it's a mobile, a call otherwise.
+- Keeper writes the words from what their listing and website say; it never invents reviews, awards, years or prices. Free stock photos (credited at the bottom) fill in only when they have fewer than two photos of their own.
+- One of three looks fits the kind of business: warm and elegant (shops, food, beauty), dark and bold (gyms, cars, events, trades), or light and calm (clinics, schools, professionals).
+- With Cloudinary set up, the pictures and map are copied there; otherwise the site fetches and shrinks them itself. Maps are drawn from OpenStreetMap and credited on the map.
 
 **In the phone app**, the home screen shows “N messages to send”.
 - Tap it to read each message, edit it or ask for a rewrite.

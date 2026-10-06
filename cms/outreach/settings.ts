@@ -13,6 +13,8 @@ export type OutreachSettings = Settings & {
   followUpDays: number;
   gmail: string;
   gmailPassword: string;
+  gmailScriptUrl: string;
+  gmailScriptSecret: string;
   dailyEmails: number;
   pagespeedKey: string;
   weeklyPost: boolean;
@@ -39,6 +41,8 @@ export async function loadOutreach(payload: Payload): Promise<OutreachSettings> 
     followUpDays: num(g.followUpDays, 4),
     gmail: str(g.gmail) || str(process.env.GMAIL_USER),
     gmailPassword: decrypt(str(g.gmailPassword)) || str(process.env.GMAIL_APP_PASSWORD),
+    gmailScriptUrl: str(g.gmailScriptUrl) || str(process.env.GMAIL_SCRIPT_URL),
+    gmailScriptSecret: decrypt(str(g.gmailScriptSecret)) || str(process.env.GMAIL_SCRIPT_PASSWORD),
     dailyEmails: num(g.dailyEmails, 20),
     pagespeedKey: decrypt(str(g.pagespeedKey)) || str(process.env.PAGESPEED_API_KEY),
     weeklyPost: g.weeklyPost === true,

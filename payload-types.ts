@@ -2523,7 +2523,7 @@ export interface Outreach {
    */
   enabled?: boolean | null;
   /**
-   * A town, city or neighbourhood (e.g. “Lekki, Lagos”, “Wuse, Abuja”, “Peckham, London”). Areas take turns, a few businesses at a time.
+   * A neighbourhood or town with its city (e.g. “Lekki Phase I, Lagos”, “Wuse, Abuja”, “Peckham, London”), not a whole county. Areas take turns, a few businesses at a time.
    */
   searches?:
     | {
@@ -2584,7 +2584,16 @@ export interface Outreach {
    */
   dailyEmails?: number | null;
   /**
-   * 16 letters from Google. Stored encrypted and never shown again.
+   * https://script.google.com/macros/s/…/exec
+   */
+  gmailScriptUrl?: string | null;
+  /**
+   * The password you set in the script. Stored encrypted.
+   */
+  gmailScriptSecret?: string | null;
+  gmailScriptSecretHint?: string | null;
+  /**
+   * Only on hosts that allow email ports (not Render's free plan): myaccount.google.com/apppasswords, with 2-Step Verification on.
    */
   gmailPassword?: string | null;
   gmailPasswordHint?: string | null;
@@ -3436,6 +3445,9 @@ export interface OutreachSelect<T extends boolean = true> {
   followUpDays?: T;
   gmail?: T;
   dailyEmails?: T;
+  gmailScriptUrl?: T;
+  gmailScriptSecret?: T;
+  gmailScriptSecretHint?: T;
   gmailPassword?: T;
   gmailPasswordHint?: T;
   pagespeedKey?: T;

@@ -39,14 +39,17 @@ export async function assertPublic(url: URL) {
   if (!addrs.length || addrs.some((a) => privateIp(a.address))) throw new Error("That address is private.");
 }
 
-export async function safeFetch(input: string, { maxBytes = 1_500_000, timeoutMs = 15_000 } = {}) {
+/** A phone's browser, for reading a page the way a customer sees it (some sites turn other visitors away). */
+export const PHONE_UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
+
+export async function safeFetch(input: string, { maxBytes = 1_500_000, timeoutMs = 15_000, userAgent = "JomiezAgent/1.0 (+https://jomiez.com)" } = {}) {
   let url = new URL(input);
   for (let hop = 0; hop < 5; hop++) {
     await assertPublic(url);
     const res = await fetch(url, {
       redirect: "manual",
       signal: AbortSignal.timeout(timeoutMs),
-      headers: { "user-agent": "JomiezAgent/1.0 (+https://jomiez.com)", accept: "text/html,application/json,text/plain,image/*;q=0.8,*/*;q=0.5" },
+      headers: { "user-agent": userAgent, accept: "text/html,application/json,text/plain,image/*;q=0.8,*/*;q=0.5", "accept-language": "en-GB,en;q=0.9" },
     });
     if (res.status >= 300 && res.status < 400 && res.headers.get("location")) {
       url = new URL(res.headers.get("location")!, url);
@@ -65,7 +68,14 @@ export async function safeFetch(input: string, { maxBytes = 1_500_000, timeoutMs
       }
       chunks.push(value);
     }
-    return { url: url.toString(), status: res.status, type: res.headers.get("content-type") ?? "", body: Buffer.concat(chunks) };
+    return {
+      url: url.toString(),
+      status: res.status,
+      type: res.headers.get("content-type") ?? "",
+      body: Buffer.concat(chunks),
+      // Whether a bot shield (Cloudflare and the like) answered instead of the site.
+      shield: Boolean(res.headers.get("cf-mitigated") || (/cloudflare|sucuri|akamai|imperva|ddos-guard/i.test(res.headers.get("server") ?? "") && res.status >= 400)),
+    };
   }
   throw new Error("Too many redirects.");
 }
