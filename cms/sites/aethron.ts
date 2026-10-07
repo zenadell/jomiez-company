@@ -33,6 +33,13 @@ export const AETHRON_TOOLS = [
 
 export type AethronTool = (typeof AETHRON_TOOLS)[number];
 
+/**
+ * The ones Keeper may call by hand, to adjust a preview's words, pictures, links and blocks. Copying,
+ * re-fetching or remaking a project by hand could turn a lead's short preview back into the whole
+ * template (every page, the template's own links, no ribbon): make_site_preview does those.
+ */
+export const KEEPER_AETHRON_TOOLS = ["get_content", "set_content_bulk", "add_block", "learn_brand", "search_brand"] as const satisfies readonly AethronTool[];
+
 const hosted = () => {
   const url = process.env.AETHRON_MCP_URL?.trim();
   const token = process.env.AETHRON_MCP_TOKEN?.trim();
