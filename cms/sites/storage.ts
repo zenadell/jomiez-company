@@ -66,7 +66,7 @@ function ensureBucket(s: Sb) {
   return bucketReady;
 }
 
-/** Every stored file's hash, kept for a few minutes (listing is paged, 1000 at a time). */
+/** Every stored file's hash, kept for a few minutes (listing is paged, 1000 at a time). Only trust it for files that are there. */
 let known: { at: number; set: Set<string> } | null = null;
 async function storedHashes(s: Sb) {
   if (known && Date.now() - known.at < 10 * 60_000) return known.set;
@@ -126,8 +126,13 @@ export async function missing(hashes: string[]): Promise<string[]> {
   const s = supabase();
   if (s) {
     await ensureBucket(s);
-    const have = await storedHashes(s);
-    return unique.filter((h) => !have.has(h));
+    const lacking = (have: Set<string>) => unique.filter((h) => !have.has(h));
+    const out = lacking(await storedHashes(s));
+    // The saved listing proves what was stored, not what wasn't: the runner uploads straight to
+    // Supabase, so anything it lacks may have arrived since. Ask Supabase again before saying so.
+    if (!out.length || (known && Date.now() - known.at < 1000)) return out;
+    known = null;
+    return lacking(await storedHashes(s));
   }
   const out: string[] = [];
   for (const h of unique) {
