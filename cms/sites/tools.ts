@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { AddTool, ToolEnv } from "../agent/tools";
 import { loadOutreach } from "../outreach/settings";
 import { writeLead, writerModel } from "../outreach/write";
-import { aethron, aethronStatus, AETHRON_TOOLS } from "./aethron";
+import { aethron, aethronStatus, KEEPER_AETHRON_TOOLS } from "./aethron";
 import { makeSitePreview, prepareTemplate, publishSitePreview } from "./make";
 import { findFreeTemplates, libraryFor } from "./templates";
 
@@ -122,12 +122,12 @@ export function addSiteTools(add: AddTool, env: ToolEnv) {
   add(
     "aethron",
     {
-      description: `Calls one of Aethron's tools directly, to adjust a template preview (its project is the lead's preview slug): ${AETHRON_TOOLS.join(", ")}. E.g. get_content {project, section: strings|images|links, only_unfilled, filter, offset, limit}; set_content_bulk {project, entries: [{old, new, section}], build: false}; add_block {project, kind: map|reviews|html, anchor, position, page, data}; preview_pages {project, pages}; preview_ribbon {project, ribbon}. After changes, publish_site_preview. ${RULES}`,
+      description: `Calls one of Aethron's tools directly, to adjust a template preview's words, pictures, links or blocks (its project is the lead's preview slug): ${KEEPER_AETHRON_TOOLS.join(", ")}. E.g. get_content {project, section: strings|images|links, only_unfilled, filter, offset, limit}; set_content_bulk {project, entries: [{old, new, section}], build: false}; add_block {project, kind: map|reviews|html, anchor, position, page, data}. After changes, publish_site_preview (it puts the Jomiez ribbon back, exports, checks and uploads). Never copy, re-fetch or rebuild a preview by hand: to start over, use make_site_preview. ${RULES}`,
       input: z.object({
-        tool: z.enum(AETHRON_TOOLS),
+        tool: z.enum(KEEPER_AETHRON_TOOLS),
         args: z.record(z.string(), z.unknown()).describe("The tool's arguments"),
       }),
-      risk: (i) => (i.tool === "delete_project" ? "delete" : "draft"),
+      risk: () => "draft",
       title: (i) => `Aethron: ${String(i.tool).replace(/_/g, " ")}`,
     },
     async ({ tool, args }) => {

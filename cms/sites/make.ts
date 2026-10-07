@@ -66,6 +66,51 @@ const anchorRank = (s: string) => {
   return words === 1 ? 3 : words <= 8 ? 0 : words <= 30 ? 1 : 2;
 };
 
+/** The Jomiez ribbon at the bottom of every page: "Get this website" tells the owner, "Not interested" opts them out. */
+const ribbonFor = (lead: Lead) => {
+  const token = encodeURIComponent(String(lead.stopToken ?? ""));
+  return {
+    text: `A free website preview Jomiez made for ${lead.name}.`,
+    get_url: `${SITE()}/api/outreach/get?t=${token}`,
+    decline_url: `${SITE()}/api/outreach/stop?t=${token}`,
+    get_label: "Get this website",
+    decline_label: "Not interested",
+  };
+};
+
+/** Where the business's own main button should go: WhatsApp, a call, an email, or else the preview's home. */
+const mainLinkFor = (lead: Lead, slug: string) => {
+  const phone = typeof lead.phone === "string" ? lead.phone : "";
+  if (phone && looksMobile(phone)) return `https://wa.me/${phone.replace(/\D/g, "")}`;
+  if (phone) return `tel:${phone.replace(/[^\d+]/g, "")}`;
+  if (typeof lead.email === "string" && lead.email) return `mailto:${lead.email}`;
+  return `/preview/${slug}`;
+};
+
+// Links that sell the template (its marketplace page, the designer's shop, Framer's own badge), and links to the template's live demo.
+const STORE_LINK = /^https?:\/\/([a-z0-9-]+\.)*(framer\.com|framer\.link|webflow\.com|gumroad\.com|lemonsqueezy\.com|payhip\.com|ko-fi\.com|buymeacoffee\.com|creativemarket\.com|ui8\.net|envato\.com|themeforest\.net)([/?#]|$)/i;
+const DEMO_LINK = /^https?:\/\/([a-z0-9-]+\.)+(framer\.website|framer\.ai|framer\.app|webflow\.io)([/?#]|$)/i;
+
+/** Points the template's sales and demo links at the business instead, so no button leads a visitor to Framer or the template's shop. */
+async function scrubTemplateLinks(project: string, lead: Lead, slug: string) {
+  const hits = linesOf(await aethron("get_content", { project, section: "links", filter: "framer|webflow|gumroad|lemonsqueezy|payhip|ko-fi|buymeacoffee|creativemarket|ui8|envato|themeforest", limit: 40 }));
+  const entries = hits.flatMap((h) => {
+    const now = typeof h.new === "string" && h.new ? h.new : h.old;
+    const to = STORE_LINK.test(now) ? mainLinkFor(lead, slug) : DEMO_LINK.test(now) ? `/preview/${slug}` : null;
+    return to && to !== now ? [{ old: h.old, new: to, section: "links" }] : [];
+  });
+  if (entries.length) await aethron("set_content_bulk", { project, entries, build: false });
+  return entries.length;
+}
+
+/** The page files a preview may have: what make_preview built for the chosen pages (and a 404 page). */
+const allowedFiles = (site: Record<string, unknown>, pages: string[]) =>
+  new Set([
+    "404.html",
+    ...((Array.isArray(site.files) ? site.files : []) as string[]),
+    ...pages.flatMap((p) => (p === "home" ? ["index.html"] : [`${p}.html`, `${p}/index.html`])),
+  ]);
+
 /** Gets a template ready in Aethron (once): copies the site, takes stock of its lines, lists its pages. */
 export async function prepareTemplate(payload: Payload, id: number, progress?: (t: string) => void, again = false) {
   const t = (await payload.findByID({ collection: "site-templates", id, depth: 0, overrideAccess: true })) as unknown as Template;
@@ -126,17 +171,32 @@ async function factsFor(lead: Lead, slug: string): Promise<Facts> {
   };
 }
 
+type Published = { ok: boolean; verdict: string; note?: string; report?: string; url?: string; uploaded?: string; pages?: string[]; extra?: string[]; relinked?: string };
+
 /** Exports a lead's template preview and, when Aethron's browser check passes, puts it online. */
-export async function publishSitePreview(payload: Payload, leadId: number, opts: { template?: Template | null; pages?: string[]; filled?: unknown; progress?: (t: string) => void } = {}) {
+export async function publishSitePreview(payload: Payload, leadId: number, opts: { template?: Template | null; pages?: string[]; filled?: unknown; progress?: (t: string) => void } = {}): Promise<Published> {
   const lead = (await payload.findByID({ collection: "leads", id: leadId, depth: 0, overrideAccess: true })) as unknown as Lead;
   const slug = String(lead.preview?.slug ?? "");
   const site = (lead.preview?.site ?? {}) as Record<string, unknown>;
   const project = String(site.project ?? slug);
   if (!slug) throw new Error("This lead has no preview yet: use make_site_preview.");
+  // Whatever happened to the project since it was made, the ribbon is on every page and no button sells the template.
+  const ribbon = await aethron("preview_ribbon", { project, ribbon: ribbonFor(lead) });
+  if (!ribbon.ok) return { ok: false, verdict: "not exported", note: `Aethron couldn't put the Jomiez ribbon on the preview, so it isn't put online: ${ribbon.text.slice(0, 300)}` };
+  const relinked = await scrubTemplateLinks(project, lead, slug);
   opts.progress?.("Exporting the preview and checking every page in a browser (1–3 minutes)…");
   const exported = await aethron("export_preview", { project });
   const verdict = verdictOf(exported);
   const report = exported.text.slice(0, 2500);
+  // Only the chosen pages go online; the rest of the template shows Aethron's "this is a preview" note.
+  const chosen = ((opts.pages ?? site.pages ?? []) as string[]).map((p) => String(p).toLowerCase());
+  const files = Object.keys(((exported.data as { pages?: unknown } | undefined)?.pages ?? {}) as Record<string, unknown>);
+  const allowed = allowedFiles(site, chosen);
+  const extra = chosen.length && !chosen.includes("all") ? files.map((f) => f.replace(/^\.?\//, "")).filter((f) => /\.html?$/i.test(f) && !allowed.has(f)) : [];
+  if (extra.length) {
+    await payload.update({ collection: "leads", id: leadId, data: { preview: { ...lead.preview, site: { ...site, project, verdict: "too many pages", report, checkedAt: new Date().toISOString() } } } as never, overrideAccess: true });
+    return { ok: false, verdict: "too many pages", pages: chosen, extra, note: `Aethron exported pages that weren't chosen (${extra.slice(0, 12).join(", ")}${extra.length > 12 ? ", …" : ""}), so it isn't put online: the lead would see the whole template. Make it again with make_site_preview; don't adjust it by hand.` };
+  }
   if (verdict !== "pass") {
     await payload.update({ collection: "leads", id: leadId, data: { preview: { ...lead.preview, site: { ...site, project, verdict, report, checkedAt: new Date().toISOString() } } } as never, overrideAccess: true });
     return { ok: false, verdict, report, note: verdict === "skipped" ? "Aethron couldn't open a browser to check it, so it isn't put online (it may be broken). Try again when the Mac is free." : "Aethron's browser check failed: fix what it lists (aethron tool), then publish_site_preview again. Don't send the link." };
@@ -171,7 +231,7 @@ export async function publishSitePreview(payload: Payload, leadId: number, opts:
     } as never,
     overrideAccess: true,
   });
-  return { ok: true, verdict, url: previewLink(slug), uploaded: up.text };
+  return { ok: true, verdict, url: previewLink(slug), uploaded: up.text, ...(relinked ? { relinked: `${relinked} link(s) to Framer or the template's shop now go to the business` } : {}) };
 }
 
 /** The whole job for one lead. */
@@ -189,8 +249,6 @@ export async function makeSitePreview(payload: Payload, leadId: number, opts: { 
   const available = ready.pages.map((p) => p.toLowerCase());
   const wanted = (opts.pages?.length ? opts.pages : ["home", "contact"]).map((p) => p.toLowerCase()).filter((p) => p === "all" || !available.length || available.includes(p));
   const pages = wanted.length ? wanted : ["home"];
-  const site = SITE();
-  const token = String(lead.stopToken ?? "");
   opts.progress?.(`Making ${lead.name}'s copy of “${template.name}” (${pages.join(", ")})…`);
   const makeArgs = (project: string) => ({
     template: project,
@@ -198,13 +256,7 @@ export async function makeSitePreview(payload: Payload, leadId: number, opts: { 
     pages,
     base: `/preview/${slug}`,
     notice: `This is a preview Jomiez made for ${lead.name}. This page will be ready when we build your full website.`,
-    ribbon: {
-      text: `A free website preview Jomiez made for ${lead.name}.`,
-      get_url: `${site}/api/outreach/get?t=${encodeURIComponent(token)}`,
-      decline_url: `${site}/api/outreach/stop?t=${encodeURIComponent(token)}`,
-      get_label: "Get this website",
-      decline_label: "Not interested",
-    },
+    ribbon: ribbonFor(lead),
   });
   let made = await aethron("make_preview", makeArgs(ready.project));
   // Aethron no longer has the template (a new Mac, a reinstall): get it ready again, once.
@@ -218,7 +270,9 @@ export async function makeSitePreview(payload: Payload, leadId: number, opts: { 
     made = await aethron("make_preview", makeArgs(ready.project));
   }
   if (!made.ok) throw new Error(`Aethron couldn't make the preview: ${made.text.slice(0, 400)}`);
-  await payload.update({ collection: "leads", id: leadId, data: { preview: { ...lead.preview, slug, site: { project: slug, pages, template: { id: template.id, name: template.name } } } } as never, overrideAccess: true });
+  const madeFiles = (made.data as { pages?: unknown } | undefined)?.pages;
+  const files = Array.isArray(madeFiles) ? madeFiles.filter((f): f is string => typeof f === "string") : [];
+  await payload.update({ collection: "leads", id: leadId, data: { preview: { ...lead.preview, slug, site: { project: slug, pages, files, template: { id: template.id, name: template.name } } } } as never, overrideAccess: true });
 
   if (typeof lead.website === "string" && lead.website && (lead.check?.kind === "basic" || lead.check?.kind === "pagespeed")) {
     await aethron("learn_brand", { project: slug, sources: [lead.website] }).catch(() => undefined);

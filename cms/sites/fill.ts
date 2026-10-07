@@ -75,6 +75,7 @@ const RULES = `You put a real business's own words into a website template made 
 - A line that is a customer quote or testimonial: replace it with a short, honest line such as "Your customers' reviews will appear here." and its author with "A customer" (only real reviews, if given, may be used).
 - A line that is a number or statistic you don't know: replace it with a short true phrase that fits the slot (e.g. "Made to order", "Lagos-wide"), never a made-up number.
 - Navigation words, form labels and legal words (Home, About, Contact, Submit, Privacy) stay as they are, unless a better plain word fits the business.
+- Words that sell the template itself (Buy template, Get this template, Use for free, Remix, Made in Framer, Made in Webflow) become the business's main action, e.g. "Chat with us" or "Call us".
 - Names of the template's own brand become the business's name. Email addresses, phone numbers and addresses become the business's, or stay generic if they have none.
 - No backticks and no "\${" anywhere.
 Give back every line you were sent, in the same order, with "old" copied exactly and "new" the line to show.`;
