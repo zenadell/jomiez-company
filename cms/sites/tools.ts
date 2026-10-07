@@ -111,12 +111,13 @@ export function addSiteTools(add: AddTool, env: ToolEnv) {
   add(
     "publish_site_preview",
     {
-      description: "After adjusting a lead's template preview with the aethron tool: exports it again, checks it in a browser, and puts it online when the check passes.",
-      input: z.object({ id: leadId }),
+      description:
+        "Publishes a lead's template preview again: puts the Jomiez ribbon back, exports it (with Aethron's latest fixes), checks it in a browser, and puts it online when the check passes. Use it whenever the owner says something about a template preview looks wrong (the menu is covered, a layout fault, the map is doubled, missing or in the wrong place) or after adjusting it with the aethron tool. Much quicker than make_site_preview: don't rebuild a preview to fix these. Set redo_map when the owner mentions the map.",
+      input: z.object({ id: leadId, redo_map: z.boolean().optional().describe("Place the one map again (above the section about visiting or contacting them), replacing any map already there") }),
       risk: () => "draft",
       title: () => "Publishing a template preview",
     },
-    async ({ id }) => publishSitePreview(payload, Number(id), { progress }),
+    async ({ id, redo_map }) => publishSitePreview(payload, Number(id), { redoMap: redo_map, progress }),
   );
 
   add(

@@ -168,10 +168,26 @@ async function factsFor(lead: Lead, slug: string): Promise<Facts> {
   };
 }
 
+/** One map, above the section where the template talks about visiting or contacting them (when we know where they are). */
+async function placeMap(project: string, lead: Lead): Promise<string | null> {
+  const where = whereOf(lead);
+  if (!where) return null;
+  // The anchor is the template's own words (the old side), on a chosen page; a lone menu word would put the map under the menu.
+  const hits = linesOf(await aethron("get_content", { project, section: "strings", filter: MAP_WORDS, limit: 40 }));
+  const ranked = hits.filter((h) => h.old.length <= 400).sort((a, b) => anchorRank(a.old) - anchorRank(b.old));
+  let map: string | null = null;
+  for (const hit of ranked.slice(0, 3)) {
+    const added = await aethron("add_block", { project, kind: "map", anchor: hit.old, position: "before", replace: true, data: { query: `${lead.name}, ${where}`, title: "Visit us" } });
+    map = added.ok ? `before “${hit.old.slice(0, 40)}”` : `not added (${added.text.slice(0, 160)})`;
+    if (added.ok) break;
+  }
+  return map;
+}
+
 type Published = { ok: boolean; verdict: string; note?: string; report?: string; url?: string; uploaded?: string; pages?: string[]; extra?: string[] };
 
 /** Exports a lead's template preview and, when Aethron's browser check passes, puts it online. */
-export async function publishSitePreview(payload: Payload, leadId: number, opts: { template?: Template | null; pages?: string[]; filled?: unknown; progress?: (t: string) => void } = {}): Promise<Published> {
+export async function publishSitePreview(payload: Payload, leadId: number, opts: { template?: Template | null; pages?: string[]; filled?: unknown; redoMap?: boolean; progress?: (t: string) => void } = {}): Promise<Published> {
   const lead = (await payload.findByID({ collection: "leads", id: leadId, depth: 0, overrideAccess: true })) as unknown as Lead;
   const slug = String(lead.preview?.slug ?? "");
   const site = (lead.preview?.site ?? {}) as Record<string, unknown>;
@@ -181,6 +197,7 @@ export async function publishSitePreview(payload: Payload, leadId: number, opts:
   const ribbon = await aethron("preview_ribbon", { project, ribbon: ribbonFor(lead) });
   if (!ribbon.ok) return { ok: false, verdict: "not exported", note: `Aethron couldn't put the Jomiez ribbon on the preview, so it isn't put online: ${ribbon.text.slice(0, 300)}` };
   await keepTemplateLinksHidden(project);
+  if (opts.redoMap) await placeMap(project, lead);
   opts.progress?.("Exporting the preview and checking every page in a browser (1–3 minutes)…");
   const exported = await aethron("export_preview", { project });
   const verdict = verdictOf(exported);
@@ -278,19 +295,7 @@ export async function makeSitePreview(payload: Payload, leadId: number, opts: { 
   const facts = await factsFor(lead, slug);
   const filled = await fillPreview({ project: slug, facts, model: opts.model, progress: opts.progress });
 
-  // A map where the template talks about visiting or contacting them, when we know where they are.
-  const where = whereOf(lead);
-  let map: string | null = null;
-  if (where) {
-    // The anchor is the template's own words (the old side), on a chosen page; a lone menu word would put the map under the menu.
-    const hits = linesOf(await aethron("get_content", { project: slug, section: "strings", filter: MAP_WORDS, limit: 40 }));
-    const ranked = hits.filter((h) => h.old.length <= 400).sort((a, b) => anchorRank(a.old) - anchorRank(b.old));
-    for (const hit of ranked.slice(0, 3)) {
-      const added = await aethron("add_block", { project: slug, kind: "map", anchor: hit.old, position: "before", replace: true, data: { query: `${lead.name}, ${where}`, title: "Visit us" } });
-      map = added.ok ? `before “${hit.old.slice(0, 40)}”` : `not added (${added.text.slice(0, 160)})`;
-      if (added.ok) break;
-    }
-  }
+  const map = await placeMap(slug, lead);
   const published = await publishSitePreview(payload, leadId, { template, pages, filled, progress: opts.progress });
   if (published.ok) await payload.update({ collection: "site-templates", id: template.id, data: { uses: Number(template.uses ?? 0) + 1 } as never, overrideAccess: true });
   return { ...published, template: template.name, pages, filled, map };
