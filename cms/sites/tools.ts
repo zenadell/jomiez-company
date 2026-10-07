@@ -131,8 +131,8 @@ export function addSiteTools(add: AddTool, env: ToolEnv) {
       title: (i) => `Aethron: ${String(i.tool).replace(/_/g, " ")}`,
     },
     async ({ tool, args }) => {
-      // make_site_preview adds the one map; another would show twice.
-      if (tool === "add_block" && args.kind === "map") return { ok: false, result: "The preview already has its map (make_site_preview adds it). Don't add another." };
+      // One map per preview: a map added by hand must replace the one there (Aethron refuses a second otherwise).
+      if (tool === "add_block" && args.kind === "map" && args.replace !== true) return { ok: false, result: "A preview has one map. To move or fix it, call add_block again with replace: true and position: \"before\"." };
       const r = await aethron(tool, args);
       return { ok: r.ok, result: r.data ?? r.text.slice(0, 12_000) };
     },

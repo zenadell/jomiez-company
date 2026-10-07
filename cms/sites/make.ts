@@ -286,7 +286,7 @@ export async function makeSitePreview(payload: Payload, leadId: number, opts: { 
     const hits = linesOf(await aethron("get_content", { project: slug, section: "strings", filter: MAP_WORDS, limit: 40 }));
     const ranked = hits.filter((h) => h.old.length <= 400).sort((a, b) => anchorRank(a.old) - anchorRank(b.old));
     for (const hit of ranked.slice(0, 3)) {
-      const added = await aethron("add_block", { project: slug, kind: "map", anchor: hit.old, position: "before", data: { query: `${lead.name}, ${where}`, title: "Visit us" } });
+      const added = await aethron("add_block", { project: slug, kind: "map", anchor: hit.old, position: "before", replace: true, data: { query: `${lead.name}, ${where}`, title: "Visit us" } });
       map = added.ok ? `before “${hit.old.slice(0, 40)}”` : `not added (${added.text.slice(0, 160)})`;
       if (added.ok) break;
     }
