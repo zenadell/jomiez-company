@@ -26,6 +26,17 @@ const whereOf = (lead: Lead) => {
   return [address, ...area.split(",").map((p) => p.trim()).filter((p) => p && !has.includes(p.toLowerCase()))].filter(Boolean).join(", ");
 };
 
+/** A template preview's own address (preview.jomiez.com when set up), so nobody gets the main site's cached page first. */
+const siteLink = (slug: string) => {
+  const raw = (process.env.PREVIEW_SITES_HOST || "").trim().toLowerCase();
+  if (!raw) return previewLink(slug);
+  try {
+    return `${new URL(/^https?:\/\//.test(raw) ? raw : `https://${raw}`).origin}/preview/${slug}`;
+  } catch {
+    return previewLink(slug);
+  }
+};
+
 const SITE = () => (process.env.NEXT_PUBLIC_SERVER_URL || "https://www.jomiez.com").replace(/\/$/, "");
 const absolute = (u: string) => (u.startsWith("/") ? `${SITE()}${u}` : u);
 
@@ -217,7 +228,7 @@ export async function publishSitePreview(payload: Payload, leadId: number, opts:
     } as never,
     overrideAccess: true,
   });
-  return { ok: true, verdict, url: previewLink(slug), uploaded: up.text };
+  return { ok: true, verdict, url: siteLink(slug), uploaded: up.text };
 }
 
 /** The whole job for one lead. */
@@ -275,8 +286,8 @@ export async function makeSitePreview(payload: Payload, leadId: number, opts: { 
     const hits = linesOf(await aethron("get_content", { project: slug, section: "strings", filter: MAP_WORDS, limit: 40 }));
     const ranked = hits.filter((h) => h.old.length <= 400).sort((a, b) => anchorRank(a.old) - anchorRank(b.old));
     for (const hit of ranked.slice(0, 3)) {
-      const added = await aethron("add_block", { project: slug, kind: "map", anchor: hit.old, position: "after", data: { query: `${lead.name}, ${where}`, title: "Visit us" } });
-      map = added.ok ? `after “${hit.old.slice(0, 40)}”` : `not added (${added.text.slice(0, 160)})`;
+      const added = await aethron("add_block", { project: slug, kind: "map", anchor: hit.old, position: "before", data: { query: `${lead.name}, ${where}`, title: "Visit us" } });
+      map = added.ok ? `before “${hit.old.slice(0, 40)}”` : `not added (${added.text.slice(0, 160)})`;
       if (added.ok) break;
     }
   }

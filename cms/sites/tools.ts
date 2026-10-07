@@ -131,6 +131,8 @@ export function addSiteTools(add: AddTool, env: ToolEnv) {
       title: (i) => `Aethron: ${String(i.tool).replace(/_/g, " ")}`,
     },
     async ({ tool, args }) => {
+      // make_site_preview adds the one map; another would show twice.
+      if (tool === "add_block" && args.kind === "map") return { ok: false, result: "The preview already has its map (make_site_preview adds it). Don't add another." };
       const r = await aethron(tool, args);
       return { ok: r.ok, result: r.data ?? r.text.slice(0, 12_000) };
     },
