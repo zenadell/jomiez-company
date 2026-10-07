@@ -143,7 +143,7 @@ export async function publishSitePreview(payload: Payload, leadId: number, opts:
   }
   opts.progress?.("Putting the preview online…");
   const up = await uploadExport(project, slug, folderOf(exported));
-  if (!up.ok) return { ok: false, verdict, report, note: `It passed, but uploading failed: ${up.text.slice(0, 400)}` };
+  if (!up.ok) return { ok: false, verdict, report, note: `It passed, but uploading failed: ${up.text.slice(0, 400)}. The preview itself is fine: don't make it again. Try publish_site_preview once more; if it fails the same way, tell the owner.` };
   const now = new Date().toISOString();
   const template = opts.template ?? null;
   await payload.update({
