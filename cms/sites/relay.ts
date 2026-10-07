@@ -15,8 +15,8 @@ import { randomBytes } from "node:crypto";
 
 export type JobInput =
   | { type: "mcp"; tool: string; args: Record<string, unknown> }
-  /** Upload an exported preview's files (the runner reads them from the Mac). */
-  | { type: "upload"; project: string; slug: string };
+  /** Upload an exported preview's files (the runner reads them from the Mac, from the folder the export reported). */
+  | { type: "upload"; project: string; slug: string; folder?: string };
 
 export type Job = JobInput & { id: string };
 

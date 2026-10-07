@@ -156,14 +156,14 @@ You can also ask directly, for example: "Make Live2living a preview from a beaut
    - In Render, open *Settings → Custom domains* and add `preview.jomiez.com`.
    - At your DNS provider, add the CNAME record Render shows you.
    - Set `PREVIEW_SITES_HOST` to `preview.jomiez.com`, then deploy. The address is read when the site builds.
-   - Until this is done, template previews open on the main address inside a browser sandbox. That's safe, but a few template effects may not work.
+   - Until this is done, template previews open on the main address inside a browser sandbox. That's safe, and Aethron's exports are made to work inside it.
 3. **The runner on your Mac:** it carries Keeper's work to Aethron and uploads finished previews. Nothing on the Mac is opened to the internet; the runner reaches out to jomiez.com.
    - In the admin, open **Agent → Access keys → Connect an agent**. Tick **only** "Aethron runner", and copy the two lines it shows.
    - Paste them into Terminal on the Mac with Aethron installed. Node 18 or newer is needed (nodejs.org).
    - Leave the window open while Keeper works. Add `--check` to test the connection.
-   - The runner only ever runs Aethron's preview tools, and only uploads from Aethron's own previews folder.
+   - The runner only ever runs Aethron's preview tools, and only uploads the folder Aethron reports for a finished export.
 
-When the runner isn't running, Keeper says so and keeps making previews with our own design. **Dashboard → Going live** shows whether Aethron is connected, where preview files are kept, and the preview address. Once Aethron is hosted online, set `AETHRON_MCP_URL` and `AETHRON_MCP_TOKEN`, and Keeper uses it directly, without the Mac.
+When the runner isn't running, Keeper says so and keeps making previews with our own design. **Dashboard → Going live** shows whether Aethron is connected, where preview files are kept, and the preview address. Once Aethron is hosted online, set `AETHRON_MCP_URL` and `AETHRON_MCP_TOKEN`, and Keeper uses it directly, without the Mac. The hosted Aethron keeps the finished previews itself; they still open at `jomiez.com/preview/…`.
 
 ## Connecting other agents (Claude Code, ChatGPT, your own scripts)
 

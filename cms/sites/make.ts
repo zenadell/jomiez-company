@@ -46,7 +46,25 @@ function pagesOf(a: Answer): string[] {
   return pick(d) ?? [...new Set([...a.text.matchAll(/(?:^|[\s,"'[])(home|about|contact|services|work|pricing|blog(?:\/[a-z0-9-]+)?|[a-z0-9-]+\/[a-z0-9-]+)(?=[\s,"'\]]|$)/gim)].map((m) => m[1].toLowerCase()))];
 }
 
-const verdictOf = (a: Answer) => (/\bPASS\b/.test(a.text) ? "pass" : /\bFAIL\b/.test(a.text) ? "fail" : /\bSKIPPED\b/.test(a.text) ? "skipped" : a.ok ? "unknown" : "fail");
+/** The browser check's verdict: export_preview's structured answer, or its words from an older Aethron. */
+const verdictOf = (a: Answer) => {
+  const v = (a.data as { verdict?: unknown } | undefined)?.verdict;
+  if (typeof v === "string" && /^(pass|fail|skipped)$/i.test(v)) return v.toLowerCase();
+  return /\bPASS\b/.test(a.text) ? "pass" : /\bFAIL\b/.test(a.text) ? "fail" : /\bSKIPPED\b/.test(a.text) ? "skipped" : a.ok ? "unknown" : "fail";
+};
+
+/** Where Aethron wrote the export, on the Mac. */
+const folderOf = (a: Answer) => {
+  const f = (a.data as { folder?: unknown } | undefined)?.folder;
+  return typeof f === "string" && f ? f : undefined;
+};
+
+/** Lines that say where to find them, best first: short headings, then sentences, then lone menu words. */
+const MAP_WORDS = "Visit|Find us|Location|Address|Directions|Get in touch|Contact";
+const anchorRank = (s: string) => {
+  const words = s.trim().split(/\s+/).length;
+  return words === 1 ? 3 : words <= 8 ? 0 : words <= 30 ? 1 : 2;
+};
 
 /** Gets a template ready in Aethron (once): copies the site, takes stock of its lines, lists its pages. */
 export async function prepareTemplate(payload: Payload, id: number, progress?: (t: string) => void, again = false) {
@@ -124,7 +142,7 @@ export async function publishSitePreview(payload: Payload, leadId: number, opts:
     return { ok: false, verdict, report, note: verdict === "skipped" ? "Aethron couldn't open a browser to check it, so it isn't put online (it may be broken). Try again when the Mac is free." : "Aethron's browser check failed: fix what it lists (aethron tool), then publish_site_preview again. Don't send the link." };
   }
   opts.progress?.("Putting the preview online…");
-  const up = await uploadExport(project, slug);
+  const up = await uploadExport(project, slug, folderOf(exported));
   if (!up.ok) return { ok: false, verdict, report, note: `It passed, but uploading failed: ${up.text.slice(0, 400)}` };
   const now = new Date().toISOString();
   const template = opts.template ?? null;
@@ -213,9 +231,10 @@ export async function makeSitePreview(payload: Payload, leadId: number, opts: { 
   const where = whereOf(lead);
   let map: string | null = null;
   if (where) {
-    for (const word of ["Contact", "Visit", "Location", "Find us", "Address", "Get in touch"]) {
-      const hit = linesOf(await aethron("get_content", { project: slug, section: "strings", filter: word, limit: 1 }))[0];
-      if (!hit) continue;
+    // The anchor is the template's own words (the old side), on a chosen page; a lone menu word would put the map under the menu.
+    const hits = linesOf(await aethron("get_content", { project: slug, section: "strings", filter: MAP_WORDS, limit: 40 }));
+    const ranked = hits.filter((h) => h.old.length <= 400).sort((a, b) => anchorRank(a.old) - anchorRank(b.old));
+    for (const hit of ranked.slice(0, 3)) {
       const added = await aethron("add_block", { project: slug, kind: "map", anchor: hit.old, position: "after", data: { query: `${lead.name}, ${where}`, title: "Visit us" } });
       map = added.ok ? `after “${hit.old.slice(0, 40)}”` : `not added (${added.text.slice(0, 160)})`;
       if (added.ok) break;

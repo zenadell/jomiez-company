@@ -105,23 +105,24 @@ export async function fillPreview(opts: { project: string; facts: Facts; model: 
 
   for (const section of ["strings", "images", "links"] as const) {
     if (section === "images" && !facts.photos.length && !facts.logo) continue;
+    // Lines Aethron listed as unfilled drop out of the list once written (kept ones too, sent back unchanged),
+    // so offset 0 is always the next batch. Offset only moves past lines already tried that are still listed.
     let offset = 0;
-    let lastFirst = "";
-    for (let round = 0; round < 60; round++) {
+    const tried = new Set<string>();
+    for (let round = 0; round < 80; round++) {
       const page = await aethron("get_content", { project, section, only_unfilled: true, limit: 40, offset });
       if (!page.ok) {
         done.notes.push(`Reading the ${section}: ${page.text.slice(0, 300)}`);
         break;
       }
-      const lines = linesOf(page);
-      if (!lines.length) break;
-      // The same lines again (kept as the template had them, still counted as unfilled): move past them.
-      if (lines[0].old === lastFirst) {
-        offset += lines.length;
-        lastFirst = "";
+      const listed = linesOf(page);
+      if (!listed.length) break;
+      const lines = listed.filter((l) => !tried.has(l.old));
+      if (!lines.length) {
+        offset += listed.length;
         continue;
       }
-      lastFirst = lines[0].old;
+      for (const l of lines) tried.add(l.old);
       opts.progress?.(`Writing their ${section === "strings" ? "words" : section === "images" ? "pictures" : "links"} into the template (${done.batches + 1})…`);
 
       let written: z.infer<typeof Out>;
@@ -129,7 +130,6 @@ export async function fillPreview(opts: { project: string; facts: Facts; model: 
         written = await batch(model, section, lines, facts);
       } catch (err) {
         done.notes.push(`A batch of ${section} couldn't be written (${(err as Error).message.slice(0, 160)}); left as the template had it.`);
-        offset += lines.length;
         continue;
       }
       done.batches++;
@@ -147,7 +147,6 @@ export async function fillPreview(opts: { project: string; facts: Facts; model: 
       const sent = await aethron("set_content_bulk", { project, entries, build: false });
       if (!sent.ok) {
         done.notes.push(`Saving a batch: ${sent.text.slice(0, 300)}`);
-        offset += lines.length;
         continue;
       }
       const refused = refusedOf(sent);

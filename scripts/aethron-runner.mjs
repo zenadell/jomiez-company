@@ -9,7 +9,8 @@
  * Agent → Access keys → Connect an agent). The runner reaches out to jomiez.com
  * over HTTPS and asks for work; nothing on this Mac is opened to the internet.
  * It only ever runs Aethron's preview tools (the list below), whatever it's
- * sent, and only uploads files from Aethron's own previews folder.
+ * sent, and only uploads the folder Aethron itself reported for an export (or
+ * one inside Aethron's own data folder).
  *
  * Settings (environment variables, all optional except the key):
  *   JOMIEZ_URL    https://www.jomiez.com
@@ -27,7 +28,7 @@ import os from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline";
 
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 const SITE = (process.env.JOMIEZ_URL || "https://www.jomiez.com").replace(/\/$/, "");
 const KEY = process.env.JOMIEZ_KEY || "";
 const BIN = process.env.AETHRON_BIN || "/Applications/Aethron.app/Contents/MacOS/Aethron";
@@ -163,11 +164,27 @@ async function walk(dir, base = dir, out = []) {
   return out;
 }
 
-async function upload({ project, slug }) {
+// Where Aethron wrote each project's last export (its own answer, seen here as it passed through).
+const exported = new Map();
+
+/** The export's folder: the one Aethron reported, else one jomiez.com names inside Aethron's data, else previews/<project>. */
+function exportFolder(project, named) {
+  const data = path.resolve(DATA);
+  const inside = (f) => f.startsWith(data + path.sep);
+  if (exported.has(project)) return exported.get(project);
+  if (typeof named === "string" && named) {
+    const f = path.resolve(data, named);
+    if (inside(f)) return f;
+  }
+  const f = path.resolve(data, "previews", project);
+  if (!inside(f)) throw new Error("That folder isn't one of Aethron's previews.");
+  return f;
+}
+
+async function upload({ project, slug, folder: named }) {
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/.test(project)) throw new Error("That isn't a preview name.");
-  const root = path.join(DATA, "previews");
-  const folder = path.resolve(root, project);
-  if (!folder.startsWith(root + path.sep)) throw new Error("That folder isn't one of Aethron's previews.");
+  const folder = exportFolder(project, named);
+  if (!(await lstat(path.join(folder, "index.html")).then((s) => s.isFile(), () => false))) throw new Error(`No exported preview in ${folder} (index.html is missing): export it first.`);
   const paths = await walk(folder);
   const files = [];
   const data = new Map();
@@ -209,6 +226,8 @@ async function handle(job) {
   if (!child) await connectAethron();
   const long = job.tool === "export_preview" || job.tool === "fetch";
   const result = await rpc("tools/call", { name: job.tool, arguments: job.args ?? {} }, long ? 20 * 60_000 : 5 * 60_000);
+  const folder = result?.structuredContent?.folder;
+  if (job.tool === "export_preview" && !result?.isError && typeof folder === "string" && path.isAbsolute(folder)) exported.set(String(job.args?.project), path.resolve(folder));
   return { ok: !result?.isError, result };
 }
 

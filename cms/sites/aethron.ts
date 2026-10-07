@@ -127,8 +127,14 @@ export async function aethron(tool: AethronTool, args: Record<string, unknown>, 
 }
 
 /** Puts an exported preview's files where jomiez.com serves them from (the runner uploads them from the Mac). */
-export async function uploadExport(project: string, slug: string): Promise<Answer> {
-  if (hosted()) return { ok: true, text: "Served from the hosted Aethron.", data: { hosted: true } };
-  const r = await relay({ type: "upload", project, slug }, 20 * 60_000);
+export async function uploadExport(project: string, slug: string, folder?: string): Promise<Answer> {
+  const h = hosted();
+  if (h) {
+    // Hosted Aethron serves its exports itself (cms/sites/serve.ts passes them through): check the home page is there.
+    const home = `${new URL(h.url).origin}/preview/${encodeURIComponent(project)}/index.html`;
+    const res = await fetch(home, { method: "HEAD", signal: AbortSignal.timeout(30_000) }).catch((e: Error) => ({ ok: false, status: 0, statusText: e.message }));
+    return res.ok ? { ok: true, text: "Served from the hosted Aethron.", data: { hosted: true } } : { ok: false, text: `The hosted Aethron isn't serving ${project} (${res.status || res.statusText}).`, data: undefined };
+  }
+  const r = await relay({ type: "upload", project, slug, ...(folder ? { folder } : {}) }, 20 * 60_000);
   return { ok: r.ok, text: typeof r.result === "string" ? r.result : JSON.stringify(r.result), data: r.result };
 }
