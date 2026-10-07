@@ -36,6 +36,10 @@ export function linesOf(a: Answer): Line[] {
   return look(a.data) ?? [];
 }
 
+/** Links Aethron hides by their address (template sales and demo links: Framer, Webflow, template shops). They must keep it. */
+export const HIDDEN_LINK = /^https?:\/\/([a-z0-9-]+\.)*(framer\.com|framer\.link|framer\.website|framer\.app|webflow\.com|webflow\.io|gumroad\.com|lemonsqueezy\.com|polar\.sh|contra\.com)([/?#:]|$)/i;
+export const HIDDEN_LINK_WORDS = "framer|webflow|gumroad|lemonsqueezy|polar.sh|contra.com";
+
 /** Which entries Aethron refused, and why. */
 export function refusedOf(a: Answer): { old: string; reason: string }[] {
   const look = (d: unknown, depth = 0): { old: string; reason: string }[] => {
@@ -88,7 +92,7 @@ async function batch(model: LanguageModel, section: "strings" | "images" | "link
   }
   if (section === "links") {
     const list = facts.links.map((l) => `${l.label}: ${l.url}`).join("\n");
-    const prompt = `${facts.text}\n\nTHEIR LINKS (use only these):\n${list || "none"}\n\nTEMPLATE LINKS (old = the template's link; new = the business's link for the same purpose (call, WhatsApp, email, map, their social pages), or the same old address to keep it; links between the template's own pages always stay as they are):\n${JSON.stringify(lines.map((l) => ({ old: l.old, notes: l.brand_notes })))}`;
+    const prompt = `${facts.text}\n\nTHEIR LINKS (use only these):\n${list || "none"}\n\nTEMPLATE LINKS (old = the template's link; new = the business's link for the same purpose (call, WhatsApp, email, map, their social pages), or the same old address to keep it; links between the template's own pages always stay as they are; links to Framer, Webflow or a template shop stay exactly as they are, because Aethron hides them):\n${JSON.stringify(lines.map((l) => ({ old: l.old, notes: l.brand_notes })))}`;
     return ask(model, `${RULES}\nHere the lines are link addresses.${extra}`, prompt, Out);
   }
   const prompt = `${facts.text}\n\nTEMPLATE LINES (max_bytes = the most UTF-8 bytes the new line may use; notes = what Aethron knows about the business for that line):\n${JSON.stringify(lines.map((l) => ({ old: l.old, max_bytes: l.max_bytes ?? undefined, notes: l.brand_notes ?? undefined })))}`;
@@ -138,8 +142,8 @@ export async function fillPreview(opts: { project: string; facts: Facts; model: 
       const entries = lines.map((l) => {
         let next = byOld.get(l.old) ?? l.old;
         if (section === "strings") next = tidy(next, l.max_bytes);
-        // Pictures and links may only become the business's own addresses (or stay as they were).
-        else if (next !== l.old && !allowedUrls.has(next)) next = l.old;
+        // Pictures and links may only become the business's own addresses (or stay as they were); links Aethron hides keep their address.
+        else if (next !== l.old && (!allowedUrls.has(next) || HIDDEN_LINK.test(l.old))) next = l.old;
         if (/^\s*javascript:/i.test(next)) next = l.old;
         if (next === l.old) done.kept++;
         else done.written++;

@@ -5,7 +5,7 @@ import type { CheckResult } from "../outreach/check";
 import { looksMobile } from "../outreach/kinds";
 import { previewLink, slugOf } from "../outreach/write";
 import { aethron, uploadExport, type Answer } from "./aethron";
-import { fillPreview, linesOf, type Facts } from "./fill";
+import { fillPreview, HIDDEN_LINK, HIDDEN_LINK_WORDS, linesOf, type Facts } from "./fill";
 
 /*
  * A lead's preview made from a template (the Aethron handoff, section 2):
@@ -78,29 +78,15 @@ const ribbonFor = (lead: Lead) => {
   };
 };
 
-/** Where the business's own main button should go: WhatsApp, a call, an email, or else the preview's home. */
-const mainLinkFor = (lead: Lead, slug: string) => {
-  const phone = typeof lead.phone === "string" ? lead.phone : "";
-  if (phone && looksMobile(phone)) return `https://wa.me/${phone.replace(/\D/g, "")}`;
-  if (phone) return `tel:${phone.replace(/[^\d+]/g, "")}`;
-  if (typeof lead.email === "string" && lead.email) return `mailto:${lead.email}`;
-  return `/preview/${slug}`;
-};
-
-// Links that sell the template (its marketplace page, the designer's shop, Framer's own badge), and links to the template's live demo.
-const STORE_LINK = /^https?:\/\/([a-z0-9-]+\.)*(framer\.com|framer\.link|webflow\.com|gumroad\.com|lemonsqueezy\.com|payhip\.com|ko-fi\.com|buymeacoffee\.com|creativemarket\.com|ui8\.net|envato\.com|themeforest\.net)([/?#]|$)/i;
-const DEMO_LINK = /^https?:\/\/([a-z0-9-]+\.)+(framer\.website|framer\.ai|framer\.app|webflow\.io)([/?#]|$)/i;
-
-/** Points the template's sales and demo links at the business instead, so no button leads a visitor to Framer or the template's shop. */
-async function scrubTemplateLinks(project: string, lead: Lead, slug: string) {
-  const hits = linesOf(await aethron("get_content", { project, section: "links", filter: "framer|webflow|gumroad|lemonsqueezy|payhip|ko-fi|buymeacoffee|creativemarket|ui8|envato|themeforest", limit: 40 }));
-  const entries = hits.flatMap((h) => {
-    const now = typeof h.new === "string" && h.new ? h.new : h.old;
-    const to = STORE_LINK.test(now) ? mainLinkFor(lead, slug) : DEMO_LINK.test(now) ? `/preview/${slug}` : null;
-    return to && to !== now ? [{ old: h.old, new: to, section: "links" }] : [];
-  });
+/**
+ * Aethron hides links to Framer, Webflow and template shops by their address, in every build and
+ * export (the template's "Buy now", "Made in Framer"…). A link pointed elsewhere would show again,
+ * so any such link that was changed is put back.
+ */
+async function keepTemplateLinksHidden(project: string) {
+  const hits = linesOf(await aethron("get_content", { project, section: "links", filter: HIDDEN_LINK_WORDS, limit: 40 }));
+  const entries = hits.filter((h) => HIDDEN_LINK.test(h.old) && typeof h.new === "string" && h.new && h.new !== h.old).map((h) => ({ old: h.old, new: h.old, section: "links" }));
   if (entries.length) await aethron("set_content_bulk", { project, entries, build: false });
-  return entries.length;
 }
 
 /** The page files a preview may have: what make_preview built for the chosen pages (and a 404 page). */
@@ -171,7 +157,7 @@ async function factsFor(lead: Lead, slug: string): Promise<Facts> {
   };
 }
 
-type Published = { ok: boolean; verdict: string; note?: string; report?: string; url?: string; uploaded?: string; pages?: string[]; extra?: string[]; relinked?: string };
+type Published = { ok: boolean; verdict: string; note?: string; report?: string; url?: string; uploaded?: string; pages?: string[]; extra?: string[] };
 
 /** Exports a lead's template preview and, when Aethron's browser check passes, puts it online. */
 export async function publishSitePreview(payload: Payload, leadId: number, opts: { template?: Template | null; pages?: string[]; filled?: unknown; progress?: (t: string) => void } = {}): Promise<Published> {
@@ -180,10 +166,10 @@ export async function publishSitePreview(payload: Payload, leadId: number, opts:
   const site = (lead.preview?.site ?? {}) as Record<string, unknown>;
   const project = String(site.project ?? slug);
   if (!slug) throw new Error("This lead has no preview yet: use make_site_preview.");
-  // Whatever happened to the project since it was made, the ribbon is on every page and no button sells the template.
+  // Whatever happened to the project since it was made, the ribbon is on every page and the template's sales links stay hidden.
   const ribbon = await aethron("preview_ribbon", { project, ribbon: ribbonFor(lead) });
   if (!ribbon.ok) return { ok: false, verdict: "not exported", note: `Aethron couldn't put the Jomiez ribbon on the preview, so it isn't put online: ${ribbon.text.slice(0, 300)}` };
-  const relinked = await scrubTemplateLinks(project, lead, slug);
+  await keepTemplateLinksHidden(project);
   opts.progress?.("Exporting the preview and checking every page in a browser (1–3 minutes)…");
   const exported = await aethron("export_preview", { project });
   const verdict = verdictOf(exported);
@@ -231,7 +217,7 @@ export async function publishSitePreview(payload: Payload, leadId: number, opts:
     } as never,
     overrideAccess: true,
   });
-  return { ok: true, verdict, url: previewLink(slug), uploaded: up.text, ...(relinked ? { relinked: `${relinked} link(s) to Framer or the template's shop now go to the business` } : {}) };
+  return { ok: true, verdict, url: previewLink(slug), uploaded: up.text };
 }
 
 /** The whole job for one lead. */
