@@ -127,6 +127,44 @@ Press the microphone next to *Send* and talk. It answers out loud, and it acts w
 
 Routines need the server's clock: while the server is running it checks every minute. A server that sleeps (Render's free plan) or Vercel needs a scheduler calling `GET /api/agent/tick` with the header `Authorization: Bearer <CRON_SECRET>` (set up in *Going live → On the free plan*); while anyone has the admin open, due routines also get their chance.
 
+## Previews from templates (Aethron)
+
+For the best leads, Keeper can make the preview from a real designer's template instead of our own design. It uses Aethron, the app on your Mac that turns a Framer or Webflow template into a site you can edit.
+
+**How Keeper does it:**
+1. **Finds a template** for the kind of business (`find_templates`). It looks in **Clients → Templates** first, your own paid ones first. If none fits, it looks through the free templates on Framer's marketplace, screenshots the best few, and picks the most beautiful one that fits.
+2. **Gets it ready in Aethron** (`save_template`). It copies the template and lists its pages. This is done once per template.
+3. **Makes the lead's copy** (`make_site_preview`):
+   - It builds only the pages worth showing: home, plus contact or about when they help.
+   - A link to any other page opens a short note: "This is a preview Jomiez made for … This page will be ready when we build your full website."
+   - It writes in the business's own words, pictures and links, 40 lines at a time, with one short model call each.
+   - It never invents reviews, numbers or prices. The template's testimonials become "Your customers' reviews will appear here."
+   - It adds a map where the template talks about contacting or visiting them.
+   - The Jomiez ribbon is at the bottom of every page. **Get this website** notifies you and opens a WhatsApp chat with you. **Not interested** removes them from your list.
+4. **Checks it:** Aethron opens every page in a browser. Only when it says **PASS** does the preview go online at `jomiez.com/preview/…`. The lead's messages are rewritten to link to it, and the template preview replaces their simple one at the same address.
+
+You can also ask directly, for example: "Make Live2living a preview from a beautiful furniture template", or "Use my template https://… for salons."
+
+**Your own paid templates:** in **Clients → Templates**, press **Create**. Paste its live address, choose **Mine (paid)**, and list the kinds of business it suits. Keeper uses these first.
+
+**Free templates:** each one's marketplace page and licence link are kept in the library and on the lead. Check the licence before building a client's real site from one.
+
+### Setting it up (once)
+
+1. **Where the finished previews are kept:** in Supabase, open *Project settings → API* and copy the **service_role** key. In Render, set it as `SUPABASE_SERVICE_ROLE_KEY`; the bucket `previews` is made automatically. Each file is stored once, so a template's pictures and scripts aren't stored again for every lead.
+2. **The previews' own address:** a template's own scripts run on its pages, so they get their own address, away from your admin login.
+   - In Render, open *Settings → Custom domains* and add `preview.jomiez.com`.
+   - At your DNS provider, add the CNAME record Render shows you.
+   - Set `PREVIEW_SITES_HOST` to `preview.jomiez.com`, then deploy. The address is read when the site builds.
+   - Until this is done, template previews open on the main address inside a browser sandbox. That's safe, and Aethron's exports are made to work inside it.
+3. **The runner on your Mac:** it carries Keeper's work to Aethron and uploads finished previews. Nothing on the Mac is opened to the internet; the runner reaches out to jomiez.com.
+   - In the admin, open **Agent → Access keys → Connect an agent**. Tick **only** "Aethron runner", and copy the two lines it shows.
+   - Paste them into Terminal on the Mac with Aethron installed. Node 18 or newer is needed (nodejs.org).
+   - Leave the window open while Keeper works. Add `--check` to test the connection.
+   - The runner only ever runs Aethron's preview tools, and only uploads the folder Aethron reports for a finished export.
+
+When the runner isn't running, Keeper says so and keeps making previews with our own design. **Dashboard → Going live** shows whether Aethron is connected, where preview files are kept, and the preview address. Once Aethron is hosted online, set `AETHRON_MCP_URL` and `AETHRON_MCP_TOKEN`, and Keeper uses it directly, without the Mac. The hosted Aethron keeps the finished previews itself; they still open at `jomiez.com/preview/…`.
+
 ## Connecting other agents (Claude Code, ChatGPT, your own scripts)
 
 Another agent can see what Keeper is doing and give it work, with an **access key**.
@@ -334,6 +372,7 @@ SUPABASE_DATABASE_URL=postgres://… npm run payload -- migrate:create <name>   
 | `cms/agent/` | The agent: settings and records (`config.ts`), models and their lists (`providers.ts`), the run loop with approvals and notices (`run.ts`, `notify.ts`), its tools (`tools.ts`), how it reads and changes documents with undo (`docs.ts`, `diff.ts`), the permission rules (`policy.ts`), its instructions (`prompt.ts`), routines and inbox sorting (`routines.ts`, `triage.ts`), live voice sessions (`voice.ts`) |
 | `cms/admin/agent/` | The console, the chat on every screen, approval cards, the dashboard card, the model picker, and voice (`useVoice.ts` for the microphone, playback and the live connection; `Voice.tsx` for its controls) |
 | `app/(payload)/api/agent/` | The agent's endpoints (chat, approve, stop, undo, status, models, voice, tick) |
+| `cms/sites/` | Previews made from templates with Aethron: the template library and free Framer search (`templates.ts`), talking to Aethron (`aethron.ts`, through the runner's queue in `relay.ts`), writing a business's words into a template (`fill.ts`), the whole job (`make.ts`), file storage (`storage.ts`), serving them (`serve.ts`), Keeper's tools (`tools.ts`); the runner is `scripts/aethron-runner.mjs` |
 | `cms/connect/` | Access keys for other agents (`keys.ts`, `auth.ts`), what they can do (`ops.ts`); served at `app/(payload)/api/v1/` (web API) and `app/(payload)/api/mcp/` (MCP) |
 | `cms/db.ts` | Postgres (Supabase) in production, SQLite locally, each with its own migrations |
 | `cms/snapshot.ts` | Saving the admin's content to `content-snapshot/` and loading it into another database |

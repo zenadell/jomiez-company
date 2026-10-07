@@ -17,6 +17,7 @@ export type Caller = {
 export type Refusal = { status: number; error: string; headers?: Record<string, string> };
 
 const PER_MINUTE = 120;
+const RUNNER_PER_MINUTE = 1200;
 const BAD_PER_TEN_MINUTES = 20;
 
 /**
@@ -75,8 +76,10 @@ export async function authenticate(payload: Payload, headers: Headers): Promise<
   // Only an admin's key works, and only while they're still an admin.
   if (!user || !(user as { roles?: string[] }).roles?.includes("admin")) return { status: 403, error: "The admin this key acts as no longer exists or isn't an admin." };
 
-  const wait = await over(payload, `connect:rate:${doc.id}`, PER_MINUTE, 60_000);
-  if (wait) return { status: 429, error: `More than ${PER_MINUTE} requests a minute. Slow down.`, headers: { "retry-after": String(wait) } };
+  // The Aethron runner makes two short requests for every step of Aethron's work, so it may make more.
+  const limit = (doc.scopes ?? []).includes("runner") ? RUNNER_PER_MINUTE : PER_MINUTE;
+  const wait = await over(payload, `connect:rate:${doc.id}`, limit, 60_000);
+  if (wait) return { status: 429, error: `More than ${limit} requests a minute. Slow down.`, headers: { "retry-after": String(wait) } };
 
   // Note when and where it was last used (at most once a minute, to keep writes down).
   if (!doc.lastUsedAt || Date.now() - new Date(doc.lastUsedAt).getTime() > 60_000) {

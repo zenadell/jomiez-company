@@ -22,6 +22,9 @@ import { connect, noStore } from "@/cms/connect/serve";
  *   GET   /api/v1/routines
  *   PATCH /api/v1/routines/:id                 { enabled }
  *   PATCH /api/v1/keeper                       { enabled?, provider?, model? }
+ *
+ * For the Aethron runner on the owner's Mac (a key with only the "runner" permission):
+ *   POST  /api/v1/runner/hello | next | result | upload | publish   (scripts/aethron-runner.mjs)
  */
 
 export const dynamic = "force-dynamic";
@@ -32,6 +35,11 @@ type Params = { params: Promise<{ path?: string[] }> };
 /** Which operation a method and path mean, and the arguments the path itself carries. */
 function route(method: string, path: string[]): { op: string; args?: Record<string, unknown> } | null {
   const [a, id, b] = path;
+  // The Aethron runner's addresses name an action, not an id.
+  if (a === "runner" && method === "POST" && id && !b) {
+    const op = ({ hello: "runner_hello", next: "runner_next", result: "runner_result", upload: "runner_upload", publish: "runner_publish" } as Record<string, string>)[id];
+    return op ? { op } : null;
+  }
   const key = `${method} ${[a, id ? ":id" : "", b].filter(Boolean).join("/")}`;
   const table: Record<string, string> = {
     "GET ": "whoami",

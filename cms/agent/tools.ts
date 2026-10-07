@@ -10,6 +10,7 @@ import { adminUrl, describeFields, siteUrl, targetsOf, toModel, walk, type Targe
 import { browserAvailable, canSee, findPhotos, getShot, imagesInHtml, imagesOn, keepShot, loadImage, makeImage, see, serviceShot, wake, withPage, DEVICES, type Sight } from "./eyes";
 import { outline, safeFetch } from "./web";
 import { addOutreachTools } from "../outreach/tools";
+import { addSiteTools } from "../sites/tools";
 
 /*
  * Everything the agent can do, as tools the model calls. Each tool declares its
@@ -1032,6 +1033,7 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
 
   // Finding clients: leads, website checks, messages (cms/outreach).
   addOutreachTools(add, env);
+  addSiteTools(add, env);
 
   // Triage reads a stranger's words: no memory, no email, no web, no other documents.
   if (env.scope === "triage") {

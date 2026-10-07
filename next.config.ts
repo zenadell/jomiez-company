@@ -2,6 +2,24 @@ import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 import path from "path";
 
+/*
+ * The previews' own address (PREVIEW_SITES_HOST, e.g. preview.jomiez.com,
+ * pointed at this same server) only ever shows previews made from templates
+ * (cms/sites/serve.ts): everything else there goes to the main site, so the
+ * admin is never open where template scripts run. Read when the site is built.
+ */
+const previewHost = (() => {
+  const raw = (process.env.PREVIEW_SITES_HOST || "").trim().toLowerCase();
+  if (!raw) return null;
+  try {
+    return new URL(/^https?:\/\//.test(raw) ? raw : `https://${raw}`).hostname;
+  } catch {
+    return null;
+  }
+})();
+const onPreviewHost = previewHost ? [{ type: "host" as const, value: previewHost.replace(/\./g, "\\.") }] : [];
+const mainSite = (process.env.NEXT_PUBLIC_SERVER_URL || "https://www.jomiez.com").replace(/\/$/, "");
+
 const nextConfig: NextConfig = {
   agentRules: false,
   // Pages published since the last deploy stay live after a restart (see the file).
@@ -29,11 +47,17 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // A template preview's address opens its home page (on the previews' own address).
+  async rewrites() {
+    return { beforeFiles: previewHost ? [{ source: "/preview/:slug", has: onPreviewHost, destination: "/preview/:slug/index.html" }] : [], afterFiles: [], fallback: [] };
+  },
   // The previous jomiez.com (the portfolio) used these addresses. Old links and
   // search results land on their new pages instead of a 404.
   async redirects() {
     const to = (source: string, destination: string) => ({ source, destination, permanent: true });
     return [
+      // On the previews' own address, anything that isn't a preview goes to the main site.
+      ...(previewHost ? [{ source: "/:path((?!preview/[a-z0-9-]{3,80}(?:/|$)).*)", has: onPreviewHost, destination: `${mainSite}/`, permanent: false }] : []),
       to("/home.html", "/"),
       to("/index.html", "/"),
       to("/about.html", "/about"),

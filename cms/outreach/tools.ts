@@ -7,6 +7,7 @@ import { addLead, findLeads } from "./find";
 import { COUNTRIES, KINDS, type Country, type Kind } from "./kinds";
 import { emailsLeftToday, sendLeadEmail, setStatus, smsLink, stopLead, whatsappLink } from "./send";
 import { loadOutreach } from "./settings";
+import { aethronStatus } from "../sites/aethron";
 import { outreachToday } from "./today";
 import { makePreview, previewLink, writeLead, writerModel } from "./write";
 
@@ -56,7 +57,15 @@ export function addOutreachTools(add: AddTool, env: ToolEnv) {
       const s = await loadOutreach(payload);
       const search = area ? { area, country: country ?? "NG", kinds: kinds?.length ? kinds : (["food", "beauty", "health", "education"] as Kind[]) } : undefined;
       const res = await outreachToday(payload, { origin: env.origin, search, newLeads, messages, progress: (text) => env.emit({ t: "notice", text }) });
-      return { ...res, next: res.waiting ? `${res.waiting} messages are waiting in the phone app (Clients) for the owner to read and send.` : undefined, emailReady: Boolean(s.gmail && s.gmailPassword) };
+      const site = aethronStatus();
+      return {
+        ...res,
+        next: res.waiting ? `${res.waiting} messages are waiting in the phone app (Clients) for the owner to read and send.` : undefined,
+        emailReady: Boolean(s.gmailScriptUrl && s.gmailScriptSecret) || Boolean(s.gmail && s.gmailPassword),
+        templates: site.ready
+          ? "Aethron is connected: for the one or two best leads today (highest score, with a phone or email), also make a preview from a beautiful template that fits them (find_templates, then make_site_preview). It replaces their simple preview at the same address."
+          : undefined,
+      };
     },
   );
 

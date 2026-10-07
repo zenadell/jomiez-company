@@ -2,6 +2,9 @@ import type { Payload } from "payload";
 import { missingSetup } from "./agent/providers";
 import { loadConfig, voiceKey } from "./agent/run";
 import { databaseUrl, usesPostgres } from "./db";
+import { aethronStatus } from "./sites/aethron";
+import { previewOrigin } from "./sites/serve";
+import { storeName } from "./sites/storage";
 import { cloudinaryConfigured } from "./storage/cloudinary";
 
 /*
@@ -11,6 +14,7 @@ import { cloudinaryConfigured } from "./storage/cloudinary";
  */
 
 export type SetupRow = { name: string; ok: boolean; warn?: boolean; text: string };
+
 
 export async function setupStatus(payload: Payload): Promise<SetupRow[]> {
   const live = process.env.NODE_ENV === "production";
@@ -77,6 +81,27 @@ export async function setupStatus(payload: Payload): Promise<SetupRow[]> {
     cfg.voice.enabled && voiceKey(cfg)
       ? { name: "Voice", ok: true, text: `Gemini Live (${cfg.voice.model}), voice ${cfg.voice.voiceName}.` }
       : { name: "Voice", ok: false, text: cfg.voice.enabled ? "Needs a Gemini key (Agent settings → Voice, or GEMINI_API_KEY)." : "Switched off." },
+  );
+
+  // Previews made from templates (cms/sites).
+  const aethronNow = aethronStatus();
+  rows.push(
+    aethronNow.mode === "hosted"
+      ? { name: "Aethron", ok: true, text: `Hosted at ${aethronNow.where}.` }
+      : aethronNow.ready
+        ? { name: "Aethron", ok: true, text: `Connected through the runner on ${"runner" in aethronNow && aethronNow.runner.connected ? aethronNow.runner.name : "the Mac"}.` }
+        : { name: "Aethron", ok: false, text: "Not connected: previews are made with our own design until the Aethron runner runs on the Mac (ADMIN.md → Previews from templates)." },
+  );
+  rows.push(
+    storeName() === "supabase"
+      ? { name: "Template previews' files", ok: true, text: "Supabase Storage (bucket previews)." }
+      : { name: "Template previews' files", ok: !live, warn: live, text: live ? "The server's own disk, which Render wipes on every deploy. Set SUPABASE_SERVICE_ROLE_KEY." : "The local uploads folder (fine on this computer)." },
+  );
+  const own = previewOrigin();
+  rows.push(
+    own
+      ? { name: "Preview address", ok: true, text: `${own.origin}: template previews open there, away from the admin.` }
+      : { name: "Preview address", ok: false, warn: live, text: "Not set: template previews open in a browser sandbox on this address. Set PREVIEW_SITES_HOST (e.g. preview.jomiez.com) for them to work fully." },
   );
 
   const snapshot = await payload.kv.get<{ savedAt: string; loadedAt: string }>("content:snapshot").catch(() => null);

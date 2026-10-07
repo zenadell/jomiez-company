@@ -17,6 +17,7 @@ import { Pages } from "./cms/collections/Pages";
 import { Projects } from "./cms/collections/Projects";
 import { Users } from "./cms/collections/Users";
 import { ClientSettings, Leads } from "./cms/outreach/config";
+import { SiteTemplates } from "./cms/sites/templates";
 import { Effects } from "./cms/globals/Effects";
 import { HomePage } from "./cms/globals/HomePage";
 import {
@@ -119,7 +120,7 @@ export default buildConfig({
     },
   },
   // Order sets the admin's sidebar: Inbox, Clients, Agent, Pages, Content, Settings, Legal.
-  collections: [Inquiries, Leads, AgentThreads, AgentRoutines, AgentMemory, AccessKeys, Pages, Projects, Articles, Media, Users],
+  collections: [Inquiries, Leads, SiteTemplates, AgentThreads, AgentRoutines, AgentMemory, AccessKeys, Pages, Projects, Articles, Media, Users],
   globals: [
     HomePage,
     AboutPage,

@@ -65,3 +65,17 @@ services:
       # (e.g. Browserless: wss://production-sfo.browserless.io?token=…).
       - key: BROWSER_WS_ENDPOINT
         sync: false
+      # Previews made from templates (ADMIN.md → Previews from templates).
+      # Supabase → Project settings → API → service_role key: keeps their files in
+      # Supabase Storage (bucket "previews", made automatically). Server only.
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      # The previews' own address, e.g. preview.jomiez.com (add it to this service
+      # under Settings → Custom domains too). Template scripts run there, away from the admin.
+      - key: PREVIEW_SITES_HOST
+        sync: false
+      # Optional, once Aethron is hosted: its MCP address and token (else the runner on the Mac is used).
+      - key: AETHRON_MCP_URL
+        sync: false
+      - key: AETHRON_MCP_TOKEN
+        sync: false

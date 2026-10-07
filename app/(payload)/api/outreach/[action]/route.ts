@@ -3,12 +3,14 @@ import { getPayload, type Where } from "payload";
 import { emailsLeftToday, markSent, sendLeadEmail, sendTestEmail, setStatus, smsLink, stopLead, unmarkSent, whatsappLink, type Channel } from "@/cms/outreach/send";
 import { loadOutreach } from "@/cms/outreach/settings";
 import { makePreview, previewLink, writeLead, writerModel } from "@/cms/outreach/write";
+import { push } from "@/cms/app/push";
 import { originOf } from "@/cms/preview";
 
 /*
  * Finding clients (cms/outreach).
  * For anyone (the link at the end of an email, "Not interested" on a preview):
  *   GET  stop?t=…    asks "stop contacting me?"; POST does it (also one-click from mail apps)
+ *   GET  get?t=…     "Get this website" on a template preview: tells the owner, opens a WhatsApp chat with them
  * For the phone app, signed in:
  *   GET  leads?tab=ready|contacted|replied|won|all   the list, with ready-made WhatsApp and text links
  *   GET  summary     counts for the home screen
@@ -85,6 +87,27 @@ export async function GET(req: Request, { params }: Params) {
   const { action } = await params;
   const payload = await getPayload({ config });
   const url = new URL(req.url);
+
+  // "Get this website" on a preview made from a template: tell the owner, then open a chat with them.
+  if (action === "get") {
+    const token = url.searchParams.get("t") ?? "";
+    const { docs } = token ? await payload.find({ collection: "leads", where: { stopToken: { equals: token } }, limit: 1, depth: 0, overrideAccess: true }) : { docs: [] };
+    const lead = docs[0] as unknown as (Lead & { preview?: { slug?: string }; log?: unknown[] }) | undefined;
+    const s = await loadOutreach(payload);
+    const site = (process.env.NEXT_PUBLIC_SERVER_URL || "https://www.jomiez.com").replace(/\/$/, "");
+    if (!lead || lead.status === "stopped") return Response.redirect(`${site}/contact`, 302);
+    const key = `outreach:get:${lead.id}`;
+    if (!(await payload.kv.get(key))) {
+      await payload.kv.set(key, Date.now());
+      await payload.update({ collection: "leads", id: lead.id, data: { log: [...((lead.log as unknown[]) ?? []), { at: new Date().toISOString(), what: "Tapped “Get this website” on their preview" }] } as never, overrideAccess: true }).catch(() => undefined);
+      await push(payload, { title: `${lead.name} wants their website`, body: "They tapped “Get this website” on their preview. Reply while they're interested.", url: `/app?lead=${lead.id}`, tag: `get-${lead.id}` }).catch(() => undefined);
+    }
+    const link = lead.preview?.slug ? previewLink(lead.preview.slug) : site;
+    return Response.redirect(
+      s.senderPhone ? `https://wa.me/${s.senderPhone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi, I saw the website preview for ${lead.name} (${link}). I'd like to know more.`)}` : `${site}/contact`,
+      302,
+    );
+  }
 
   if (action === "stop") {
     const token = url.searchParams.get("t") ?? "";

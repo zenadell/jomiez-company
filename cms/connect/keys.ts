@@ -20,6 +20,7 @@ export const SCOPES = [
   { value: "chat", label: "Talk", hint: "give Keeper tasks and continue conversations (its approval rules still apply)" },
   { value: "approve", label: "Approve", hint: "answer Keeper's approval requests (only for agents you fully trust)" },
   { value: "control", label: "Control", hint: "stop or undo work, switch the model, turn Keeper or routines on and off" },
+  { value: "runner", label: "Aethron runner", hint: "only for the Aethron runner on your Mac: carries Keeper's template work to Aethron and uploads finished previews" },
 ] as const;
 
 export type Scope = (typeof SCOPES)[number]["value"];

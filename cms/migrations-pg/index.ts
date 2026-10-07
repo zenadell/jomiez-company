@@ -6,6 +6,7 @@ import * as migration_20261005_165409_agent_providers from './20261005_165409_ag
 import * as migration_20261006_002154_outreach from './20261006_002154_outreach';
 import * as migration_20261006_113120_gmail_script from './20261006_113120_gmail_script';
 import * as migration_20261006_185731_access_keys from './20261006_185731_access_keys';
+import * as migration_20261007_101238_aethron_previews from './20261007_101238_aethron_previews';
 
 export const migrations = [
   {
@@ -46,6 +47,11 @@ export const migrations = [
   {
     up: migration_20261006_185731_access_keys.up,
     down: migration_20261006_185731_access_keys.down,
-    name: '20261006_185731_access_keys'
+    name: '20261006_185731_access_keys',
+  },
+  {
+    up: migration_20261007_101238_aethron_previews.up,
+    down: migration_20261007_101238_aethron_previews.down,
+    name: '20261007_101238_aethron_previews'
   },
 ];
