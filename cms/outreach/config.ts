@@ -93,7 +93,20 @@ export const Leads: CollectionConfig = {
       admin: { description: "A free sample homepage made for them, at jomiez.com/preview/…" },
       fields: [
         { name: "slug", type: "text", unique: true, index: true, admin: { readOnly: true } },
+        {
+          name: "kind",
+          label: "Made from",
+          type: "select",
+          defaultValue: "built-in",
+          options: [
+            { value: "built-in", label: "Our own design" },
+            { value: "aethron", label: "A template (Aethron)" },
+          ],
+          admin: { readOnly: true },
+        },
         { name: "content", type: "json", admin: { hidden: true } },
+        // A preview made from a template: which one, its pages, the browser check and where its files are (cms/sites).
+        { name: "site", type: "json", admin: { hidden: true } },
         { name: "madeAt", type: "date", admin: { readOnly: true, date: { pickerAppearance: "dayAndTime" } } },
         { name: "views", type: "number", defaultValue: 0, admin: { readOnly: true, description: "Times someone (not a link-preview robot) opened it." } },
         { name: "lastViewedAt", type: "date", admin: { readOnly: true, date: { pickerAppearance: "dayAndTime" } } },

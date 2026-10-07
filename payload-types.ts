@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     inquiries: Inquiry;
     leads: Lead;
+    'site-templates': SiteTemplate;
     'agent-threads': AgentThread;
     'agent-routines': AgentRoutine;
     'agent-memory': AgentMemory;
@@ -88,6 +89,7 @@ export interface Config {
   collectionsSelect: {
     inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
+    'site-templates': SiteTemplatesSelect<false> | SiteTemplatesSelect<true>;
     'agent-threads': AgentThreadsSelect<false> | AgentThreadsSelect<true>;
     'agent-routines': AgentRoutinesSelect<false> | AgentRoutinesSelect<true>;
     'agent-memory': AgentMemorySelect<false> | AgentMemorySelect<true>;
@@ -247,7 +249,17 @@ export interface Lead {
    */
   preview?: {
     slug?: string | null;
+    kind?: ('built-in' | 'aethron') | null;
     content?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    site?:
       | {
           [k: string]: unknown;
         }
@@ -287,6 +299,48 @@ export interface Lead {
     | null;
   shot?: string | null;
   stopToken?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Website templates Keeper makes previews from (with Aethron). It finds free Framer templates by itself and adds them here; add your own paid ones (their live address) and say what kinds of business they suit, and Keeper uses them first.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-templates".
+ */
+export interface SiteTemplate {
+  id: number;
+  name: string;
+  /**
+   * Where the template can be seen, e.g. https://agarimo.framer.website
+   */
+  url: string;
+  source?: ('free' | 'paid') | null;
+  platform?: ('framer' | 'webflow' | 'other') | null;
+  enabled?: boolean | null;
+  /**
+   * Kinds of business, e.g. furniture, restaurant, salon, clinic, gym, hotel, school, real estate.
+   */
+  kinds?: string[] | null;
+  style?: string | null;
+  page?: string | null;
+  /**
+   * e.g. Framer Marketplace licence
+   */
+  licence?: string | null;
+  licenceUrl?: string | null;
+  project?: string | null;
+  prepared?: boolean | null;
+  pages?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  uses?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -455,7 +509,10 @@ export interface AccessKey {
    * e.g. “Claude Code on my laptop”
    */
   name: string;
-  scopes: ('read' | 'chat' | 'approve' | 'control')[];
+  /**
+   * See: conversations, what Keeper did, leads, settings (never keys or passwords). Talk: give Keeper tasks and continue conversations (its approval rules still apply). Approve: answer Keeper's approval requests (only for agents you fully trust). Control: stop or undo work, switch the model, turn Keeper or routines on and off. Aethron runner: only for the Aethron runner on your Mac: carries Keeper's template work to Aethron and uploads finished previews.
+   */
+  scopes: ('read' | 'chat' | 'approve' | 'control' | 'runner')[];
   /**
    * Empty: never.
    */
@@ -948,6 +1005,10 @@ export interface PayloadLockedDocument {
         value: number | Lead;
       } | null)
     | ({
+        relationTo: 'site-templates';
+        value: number | SiteTemplate;
+      } | null)
+    | ({
         relationTo: 'agent-threads';
         value: number | AgentThread;
       } | null)
@@ -1082,7 +1143,9 @@ export interface LeadsSelect<T extends boolean = true> {
     | T
     | {
         slug?: T;
+        kind?: T;
         content?: T;
+        site?: T;
         madeAt?: T;
         views?: T;
         lastViewedAt?: T;
@@ -1103,6 +1166,28 @@ export interface LeadsSelect<T extends boolean = true> {
   check?: T;
   shot?: T;
   stopToken?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-templates_select".
+ */
+export interface SiteTemplatesSelect<T extends boolean = true> {
+  name?: T;
+  url?: T;
+  source?: T;
+  platform?: T;
+  enabled?: T;
+  kinds?: T;
+  style?: T;
+  page?: T;
+  licence?: T;
+  licenceUrl?: T;
+  project?: T;
+  prepared?: T;
+  pages?: T;
+  uses?: T;
   updatedAt?: T;
   createdAt?: T;
 }

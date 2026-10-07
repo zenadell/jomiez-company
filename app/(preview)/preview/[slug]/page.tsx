@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import config from "@payload-config";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getPayload } from "payload";
 import type { CSSProperties, ReactNode } from "react";
 import { push } from "@/cms/app/push";
@@ -12,6 +12,7 @@ import { readPreview } from "@/cms/outreach/preview-content";
 import { loadOutreach } from "@/cms/outreach/settings";
 import { previewLink, type PreviewContent } from "@/cms/outreach/write";
 import { mapRoute } from "@/cms/outreach/map";
+import { siteEntry } from "@/cms/sites/serve";
 import { Header, OpenNow, Reveal, Ribbon, ScrollWords, StickyBar } from "@/components/preview/PreviewBits";
 
 /*
@@ -30,10 +31,12 @@ type Params = { params: Promise<{ slug: string }> };
 async function leadFor(slug: string) {
   const payload = await getPayload({ config });
   const { docs } = await payload.find({ collection: "leads", where: { "preview.slug": { equals: slug } }, limit: 1, depth: 0, overrideAccess: true });
-  const lead = docs[0] as unknown as (Record<string, unknown> & { id: number; name: string; preview?: { content?: unknown; views?: number } }) | undefined;
-  const content = readPreview(lead?.preview?.content);
-  if (!lead || !content || lead.status === "stopped") return null;
-  return { payload, lead, content };
+  const lead = docs[0] as unknown as (Record<string, unknown> & { id: number; name: string; preview?: { content?: unknown; views?: number; kind?: string } }) | undefined;
+  if (!lead || lead.status === "stopped") return null;
+  // A preview made from a template is its own set of files (cms/sites): this address leads to it.
+  if (lead.preview?.kind === "aethron") return { payload, lead, content: null };
+  const content = readPreview(lead.preview?.content);
+  return content ? { payload, lead, content } : null;
 }
 
 const heroOf = (c: PreviewContent) => c.brand.photos[0] ?? c.stock[0];
@@ -43,6 +46,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const found = await leadFor(slug);
   if (!found) return { title: "Preview" };
   const { content } = found;
+  if (!content) return { title: `${found.lead.name}: a website preview` };
   const hero = heroOf(content);
   const abs = (u: string) => (u.startsWith("/") ? `${previewLink("").replace(/\/preview\/$/, "")}${u}` : u);
   return {
@@ -158,6 +162,7 @@ export default async function PreviewPage({ params }: Params) {
   if (!found) notFound();
   const { payload, lead, content: c } = found;
   await countView(payload, lead).catch(() => undefined);
+  if (!c) redirect(siteEntry(slug));
   const s = await loadOutreach(payload);
 
   const [fallback, fallback2] = PALETTE[c.palette] ?? PALETTE.ember;

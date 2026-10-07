@@ -33,7 +33,7 @@ export async function writerModel(payload: Payload): Promise<LanguageModel> {
 }
 
 /** A JSON answer in a given shape, from any provider: structured output where it works, else parsed from the text. */
-async function ask<T>(model: LanguageModel, instructions: string, prompt: string, schema: z.ZodType<T>): Promise<T> {
+export async function ask<T>(model: LanguageModel, instructions: string, prompt: string, schema: z.ZodType<T>): Promise<T> {
   try {
     const { output } = await generateText({ model, instructions, prompt, output: Output.object({ schema }) });
     return schema.parse(output);
@@ -218,7 +218,7 @@ export function previewLink(slug: string) {
   return `${origin}/preview/${slug}`;
 }
 
-const slugOf = (name: string) =>
+export const slugOf = (name: string) =>
   `${name
     .toLowerCase()
     .normalize("NFKD")

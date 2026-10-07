@@ -8,6 +8,9 @@ import { loadConfig, requestStop, runAgent, undoThread, usableProviders, usageTo
 import { gist, push } from "../app/push";
 import { loadOutreach } from "../outreach/settings";
 import { LEAD_STATUSES } from "../outreach/config";
+import { AETHRON_TOOLS } from "../sites/aethron";
+import { finishJob, nextJob, runnerSeen } from "../sites/relay";
+import { isHash, MAX_FILE, MAX_FILES, missing, putManifest, remember, safePath, storeName, uploadTargets } from "../sites/storage";
 import { previewLink } from "../outreach/write";
 import { logCall, type Caller } from "./auth";
 import type { Scope } from "./keys";
@@ -32,6 +35,8 @@ export type Op<S extends z.ZodType = z.ZodType> = {
   description: string;
   input: S;
   run: (ctx: Ctx, args: z.infer<S>) => Promise<unknown>;
+  /** Not recorded when it succeeds (the runner asks for work every few seconds). */
+  quiet?: boolean;
 };
 
 const op = <S extends z.ZodType>(o: Op<S>) => o as unknown as Op;
@@ -175,6 +180,22 @@ const leadBrief = (l: Lead) => ({
   contacted_at: l.contactedAt ?? null,
   updated_at: l.updatedAt,
 });
+
+/* ---------- The Aethron runner's files ---------- */
+
+const fileEntry = z.object({
+  path: z.string().refine(safePath, "a plain relative path inside the preview"),
+  hash: z.string().refine(isHash, "a SHA-256 in hex"),
+  size: z.number().int().min(0).max(MAX_FILE),
+  type: z.string().max(120),
+});
+
+/** Only previews that belong to a lead can be uploaded or published. */
+async function leadForSlug(ctx: Ctx, slug: string) {
+  const { docs } = await ctx.payload.find({ collection: "leads", where: { "preview.slug": { equals: slug } }, limit: 1, depth: 0, overrideAccess: true, select: { name: true } });
+  if (!docs[0]) throw new OpError(`No lead has the preview “${slug}”.`, 404);
+  return docs[0];
+}
 
 /* ---------- The operations ---------- */
 
@@ -479,6 +500,74 @@ export const OPS: Op[] = [
       return { ok: true, enabled: now.enabled, provider: now.provider, model: now.model };
     },
   }),
+  /* ---------- The Aethron runner on the owner's Mac (cms/sites/relay.ts) ---------- */
+  op({
+    name: "runner_hello",
+    scope: "runner",
+    quiet: true,
+    description: "The Aethron runner connects: its name, versions, and the tools Aethron offers.",
+    input: z.object({
+      name: z.string().min(1).max(80),
+      version: z.string().max(40).optional(),
+      aethron: z.string().max(80).optional(),
+      tools: z.array(z.object({ name: z.string().max(80), description: z.string().max(4000).optional(), inputSchema: z.unknown().optional() })).max(200).optional(),
+    }),
+    run: async (ctx, a) => {
+      runnerSeen({ name: a.name, version: a.version, aethron: a.aethron, tools: a.tools, ip: ctx.ip });
+      return { ok: true, storage: storeName(), max_file_bytes: MAX_FILE, allowed_tools: AETHRON_TOOLS };
+    },
+  }),
+  op({
+    name: "runner_next",
+    scope: "runner",
+    quiet: true,
+    description: "The runner asks for the next piece of work, waiting up to `wait` seconds for one.",
+    input: z.object({ wait: z.coerce.number().int().min(0).max(25).default(20) }),
+    run: async (ctx, a) => {
+      runnerSeen({ name: ctx.key.name, ip: ctx.ip });
+      const job = await nextJob(a.wait * 1000);
+      runnerSeen({ name: ctx.key.name, ip: ctx.ip });
+      return { job };
+    },
+  }),
+  op({
+    name: "runner_result",
+    scope: "runner",
+    quiet: true,
+    description: "The runner's answer to a piece of work.",
+    input: z.object({ id: z.string().min(1).max(60), ok: bool, result: z.unknown() }),
+    run: async (_ctx, a) => {
+      if (!finishJob(a.id, a.ok, a.result)) throw new OpError("Nobody is waiting for that answer any more (it took too long, or the server restarted).", 410);
+      return { ok: true };
+    },
+  }),
+  op({
+    name: "runner_upload",
+    scope: "runner",
+    description: "Before uploading an exported preview: which of its files aren't stored yet, each with a one-time upload link.",
+    input: z.object({ slug: z.string().regex(/^[a-z0-9-]{3,80}$/), files: z.array(fileEntry).min(1).max(MAX_FILES) }),
+    run: async (ctx, a) => {
+      await leadForSlug(ctx, a.slug);
+      const types = Object.fromEntries(a.files.map((f) => [f.hash, f.type]));
+      const need = await missing(a.files.map((f) => f.hash));
+      return { already_stored: new Set(a.files.map((f) => f.hash)).size - need.length, upload: await uploadTargets(need, types, ctx.origin) };
+    },
+  }),
+  op({
+    name: "runner_publish",
+    scope: "runner",
+    description: "After uploading: saves the preview's list of files, so jomiez.com serves it.",
+    input: z.object({ slug: z.string().regex(/^[a-z0-9-]{3,80}$/), project: z.string().min(1).max(120), files: z.array(fileEntry).min(1).max(MAX_FILES) }),
+    run: async (ctx, a) => {
+      await leadForSlug(ctx, a.slug);
+      if (!a.files.some((f) => f.path === "index.html")) throw new OpError("An exported preview needs an index.html.");
+      const still = await missing(a.files.map((f) => f.hash));
+      if (still.length) throw new OpError(`${still.length} files haven't arrived yet; upload them first.`, 409);
+      remember(a.files.map((f) => f.hash));
+      await putManifest({ slug: a.slug, project: a.project, at: new Date().toISOString(), files: Object.fromEntries(a.files.map((f) => [f.path, { h: f.hash, t: f.type, s: f.size }])) });
+      return { ok: true, files: a.files.length, bytes: a.files.reduce((n, f) => n + f.size, 0) };
+    },
+  }),
 ];
 
 export const opNamed = (name: string) => OPS.find((o) => o.name === name);
@@ -503,7 +592,7 @@ export async function callOp(ctx: Ctx, name: string, raw: unknown, via: "api" | 
   }
   try {
     const result = await o.run(ctx, parsed.data);
-    await log(true, name === "ask_keeper" ? cut((parsed.data as { message?: string }).message, 120) : undefined);
+    if (!o.quiet) await log(true, name === "ask_keeper" ? cut((parsed.data as { message?: string }).message, 120) : undefined);
     return { ok: true, result };
   } catch (err) {
     const e = err as OpError;

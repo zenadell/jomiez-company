@@ -14,6 +14,7 @@ const SCOPES = [
   { value: "chat", label: "Talk", hint: "give Keeper tasks and continue conversations; its approval rules still apply" },
   { value: "approve", label: "Approve", hint: "answer Keeper's approval requests (only for agents you fully trust)" },
   { value: "control", label: "Control", hint: "stop or undo work, switch the model, turn Keeper or routines on and off" },
+  { value: "runner", label: "Aethron runner", hint: "only for the Aethron runner on your Mac (tick this one alone)" },
 ];
 
 const EXPIRY = [
@@ -23,7 +24,7 @@ const EXPIRY = [
   { days: 0, label: "Never" },
 ];
 
-type Made = { id: number; name: string; token: string; origin: string };
+type Made = { id: number; name: string; token: string; origin: string; scopes: string[] };
 
 function Copy({ text, label = "Copy" }: { text: string; label?: string }) {
   const [done, setDone] = useState(false);
@@ -84,12 +85,21 @@ function Panel() {
           <code>{made.token}</code>
           <Copy text={made.token} label="Copy the key" />
         </div>
-        <Snippet title="Claude Code (run this in a terminal)" text={`claude mcp add --transport http jomiez ${mcp} --header "Authorization: Bearer ${made.token}"`} />
-        <Snippet
-          title="Other MCP apps (Claude Desktop, Cursor, ChatGPT connectors…): the server's settings"
-          text={JSON.stringify({ mcpServers: { jomiez: { type: "http", url: mcp, headers: { Authorization: `Bearer ${made.token}` } } } }, null, 2)}
-        />
-        <Snippet title="Scripts: the plain web API" text={`curl -H "Authorization: Bearer ${made.token}" ${made.origin}/api/v1/status`} />
+        {made.scopes.includes("runner") ? (
+          <Snippet
+            title="On the Mac with Aethron, in Terminal (leave the window open while Keeper works)"
+            text={`curl -fsSL ${made.origin}/api/connect/runner -o aethron-runner.mjs\nJOMIEZ_URL=${made.origin} JOMIEZ_KEY=${made.token} node aethron-runner.mjs`}
+          />
+        ) : (
+          <>
+            <Snippet title="Claude Code (run this in a terminal)" text={`claude mcp add --transport http jomiez ${mcp} --header "Authorization: Bearer ${made.token}"`} />
+            <Snippet
+              title="Other MCP apps (Claude Desktop, Cursor, ChatGPT connectors…): the server's settings"
+              text={JSON.stringify({ mcpServers: { jomiez: { type: "http", url: mcp, headers: { Authorization: `Bearer ${made.token}` } } } }, null, 2)}
+            />
+            <Snippet title="Scripts: the plain web API" text={`curl -H "Authorization: Bearer ${made.token}" ${made.origin}/api/v1/status`} />
+          </>
+        )}
         <button
           type="button"
           className="jz-btn jz-btn--yes"

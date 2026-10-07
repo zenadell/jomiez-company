@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import config from "@payload-config";
 import { getPayload } from "payload";
 import { originOf } from "@/cms/preview";
@@ -8,6 +10,7 @@ import { newToken, SCOPES, type Scope } from "@/cms/connect/keys";
  * Access keys, for admins signed in to the admin:
  *   POST new   make a key; the answer is the only time it's shown
  *   GET  log   the record of calls (all keys, or ?key=<id>)
+ *   GET  runner   the Aethron runner script (anyone: it does nothing without a runner key)
  */
 
 export const dynamic = "force-dynamic";
@@ -53,6 +56,11 @@ export async function POST(req: Request, { params }: Params) {
 
 export async function GET(req: Request, { params }: Params) {
   const { action } = await params;
+  // The Aethron runner script, for the Mac (no secrets in it: it needs a runner key to do anything).
+  if (action === "runner") {
+    const code = await readFile(path.join(/*turbopackIgnore: true*/ process.cwd(), "scripts", "aethron-runner.mjs"), "utf8");
+    return new Response(code, { headers: { "content-type": "text/javascript; charset=utf-8", "content-disposition": 'attachment; filename="aethron-runner.mjs"', "cache-control": "no-cache" } });
+  }
   const { payload, user } = await admin(req);
   if (!user) return json({ error: "Admins only." }, 403);
   if (action !== "log") return json({ error: "Unknown action." }, 404);
