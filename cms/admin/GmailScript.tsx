@@ -16,7 +16,14 @@ function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents);
     if (d.password !== PASSWORD) return out({ ok: false, error: 'wrong password' });
-    if (!d.test) GmailApp.sendEmail(d.to, d.subject, d.text, { htmlBody: d.html, name: d.name || undefined });
+    if (!d.test) {
+      try {
+        GmailApp.sendEmail(d.to, d.subject, d.text, { htmlBody: d.html, name: d.name || undefined });
+      } catch (gmailErr) {
+        // Some accounts refuse GmailApp ("Gmail operation not allowed"); MailApp sends from the same address.
+        MailApp.sendEmail({ to: d.to, subject: d.subject, body: d.text, htmlBody: d.html, name: d.name || undefined });
+      }
+    }
     return out({ ok: true, from: Session.getEffectiveUser().getEmail(), left: MailApp.getRemainingDailyQuota() });
   } catch (err) {
     return out({ ok: false, error: String(err) });
