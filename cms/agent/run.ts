@@ -334,7 +334,11 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
   /* ----- What was asked ----- */
   if (input.decisions?.length) {
     const known = new Map(pending.map((p) => [p.approvalId, p]));
-    const valid = input.decisions.filter((d) => known.has(d.approvalId));
+    const answered = input.decisions.filter((d) => known.has(d.approvalId));
+    // The model needs an answer for every approval it asked for at once: ones left unanswered count as "not now".
+    const valid = answered.length
+      ? [...answered, ...pending.filter((p) => !p.approvalId.startsWith("va_") && !answered.some((d) => d.approvalId === p.approvalId)).map((p) => ({ approvalId: p.approvalId, approved: false, note: "not answered yet; ask again if it's still needed" }))]
+      : answered;
     if (!valid.length) {
       await payload.kv.delete(lockKey);
       return fail("Those approvals were already answered.");
