@@ -88,7 +88,7 @@ function Panel() {
         {made.scopes.includes("runner") ? (
           <Snippet
             title="On the Mac with Aethron, in Terminal (leave the window open while Keeper works)"
-            text={`curl -fsSL ${made.origin}/api/connect/runner -o aethron-runner.mjs\nJOMIEZ_URL=${made.origin} JOMIEZ_KEY=${made.token} node aethron-runner.mjs`}
+            text={`curl -fsSL ${made.origin}/api/connect/runner -o ~/aethron-runner.mjs\nJOMIEZ_URL=${made.origin} JOMIEZ_KEY=${made.token} node ~/aethron-runner.mjs\n\n# Next time (the key is remembered on this Mac), from any folder:\nnode ~/aethron-runner.mjs`}
           />
         ) : (
           <>

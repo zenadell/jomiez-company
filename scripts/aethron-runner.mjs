@@ -23,14 +23,29 @@
 
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
+import { readFileSync, writeFileSync } from "node:fs";
 import { lstat, readdir, readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline";
 
 const VERSION = "1.1.0";
-const SITE = (process.env.JOMIEZ_URL || "https://www.jomiez.com").replace(/\/$/, "");
-const KEY = process.env.JOMIEZ_KEY || "";
+// The key and address are remembered on this Mac after the first start, so later just: node ~/aethron-runner.mjs
+const SAVED = path.join(os.homedir(), ".jomiez-runner.json");
+const saved = (() => {
+  try {
+    return JSON.parse(readFileSync(SAVED, "utf8"));
+  } catch {
+    return {};
+  }
+})();
+const SITE = (process.env.JOMIEZ_URL || saved.url || "https://www.jomiez.com").replace(/\/$/, "");
+const KEY = process.env.JOMIEZ_KEY || saved.key || "";
+if (process.env.JOMIEZ_KEY) {
+  try {
+    writeFileSync(SAVED, JSON.stringify({ url: SITE, key: KEY }), { mode: 0o600 });
+  } catch {}
+}
 const BIN = process.env.AETHRON_BIN || "/Applications/Aethron.app/Contents/MacOS/Aethron";
 const ARGS = (process.env.AETHRON_ARGS || "--mcp").split(" ").filter(Boolean);
 const DATA = process.env.AETHRON_DATA || path.join(os.homedir(), "Library", "Application Support", "Aethron");
