@@ -143,7 +143,8 @@ export async function fillPreview(opts: { project: string; facts: Facts; model: 
         let next = byOld.get(l.old) ?? l.old;
         if (section === "strings") next = tidy(next, l.max_bytes);
         // Pictures and links may only become the business's own addresses (or stay as they were); links Aethron hides keep their address.
-        else if (next !== l.old && (!allowedUrls.has(next) || HIDDEN_LINK.test(l.old))) next = l.old;
+        else if (next !== l.old && (!allowedUrls.has(next) || HIDDEN_LINK.test(l.old) || /\.(mp4|webm|mov|m4v|ogv)([?#]|$)/i.test(l.old))) next = l.old;
+        // (a template's background video stays: a photo put in its place leaves the section empty)
         if (/^\s*javascript:/i.test(next)) next = l.old;
         if (next === l.old) done.kept++;
         else done.written++;
