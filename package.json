@@ -17,7 +17,8 @@
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
     "content:save": "payload run cms/snapshot-run.ts",
-    "content:load": "payload run cms/snapshot-run.ts -- --load"
+    "content:load": "payload run cms/snapshot-run.ts -- --load",
+    "test:replies": "payload run tests/replies.test.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "4.0.68",

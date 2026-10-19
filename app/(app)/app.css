@@ -1891,6 +1891,69 @@ a {
   font-size: 13.5px;
 }
 
+.ja-lead__reply {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 16px 16px 6px 16px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.ja-lead__reply small,
+.ja-lead__msg.is-answer small {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ja-ink-3);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.ja-lead__gist {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.45;
+}
+
+.ja-lead__words {
+  margin: 10px 0 0;
+  color: var(--ja-ink-2);
+  font-size: 14.5px;
+  line-height: 1.45;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.ja-lead__reply button {
+  margin-top: 8px;
+  color: var(--ja-ink-2);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ja-replies {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 2px 4px;
+  color: var(--ja-ink-3);
+  font-size: 13.5px;
+}
+
+.ja-replies p {
+  flex: 1;
+  margin: 0;
+}
+
+.ja-replies.is-bad p {
+  color: #ffb4a8;
+}
+
+.ja-replies button {
+  flex: none;
+  color: var(--ja-accent);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .ja-lead__line,
 .ja-lead__note {
   margin: 10px 0 0;

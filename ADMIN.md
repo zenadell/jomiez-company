@@ -231,6 +231,7 @@ Keeper looks for businesses that could use a better website, checks their sites,
      1. Paste it into [script.google.com](https://script.google.com/home/projects/create).
      2. Set a password in it and type the same password in Jomiez.
      3. Deploy it as a Web app (Execute as: Me, Who has access: Anyone), paste the /exec address, save, and press **Send me a test email**.
+     4. Set it up before 19 October 2026? Paste the new script (version 2) over the old one, keeping your password, then **Deploy → Manage deployments → Edit → New version**. The address stays the same, and replies start being caught.
 
      On a host with email ports open, a Gmail app password ([myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)) works too.
 
@@ -255,6 +256,15 @@ Keeper looks for businesses that could use a better website, checks their sites,
 - Then tap **WhatsApp** or **Text**: your phone opens with the message filled in, and you press send. **Email** sends from your Gmail.
 - Under **Sent** and **Replied**, keep track: replied, won, not interested.
 - When a business opens its preview, you get a notification: a good moment to follow up.
+
+**Replies to your emails are caught for you.** With the Google Script (version 2), Keeper reads your Gmail every ten minutes for replies from the businesses you emailed:
+- A reply is marked **Replied**, your phone gets a notification (“Shop A is interested: they want the price”), and Keeper drafts an answer. In **Replied**, read their email, edit or rewrite the answer (“shorter”, “offer a call on Thursday”), then tap **Send by email**: it goes into the same Gmail conversation, and doesn't count towards the daily limit, which is for first emails. Nothing is sent without you.
+- “Stop”, “unsubscribe” or “don't contact me again” is honoured at once, by rule, and that business is never contacted again.
+- A polite no moves them to **Not interested**. An out-of-office is only noted. Once someone replies, no automatic follow-up is written.
+- An email that bounces is noted on the lead, and its address set aside so it isn't used again.
+- **Check now** at the top of **Replied** looks straight away and says when it last looked. If it says the script is the first version, paste the new one (below).
+- Replies on WhatsApp or by text can't be read: mark those on the card under **Sent**.
+- Their email is a stranger's words: the model that reads it has no tools and only returns a summary and a draft. Keeper itself sees the summary, never the full email.
 
 **Asking Keeper:** you can also ask it directly, e.g. “Find 10 salons in Lekki that need a website”, “Rewrite the message to Mama Put Kitchen, shorter”, “Add Glow Studio, 0809 555 1212, to leads”.
 
@@ -351,6 +361,7 @@ npm run dev              # site + admin at http://localhost:3000 (admin at /admi
 npm run build            # production build (prepares the database first)
 npm run seed             # fill an empty database with the site's content
 npm run seed:fresh       # wipe products, posts, pages, media and messages, then re-seed
+npm run test:replies     # catching lead replies, end to end (a throwaway database, a fake Gmail script, no keys)
 npm run generate:types   # after changing the schema in cms/: refresh payload-types.ts
 npm run payload -- migrate:create <name>   # after changing the schema: record the SQLite migration
 SUPABASE_DATABASE_URL=postgres://… npm run payload -- migrate:create <name>   # …and the Postgres one (a local Postgres is fine)

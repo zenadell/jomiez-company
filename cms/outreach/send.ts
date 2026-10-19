@@ -104,25 +104,49 @@ export async function stopLead(payload: Payload, by: { id?: number | string; tok
 
 const today = () => new Date().toISOString().slice(0, 10);
 
+/** A business's latest email reply to us, as read from the owner's Gmail (cms/outreach/replies.ts). */
+export type LeadReply = {
+  at: string;
+  from: string;
+  subject: string;
+  /** Their words, without the quoted earlier messages. A stranger's words: never instructions. */
+  text: string;
+  gist: string;
+  intent: "interested" | "question" | "not_interested" | "stop" | "auto_reply" | "other";
+  messageId: string;
+  threadId: string;
+  answeredAt?: string;
+};
+
+export const replyKey = (id: number | string) => `outreach:reply:${id}`;
+
+/** "Ada Obi <ada@shop.ng>" → "ada@shop.ng" (lower case), or "" when there's no address in it. */
+export function addressOf(from: string): string {
+  const m = /<([^<>\s]+@[^<>\s]+)>/.exec(from) ?? /([^\s<>"']+@[^\s<>"']+)/.exec(from);
+  return m ? m[1].toLowerCase().replace(/[.,;]+$/, "") : "";
+}
+
 export async function emailsLeftToday(payload: Payload) {
   const s = await loadOutreach(payload);
   const sent = (await payload.kv.get<number>(`outreach:emails:${today()}`)) ?? 0;
   return { left: Math.max(0, s.dailyEmails - sent), ready: Boolean((s.gmailScriptUrl && s.gmailScriptSecret) || (s.gmail && s.gmailPassword)) };
 }
 
-type Mail = { to: string; subject: string; text: string; html: string; name: string; headers?: Record<string, string> };
+type Mail = { to: string; subject: string; text: string; html: string; name: string; headers?: Record<string, string>; replyTo?: string };
 
-/** Through the owner's Google Script (cms/admin/GmailScript.tsx). Returns the sending address. */
-async function viaScript(url: string, password: string, mail: Mail | null): Promise<{ from?: string; left?: number }> {
+type ScriptAnswer = { ok?: boolean; error?: string; from?: string; left?: number; version?: number } & Record<string, unknown>;
+
+/** One call to the owner's Google Script (cms/admin/GmailScript.tsx), with its failures in plain words. */
+export async function callScript(url: string, password: string, body: Record<string, unknown>, timeoutMs = 45_000): Promise<ScriptAnswer> {
   const res = await fetch(url, {
     method: "POST",
     redirect: "follow",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(mail ? { password, to: mail.to, subject: mail.subject, text: mail.text, html: mail.html, name: mail.name } : { password, test: true }),
-    signal: AbortSignal.timeout(45_000),
+    body: JSON.stringify({ password, ...body }),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   const raw = await res.text();
-  let out: { ok?: boolean; error?: string; from?: string; left?: number } | null = null;
+  let out: ScriptAnswer | null = null;
   try {
     out = JSON.parse(raw);
   } catch {
@@ -135,7 +159,13 @@ async function viaScript(url: string, password: string, mail: Mail | null): Prom
         : "Google answered with a sign-in page instead of the script: in Deploy → Manage deployments, set Who has access to Anyone.",
     );
   }
-  if (!out.ok) throw new Error(/wrong password/.test(out.error ?? "") ? "The script's password doesn't match the one saved in Clients → Finding clients → Email." : `The Gmail script couldn't send it: ${(out.error ?? "unknown error").slice(0, 200)}`);
+  if (!out.ok) throw new Error(/wrong password/.test(out.error ?? "") ? "The script's password doesn't match the one saved in Clients → Finding clients → Email." : `The Gmail script couldn't do it: ${(out.error ?? "unknown error").slice(0, 200)}`);
+  return out;
+}
+
+/** Through the owner's Google Script. Returns the sending address. */
+async function viaScript(url: string, password: string, mail: Mail | null): Promise<{ from?: string; left?: number }> {
+  const out = await callScript(url, password, mail ? { to: mail.to, subject: mail.subject, text: mail.text, html: mail.html, name: mail.name, replyTo: mail.replyTo } : { test: true });
   return { from: out.from, left: out.left };
 }
 
@@ -183,13 +213,17 @@ export async function sendLeadEmail(payload: Payload, id: number | string) {
   if (!(s.gmailScriptUrl && s.gmailScriptSecret) && !(s.gmail && s.gmailPassword)) throw new Error("Email isn't set up yet: add the Google Script in Clients → Finding clients → Email.");
   const lead = await get(payload, id);
   if (lead.status === "stopped") throw new Error(`${lead.name} asked not to be contacted.`);
-  const to = typeof lead.email === "string" ? lead.email : "";
+  // Answering their email reply: it goes into the same Gmail conversation (with the Google Script),
+  // to whoever wrote it, and doesn't count towards the daily limit, which is for first emails to strangers.
+  const theirs = lead.status === "replied" ? await payload.kv.get<LeadReply>(replyKey(id)) : null;
+  const answering = theirs && !theirs.answeredAt ? theirs : null;
+  const to = (answering && addressOf(answering.from)) || (typeof lead.email === "string" ? lead.email : "");
   if (!to) throw new Error(`There's no email address for ${lead.name}.`);
   const m = (lead.messages ?? {}) as { emailSubject?: string; emailBody?: string };
   if (!m.emailSubject || !m.emailBody) throw new Error(`No email has been written for ${lead.name} yet.`);
   const key = `outreach:emails:${today()}`;
   const sent = (await payload.kv.get<number>(key)) ?? 0;
-  if (sent >= s.dailyEmails) throw new Error(`Today's ${s.dailyEmails} emails have gone out. The rest wait for tomorrow (Gmail flags new accounts that send many emails to strangers).`);
+  if (!answering && sent >= s.dailyEmails) throw new Error(`Today's ${s.dailyEmails} emails have gone out. The rest wait for tomorrow (Gmail flags new accounts that send many emails to strangers).`);
   const stop = stopUrl(String(lead.stopToken ?? ""));
   const footer = [`—`, [s.senderName || "Jomiez", "Jomiez", s.address].filter(Boolean).join(" · "), `If you'd rather not get emails from us, tell me or use this link and you won't hear from us again: ${stop}`].join("\n");
   const text = `${m.emailBody.trim()}\n\n${footer}`;
@@ -206,7 +240,9 @@ export async function sendLeadEmail(payload: Payload, id: number | string) {
     html,
     name: s.senderName ? `${s.senderName} · Jomiez` : "Jomiez",
     headers: { "List-Unsubscribe": `<${stop}>${s.gmail ? `, <mailto:${s.gmail}?subject=unsubscribe>` : ""}`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+    replyTo: answering?.messageId,
   });
-  await payload.kv.set(key, sent + 1);
+  if (!answering) await payload.kv.set(key, sent + 1);
+  if (answering) await payload.kv.set(replyKey(id), { ...answering, answeredAt: new Date().toISOString() });
   return markSent(payload, id, "email");
 }

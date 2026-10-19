@@ -33,7 +33,7 @@ export async function markNoticesRead(payload: Payload) {
   );
 }
 
-async function addNotice(payload: Payload, n: Omit<Notice, "id" | "at">) {
+export async function addNotice(payload: Payload, n: Omit<Notice, "id" | "at">) {
   const all = await listNotices(payload);
   const notice: Notice = { ...n, id: `n${Date.now().toString(36)}`, at: new Date().toISOString() };
   await payload.kv.set(KEY, [notice, ...all].slice(0, 100));

@@ -5,7 +5,8 @@ import { sightOf, loadConfig } from "../agent/run";
 import { checkLead } from "./check";
 import { addLead, findLeads } from "./find";
 import { COUNTRIES, KINDS, type Country, type Kind } from "./kinds";
-import { emailsLeftToday, sendLeadEmail, setStatus, smsLink, stopLead, whatsappLink } from "./send";
+import { checkReplies, redraftAnswer } from "./replies";
+import { emailsLeftToday, replyKey, sendLeadEmail, setStatus, smsLink, stopLead, whatsappLink, type LeadReply } from "./send";
 import { loadOutreach } from "./settings";
 import { aethronStatus } from "../sites/aethron";
 import { outreachToday } from "./today";
@@ -13,8 +14,9 @@ import { makePreview, previewLink, writeLead, writerModel } from "./write";
 
 /*
  * Keeper's tools for finding clients (cms/outreach). It can find, check and
- * write to businesses, and send an email when the owner approves it; WhatsApp
- * and texts are always sent by the owner from the phone app.
+ * write to businesses, catch their email replies and draft answers, and send an
+ * email when the owner approves it; WhatsApp and texts are always sent by the
+ * owner from the phone app.
  */
 
 const kindEnum = z.enum(Object.keys(KINDS) as [Kind, ...Kind[]]);
@@ -143,6 +145,10 @@ export function addOutreachTools(add: AddTool, env: ToolEnv) {
         messages: l.messages,
         notes: l.notes,
         history: l.log,
+        theirReply: await payload.kv.get<LeadReply>(replyKey(id)).then((r) =>
+          // Only the gist: their full email is a stranger's words, and stays out of a run that has every tool (the owner reads it in the app).
+          r ? { at: r.at, gist: r.gist, intent: r.intent, answered: Boolean(r.answeredAt), note: "A summary of their email reply. Their full words are on the lead in the phone app." } : null,
+        ),
       };
     },
   );
@@ -228,6 +234,33 @@ export function addOutreachTools(add: AddTool, env: ToolEnv) {
       if (!left.left) throw new Error("Today's emails have all gone out; it waits for tomorrow.");
       return sendLeadEmail(payload, id);
     },
+  );
+
+  add(
+    "check_replies",
+    {
+      description:
+        "Reads new email replies from the businesses that were emailed, from the owner's Gmail (through the Google Script, version 2). It happens on its own every ten minutes; call this to check now. Each reply is sorted: a request to stop is honoured at once, a no becomes Not interested, anything else becomes Replied with an answer drafted for the owner to send. Bounced addresses are set aside. WhatsApp replies can't be read: the owner marks those.",
+      input: z.object({}),
+      risk: () => "note",
+      title: () => "Checking for replies from leads",
+    },
+    async () => {
+      const res = await checkReplies(payload, { force: true });
+      for (const r of res?.replied ?? []) env.emit({ t: "change", title: r.name, action: "caught a reply from", admin: `/admin/collections/leads/${r.id}`, site: null });
+      return res;
+    },
+  );
+
+  add(
+    "answer_reply",
+    {
+      description: "Writes again the answer to a lead's latest email reply (the email and WhatsApp versions), e.g. “shorter” or “offer a call on Thursday at 10”. The owner sends it from the phone app, or ask to email it (email_lead), which goes into the same Gmail conversation.",
+      input: z.object({ id: leadId, instructions: z.string().optional() }),
+      risk: () => "draft",
+      title: () => "Answering a reply",
+    },
+    async ({ id, instructions }) => redraftAnswer(payload, id, instructions),
   );
 
   add(
