@@ -1,0 +1,203 @@
+/*
+ * The shared parts of every preview layout. Colours and type come from the
+ * theme variables set on the frame (context.ts): --bg --surface --ink --muted
+ * --accent --accent-ink --f1…--f4, --display --text and the display settings.
+ */
+
+.frame {
+  min-height: 100vh;
+  overflow-x: clip;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--text);
+  font-weight: var(--t-weight);
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.frame :is(h1, h2, h3, p, ul, ol, dl, dd, figure) {
+  margin: 0;
+}
+
+.frame a {
+  color: inherit;
+}
+
+.frame img {
+  display: block;
+  max-width: 100%;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  letter-spacing: var(--d-track);
+  text-transform: var(--d-case);
+  font-size: 20px;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.brand img {
+  width: auto;
+  max-width: 160px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.nav {
+  display: none;
+  gap: 28px;
+  font-size: 15px;
+}
+
+.nav a {
+  text-decoration: none;
+}
+
+.nav a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (min-width: 900px) {
+  .nav {
+    display: flex;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 0;
+  background: var(--accent);
+  color: var(--accent-ink) !important;
+  font-family: var(--text);
+  font-weight: var(--t-strong);
+  font-size: 16px;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.btn:hover {
+  background: color-mix(in srgb, var(--accent) 86%, var(--ink));
+}
+
+.btn:focus-visible,
+.frame a:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.open {
+  font-size: 15px;
+}
+
+/* OpenNow's own markup (PreviewBits): a dot and a sentence. */
+.open :global(.pv-open) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.open :global(.pv-open i) {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e0a33a;
+}
+
+.open :global(.pv-open.is-open i) {
+  background: #2fbf71;
+}
+
+.hours {
+  display: grid;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hours div {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.hours dt {
+  color: var(--muted);
+}
+
+.reach {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.reach a {
+  text-underline-offset: 4px;
+}
+
+.map {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.map img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.4) contrast(0.95);
+}
+
+.map i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  border: 4px solid var(--bg);
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, -50%);
+}
+
+.map small {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  color: #333;
+  font-size: 11px;
+}
+
+.credits {
+  padding: 28px max(20px, 4vw) 120px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (min-width: 900px) {
+  .credits {
+    padding-bottom: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame *,
+  .frame *::before,
+  .frame *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
