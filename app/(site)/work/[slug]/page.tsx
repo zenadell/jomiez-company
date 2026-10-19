@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Live } from "@/components/cms/live/Live";
 import { getGlobal, getProject, getProjects } from "@/lib/cms";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { pageMetadata } from "@/lib/metadata";
+import { breadcrumbs, faqPage, project as projectThing } from "@/lib/structured-data";
 
 export async function generateStaticParams() {
   const projects = await getProjects();
@@ -26,11 +28,16 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
     getGlobal("site"),
   ]);
   if (!project) notFound();
+  // The product page shows its questions (components/product/ProductPage.tsx); a case study shows none.
+  const faq = project.isProduct && project.productPage?.hero?.title ? faqPage((project.productPage?.faq?.items ?? []).map((i) => ({ question: i.q, answer: i.a }))) : null;
   return (
-    <Live
+    <>
+      <JsonLd things={[projectThing(site, project), breadcrumbs(site, [{ name: "Products & Work", path: "/work" }, { name: project.name, path: `/work/${project.slug}` }]), faq]} />
+      <Live
       view="project"
       doc={{ field: "project", collection: "projects", id: project.id }}
       props={{ project, projects, page, site }}
-    />
+      />
+    </>
   );
 }

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Live } from "@/components/cms/live/Live";
 import { getArticles, getGlobal, getProjects } from "@/lib/cms";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { pageMetadata } from "@/lib/metadata";
+import { faqPage } from "@/lib/structured-data";
 
 export async function generateMetadata(): Promise<Metadata> {
   const home = await getGlobal("home");
@@ -16,5 +18,11 @@ export default async function HomePage() {
     getArticles(),
     getGlobal("journal-page"),
   ]);
-  return <Live view="home" doc={{ field: "home", global: "home" }} props={{ home, projects, articles, journal }} />;
+  const faqShown = home.faq && home.faq.enabled !== false;
+  return (
+    <>
+      {faqShown && <JsonLd things={[faqPage((home.faq.items ?? []).map((i) => ({ question: i.q, answer: i.a })))]} />}
+      <Live view="home" doc={{ field: "home", global: "home" }} props={{ home, projects, articles, journal }} />
+    </>
+  );
 }

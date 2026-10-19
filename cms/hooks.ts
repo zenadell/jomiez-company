@@ -1,10 +1,12 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, GlobalAfterChangeHook } from "payload";
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, GlobalAfterChangeHook, Payload } from "payload";
+import { notifyIndexNow } from "./indexnow";
 
 /*
  * The public site is built as static pages. When something is published (or
  * unpublished, or deleted) every page is rebuilt on its next visit, so a change
  * made in the admin shows on the live site within seconds. Draft and autosave
- * saves leave the live site alone; they only show in preview.
+ * saves leave the live site alone; they only show in preview. Publishing also
+ * tells the search engines that take pings (cms/indexnow.ts).
  */
 
 type Doc = { _status?: "draft" | "published" | null } | null | undefined;
@@ -30,8 +32,25 @@ async function revalidateEverything(context: Record<string, unknown>) {
   }
 }
 
-export const revalidateCollection: CollectionAfterChangeHook = async ({ doc, previousDoc, req }) => {
+/** Where each published thing lives on the site, for the search-engine ping. */
+const COLLECTION_PATH: Record<string, string> = { pages: "/", articles: "/insights/", projects: "/work/" };
+const GLOBAL_PATH: Record<string, string> = { home: "/", about: "/about", "services-page": "/services", "work-page": "/work", "journal-page": "/insights", "contact-page": "/contact", privacy: "/privacy-policy", terms: "/terms-conditions" };
+
+function ping(payload: Payload, context: Record<string, unknown>, paths: string[]) {
+  if (context.skipRevalidate || !paths.length) return;
+  // In the background: a save never waits on a search engine.
+  void notifyIndexNow(payload, paths).catch(() => undefined);
+}
+
+export const revalidateCollection: CollectionAfterChangeHook = async ({ doc, previousDoc, req, collection }) => {
   if (affectsLiveSite(doc, previousDoc)) await revalidateEverything(req.context);
+  const prefix = COLLECTION_PATH[collection.slug];
+  const now = doc as Addressed;
+  if (prefix && now?._status === "published" && now.slug) {
+    // A new post or product also changes its list page.
+    const list = collection.slug === "articles" ? ["/insights", "/"] : collection.slug === "projects" ? ["/work", "/"] : [];
+    ping(req.payload, req.context, [`${prefix}${now.slug}`, ...list]);
+  }
   return doc;
 };
 
@@ -40,8 +59,10 @@ export const revalidateAfterDelete: CollectionAfterDeleteHook = async ({ doc, re
   return doc;
 };
 
-export const revalidateGlobal: GlobalAfterChangeHook = async ({ doc, previousDoc, req }) => {
+export const revalidateGlobal: GlobalAfterChangeHook = async ({ doc, previousDoc, req, global }) => {
   if (affectsLiveSite(doc, previousDoc)) await revalidateEverything(req.context);
+  const path = GLOBAL_PATH[global.slug];
+  if (path && (doc as Doc)?._status === "published") ping(req.payload, req.context, [path]);
   return doc;
 };
 

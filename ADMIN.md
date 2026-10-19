@@ -127,6 +127,17 @@ Press the microphone next to *Send* and talk. It answers out loud, and it acts w
 
 Routines need the server's clock: while the server is running it checks every minute. A server that sleeps (Render's free plan) or Vercel needs a scheduler calling `GET /api/agent/tick` with the header `Authorization: Bearer <CRON_SECRET>` (set up in *Going live → On the free plan*); while anyone has the admin open, due routines also get their chance.
 
+## Being found (Google and AI assistants)
+
+The site describes itself to search engines and AI assistants (ChatGPT, Perplexity, Copilot, Gemini) on its own, from what's in the admin. Nothing here needs setting up.
+
+- **Who Jomiez is**: every page carries structured data (schema.org) built from **Site settings**: name, legal name, description, email, phone, location, founder and social links. Keep those accurate: Google's knowledge panel and AI answers are built from them.
+- **Each post** is described as an article (headline, author, dates, image), **each product** as software and **each client project** as a piece of work, with breadcrumbs. The questions on the home page and on product pages are listed as questions and answers, exactly as shown.
+- **Sharing cards** (WhatsApp, LinkedIn, X) are always complete. A page's own sharing image (SEO tab) comes first, then **Site settings → Default sharing image**. With neither, a clean card with the page's title is drawn automatically.
+- **llms.txt** (`/llms.txt`) lists the site, products and posts in plain text for AI assistants. It updates itself within the hour.
+- **Instant indexing**: publishing a page, product or post tells Bing, Yandex and the AI search engines built on Bing (Copilot, ChatGPT search, DuckDuckGo) straight away, through IndexNow. Google reads the sitemap instead: submit `https://www.jomiez.com/sitemap.xml` once in Google Search Console.
+- **What you control**: each page's **SEO** tab (title under 60 characters, description under 160). Pages you don't want found (tests, drafts) should stay unpublished: every published custom page is in the sitemap.
+
 ## Previews from templates (Aethron)
 
 For the best leads, Keeper can make the preview from a real designer's template instead of our own design. It uses Aethron, the app on your Mac that turns a Framer or Webflow template into a site you can edit.

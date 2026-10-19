@@ -10,6 +10,8 @@ export function JournalView({ page, articles }: JournalViewProps) {
   return (
     <section className={styles.section}>
       <div className={styles.panel}>
+        {/* The scrolling marquee is the visible title; this is the page's heading for search engines and screen readers. */}
+        <h1 className="sr-only">{page.marquee}</h1>
         <div className={styles.marquee}>
           <BigMarquee text={page.marquee} />
         </div>
