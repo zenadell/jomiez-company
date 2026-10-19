@@ -18,6 +18,8 @@ export function WorkView({ page, home, projects }: WorkViewProps) {
   return (
     <>
       <section className={styles.hero}>
+        {/* The scrolling marquee is the visible title; this is the page's heading for search engines and screen readers. */}
+        <h1 className="sr-only">{page.marquee}</h1>
         <Appear scale={1.08} transition={springSlow} delay={0.1} className={styles.heroPanel}>
           <Image src={src(page.image, "/media/pricing-swirl.jpg")} alt="" fill priority sizes="100vw" className={styles.heroImg} />
           <div className={styles.heroMarquee}>

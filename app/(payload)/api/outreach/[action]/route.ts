@@ -1,6 +1,7 @@
 import config from "@payload-config";
 import { getPayload, type Where } from "payload";
-import { emailsLeftToday, markSent, sendLeadEmail, sendTestEmail, setStatus, smsLink, stopLead, unmarkSent, whatsappLink, type Channel } from "@/cms/outreach/send";
+import { checkReplies, redraftAnswer, STATE_KEY, type RepliesState } from "@/cms/outreach/replies";
+import { emailsLeftToday, markSent, replyKey, sendLeadEmail, sendTestEmail, setStatus, smsLink, stopLead, unmarkSent, whatsappLink, type Channel, type LeadReply } from "@/cms/outreach/send";
 import { loadOutreach } from "@/cms/outreach/settings";
 import { makePreview, previewLink, writeLead, writerModel } from "@/cms/outreach/write";
 import { push } from "@/cms/app/push";
@@ -15,8 +16,9 @@ import { originOf } from "@/cms/preview";
  *   GET  leads?tab=ready|contacted|replied|won|all   the list, with ready-made WhatsApp and text links
  *   GET  summary     counts for the home screen
  *   GET  shot?id=…   the small screenshot of a lead's current website
- *   POST lead        { id, do: sent|unsent|status|save|email|rewrite|preview, … }
+ *   POST lead        { id, do: sent|unsent|status|save|email|rewrite|answer|preview, … }
  *   POST test-email  a test email to the sending Gmail (from the settings screen)
+ *   POST replies     read new email replies from leads now (cms/outreach/replies.ts)
  */
 
 export const dynamic = "force-dynamic";
@@ -41,7 +43,7 @@ function sameOrigin(req: Request) {
 
 type Lead = Record<string, unknown> & { id: number; name: string };
 
-function forApp(l: Lead) {
+function forApp(l: Lead, reply: LeadReply | null = null) {
   const m = (l.messages ?? {}) as { whatsapp?: string; sms?: string; emailSubject?: string; emailBody?: string; followUp?: boolean };
   const phone = typeof l.phone === "string" ? l.phone : null;
   const preview = (l.preview ?? {}) as { slug?: string; views?: number; lastViewedAt?: string };
@@ -72,7 +74,14 @@ function forApp(l: Lead) {
     updatedAt: l.updatedAt,
     notes: l.notes ?? null,
     log: ((l.log as { at: string; what: string }[]) ?? []).slice(-6),
+    // Their latest email reply, caught from Gmail: a stranger's words, shown as text only.
+    reply: reply ? { at: reply.at, from: reply.from, subject: reply.subject, text: reply.text, gist: reply.gist, intent: reply.intent, answeredAt: reply.answeredAt ?? null } : null,
   };
+}
+
+/** The leads with their latest replies (only those who could have one). */
+async function withReplies(payload: Awaited<ReturnType<typeof getPayload>>, leads: Lead[]) {
+  return Promise.all(leads.map(async (l) => forApp(l, ["replied", "won", "lost", "contacted"].includes(String(l.status)) ? ((await payload.kv.get<LeadReply>(replyKey(l.id))) ?? null) : null)));
 }
 
 const TABS: Record<string, Where> = {
@@ -128,7 +137,8 @@ export async function GET(req: Request, { params }: Params) {
     const n = async (status: string) => (await payload.count({ collection: "leads", where: { status: { equals: status } }, overrideAccess: true })).totalDocs;
     const s = await loadOutreach(payload);
     const last = await payload.kv.get<{ at: string; found: number; written: number; notes: string[] }>("outreach:last");
-    return json({ enabled: s.enabled, ready: await n("ready"), contacted: await n("contacted"), replied: await n("replied"), won: await n("won"), last, email: await emailsLeftToday(payload) });
+    const replies = (await payload.kv.get<RepliesState>(STATE_KEY)) ?? null;
+    return json({ enabled: s.enabled, ready: await n("ready"), contacted: await n("contacted"), replied: await n("replied"), won: await n("won"), last, email: await emailsLeftToday(payload), replies });
   }
 
   if (action === "leads") {
@@ -141,7 +151,7 @@ export async function GET(req: Request, { params }: Params) {
     const one = url.searchParams.get("lead");
     let extra: Lead | null = null;
     if (one && !docs.some((d) => String(d.id) === one)) extra = (await payload.findByID({ collection: "leads", id: one, depth: 0, overrideAccess: true }).catch(() => null)) as unknown as Lead | null;
-    return json({ tab, total: totalDocs, leads: [...(extra ? [extra] : []), ...docs].map(forApp), email: await emailsLeftToday(payload) });
+    return json({ tab, total: totalDocs, leads: await withReplies(payload, [...(extra ? [extra] : []), ...docs]), email: await emailsLeftToday(payload) });
   }
 
   if (action === "shot") {
@@ -179,6 +189,14 @@ export async function POST(req: Request, { params }: Params) {
       return json({ ok: false, message: (err as Error).message });
     }
   }
+  if (action === "replies") {
+    try {
+      const res = await checkReplies(payload, { force: true });
+      return json({ ok: true, result: res, state: (await payload.kv.get<RepliesState>(STATE_KEY)) ?? null });
+    } catch (err) {
+      return json({ ok: false, message: (err as Error).message });
+    }
+  }
   if (action !== "lead") return json({ error: "Unknown action." }, 404);
 
   const body = (await req.json().catch(() => ({}))) as {
@@ -192,7 +210,7 @@ export async function POST(req: Request, { params }: Params) {
   };
   if (body.id == null) return json({ error: "Which lead?" }, 400);
   const id = body.id;
-  const reply = async () => json({ lead: forApp((await payload.findByID({ collection: "leads", id, depth: 0, overrideAccess: true })) as unknown as Lead) });
+  const reply = async () => json({ lead: (await withReplies(payload, [(await payload.findByID({ collection: "leads", id, depth: 0, overrideAccess: true })) as unknown as Lead]))[0] });
   try {
     switch (body.do) {
       case "sent":
@@ -214,6 +232,9 @@ export async function POST(req: Request, { params }: Params) {
       }
       case "email":
         await sendLeadEmail(payload, id);
+        return reply();
+      case "answer":
+        await redraftAnswer(payload, id, body.instructions?.slice(0, 400));
         return reply();
       case "rewrite":
       case "preview": {

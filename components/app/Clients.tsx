@@ -11,6 +11,8 @@ import { ago, post, tap } from "./lib";
  * the message it wrote to each. Read it, change it if you like, then send it
  * yourself: WhatsApp or Messages opens with it filled in (your own number), or
  * the email goes from your Gmail. Then keep track: replied, won, not interested.
+ * Email replies are caught from your Gmail on their own (cms/outreach/replies.ts),
+ * with an answer drafted; WhatsApp replies are marked by hand.
  */
 
 export type ClientsSummary = {
@@ -21,6 +23,7 @@ export type ClientsSummary = {
   won: number;
   last?: { at: string; found: number; written: number; notes: string[] } | null;
   email?: { left: number; ready: boolean };
+  replies?: { at: string; ok: boolean; message: string } | null;
 };
 
 type Lead = {
@@ -42,6 +45,7 @@ type Lead = {
   contactedAt: string | null;
   updatedAt: string;
   log: { at: string; what: string }[];
+  reply: { at: string; from: string; subject: string; text: string; gist: string; intent: string; answeredAt: string | null } | null;
 };
 
 const TABS = [
@@ -137,6 +141,7 @@ function ClientsList({ focus, onChanged }: { focus: number | null; onChanged: ()
         ))}
       </div>
 
+      {tab === "replied" && <RepliesBar onFound={() => (onChanged(), void load("replied"))} />}
       {error && <p className="ja-error">{error}</p>}
       {leads === null && (
         <div className="ja-leads">
@@ -182,11 +187,39 @@ function ClientsList({ focus, onChanged }: { focus: number | null; onChanged: ()
   );
 }
 
+/** Email replies are caught on their own; this says when it last looked, and looks now. */
+function RepliesBar({ onFound }: { onFound: () => void }) {
+  const [state, setState] = useState<{ ok: boolean; message: string; at: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    void fetchClientsSummary().then((s) => setState(s?.replies ?? null));
+  }, []);
+  return (
+    <div className={`ja-replies${state && !state.ok ? " is-bad" : ""}`}>
+      <p>{state ? `${state.message} ${state.ok ? `· ${ago(state.at)}` : ""}` : "Email replies are read from your Gmail every ten minutes."}</p>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          const out = await post<{ ok?: boolean; message?: string; state?: { ok: boolean; message: string; at: string } | null; result?: { replied?: unknown[] } | null }>("/api/outreach/replies").catch((err: Error) => ({ ok: false, message: err.message, state: null, result: null }));
+          setState(out.state ?? { ok: false, message: out.message ?? "Couldn't check.", at: new Date().toISOString() });
+          setBusy(false);
+          tap(10);
+          if (out.result?.replied?.length) onFound();
+        }}
+      >
+        {busy ? "Checking…" : "Check now"}
+      </button>
+    </div>
+  );
+}
+
 function Empty({ tab }: { tab: Tab }) {
   const text = {
     ready: "No messages waiting. Keeper writes new ones each morning, or ask it: “Find 10 salons in Lekki that need a website”.",
     contacted: "Messages you send show up here, with whether they opened their preview.",
-    replied: "When someone replies, mark it on their card under Sent.",
+    replied: "Email replies show up here on their own, with an answer ready for you. For a reply on WhatsApp or by text, mark it on their card under Sent.",
     won: "Your new clients will be here.",
   }[tab];
   return (
@@ -221,6 +254,9 @@ function LeadCard({
   const [asking, setAsking] = useState(false);
   const [ask, setAsk] = useState("");
   const [open, setOpen] = useState(false);
+  const [answer, setAnswer] = useState(lead.messages.emailBody ?? "");
+  const [editingAnswer, setEditingAnswer] = useState(false);
+  const [readAll, setReadAll] = useState(false);
 
   const run = async (label: string, body: Record<string, unknown>) => {
     setBusy(label);
@@ -228,6 +264,7 @@ function LeadCard({
     try {
       const next = await onAct(lead, body);
       setDraft(next.messages.whatsapp ?? "");
+      setAnswer(next.messages.emailBody ?? "");
       tap(10);
     } catch (err) {
       setProblem((err as Error).message);
@@ -375,6 +412,75 @@ function LeadCard({
               They asked not to be contacted
             </button>
           </div>
+        </>
+      )}
+
+      {tab === "replied" && lead.reply && (
+        <>
+          <div className="ja-lead__reply">
+            <small>
+              {lead.reply.intent === "interested" ? "Interested" : lead.reply.intent === "question" ? "A question" : "Their reply"} · {ago(lead.reply.at)}
+            </small>
+            <p className="ja-lead__gist">{lead.reply.gist}</p>
+            {readAll ? <p className="ja-lead__words">{lead.reply.text}</p> : null}
+            <button type="button" onClick={() => setReadAll((v) => !v)}>
+              {readAll ? "Hide their email" : "Read their email"}
+            </button>
+          </div>
+          {!lead.reply.answeredAt && lead.messages.emailBody && (
+            <div className="ja-lead__msg is-answer">
+              <small>Your answer, drafted by Keeper</small>
+              {editingAnswer ? <textarea value={answer} onChange={(e) => setAnswer(e.target.value)} rows={8} aria-label="Your answer" /> : <p>{lead.messages.emailBody}</p>}
+              <div className="ja-lead__msgbar">
+                {editingAnswer ? (
+                  <>
+                    <button type="button" onClick={() => (setEditingAnswer(false), setAnswer(lead.messages.emailBody ?? ""))}>
+                      Cancel
+                    </button>
+                    <button type="button" className="is-strong" disabled={busy !== null} onClick={async () => (await run("save", { do: "save", messages: { emailBody: answer } }), setEditingAnswer(false))}>
+                      {busy === "save" ? "Saving…" : "Save"}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button type="button" onClick={() => setEditingAnswer(true)}>
+                      Edit
+                    </button>
+                    <button type="button" onClick={() => setAsking((v) => !v)}>
+                      Rewrite…
+                    </button>
+                  </>
+                )}
+              </div>
+              {asking && !editingAnswer && (
+                <form
+                  className="ja-lead__ask"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setAsking(false);
+                    void run("answer", { do: "answer", instructions: ask });
+                    setAsk("");
+                  }}
+                >
+                  <input value={ask} onChange={(e) => setAsk(e.target.value)} placeholder="Shorter, offer a call on Thursday…" enterKeyHint="send" />
+                  <button type="submit" className="ja-btn ja-btn--plain ja-btn--small">
+                    Rewrite
+                  </button>
+                </form>
+              )}
+              {busy === "answer" && <p className="ja-lead__busy">Rewriting…</p>}
+              <div className="ja-lead__send">
+                <button type="button" className="ja-btn ja-btn--approve" disabled={busy !== null || !email?.ready} title={!email?.ready ? "Set up your Gmail in Clients settings first" : undefined} onClick={() => void run("email", { do: "email" })}>
+                  {busy === "email" ? "Sending…" : "Send by email"}
+                </button>
+                {lead.links.whatsapp && (
+                  <a className="ja-btn ja-btn--plain" href={lead.links.whatsapp} target="_blank" rel="noopener" onClick={() => onSent(lead, "whatsapp")}>
+                    WhatsApp
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
         </>
       )}
 

@@ -8,7 +8,8 @@ import { nextRunAt } from "./schedule";
  * something outside has to call /api/agent/tick with the CRON_SECRET. The admin
  * also gives due routines a chance to run whenever someone has it open. Each
  * tick runs whatever is due, a few at a time, and the owner is told about each
- * run (see notify.ts).
+ * run (see notify.ts). Each tick also catches email replies from leads
+ * (cms/outreach/replies.ts), at most every ten minutes.
  */
 
 async function firstAdmin(payload: Payload): Promise<TypedUser | null> {
@@ -33,6 +34,10 @@ export async function tickRoutines(payload: Payload, origin: string, max = 3): P
   await payload.kv.set("agent:tick", { at: Date.now() });
   let ran = 0;
   try {
+    // Replies to the emails sent to leads (every ten minutes at most; it doesn't need the agent switched on).
+    await import("../outreach/replies")
+      .then((m) => m.checkReplies(payload))
+      .catch((err) => payload.logger.warn({ err, msg: "Checking lead replies" }));
     const cfg = await loadConfig(payload);
     if (!cfg.enabled) return { ran: 0 };
     const now = new Date();
