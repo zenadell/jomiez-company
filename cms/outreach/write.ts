@@ -9,6 +9,9 @@ import { buildModel } from "../agent/providers";
 import { loadConfig } from "../agent/run";
 import type { CheckResult } from "./check";
 import { COUNTRIES } from "./kinds";
+import { directionsFor, menu, settle, type Design } from "./design/choose";
+import { byId, type DirectionId } from "./design/library";
+import { problems, tidy } from "./design/lint";
 
 /*
  * Writing to a business: a WhatsApp message, a text and an email, built only
@@ -130,35 +133,37 @@ export async function writeLead(payload: Payload, id: number | string, opts: { m
 
 /* ---------- The free homepage preview ---------- */
 
-export const PALETTES = ["ember", "forest", "ocean", "berry", "sand", "slate"] as const;
-export const STYLES = ["editorial", "bold", "clean"] as const;
-
 /*
- * What Keeper writes for a preview. Lengths are asked for in the descriptions
- * and trimmed afterwards (a model that runs a little long shouldn't lose the
- * whole preview).
+ * What Keeper writes for a preview: first the design (one of the directions
+ * offered for this business, with one of its type systems and palettes:
+ * cms/outreach/design), then words shaped for it. Lengths are asked for in
+ * the descriptions and trimmed afterwards (a model that runs a little long
+ * shouldn't lose the whole preview).
  */
-const PreviewSchema = z.object({
-  style: z.enum(STYLES).describe("editorial: warm and elegant (furniture, interiors, hotels, beauty, restaurants, fashion); bold: dark and punchy (gyms, cars, events, nightlife, trades); clean: light and calm (clinics, schools, professional services, pharmacies)"),
-  palette: z.enum(PALETTES).describe("Only used when they have no brand colours of their own"),
-  eyebrow: z.string().min(2).describe("2–5 words above the headline, e.g. “Furniture & décor · Ikeja”"),
-  headline: z.string().min(3).describe("A striking headline, at most 7 words"),
-  headlineAccent: z.string().describe("One or two words from the headline to set in italics/colour, or empty"),
-  sub: z.string().min(10).describe("One sentence, at most 24 words"),
-  cta: z.string().min(3).describe("The main button, 2–4 words: how a customer acts (Order on WhatsApp, Book a visit, Call us)"),
-  marquee: z.array(z.string().min(2)).min(3).describe("4–7 short words or phrases (1–3 words) for a moving band: what they offer"),
-  statement: z.string().min(20).describe("A bold 18–35 word statement of what they do and for whom, true to the facts"),
-  services: z.array(z.object({ title: z.string().min(2), text: z.string().min(5) })).min(3).describe("3–6 services or product lines, each with a line of at most 18 words"),
-  about: z.string().min(30).describe("40–80 words about the business, only from the facts given"),
-  highlights: z.array(z.object({ title: z.string().min(2), text: z.string().min(4) })).min(2).describe("3 reasons to choose them (title of 2–4 words, line of at most 14 words), true by nature, no numbers or awards unless given"),
-  closing: z.string().min(3).describe("A short closing call, at most 7 words"),
-  photo: z.string().min(3).describe("A 3–5 word stock photo search that fits, used only if they have no photos of their own"),
-});
+function previewSchema(offered: DirectionId[]) {
+  const types = [...new Set(offered.flatMap((d) => byId.direction(d)!.types))] as [string, ...string[]];
+  const palettes = [...new Set(offered.flatMap((d) => byId.direction(d)!.palettes))] as [string, ...string[]];
+  return z.object({
+    direction: z.enum(offered as [DirectionId, ...DirectionId[]]).describe("The art direction that suits THIS business best"),
+    type: z.enum(types).describe("A type system offered for the chosen direction"),
+    palette: z.enum(palettes).describe("A palette offered for the chosen direction (their own brand colour, if they have one, replaces its accent)"),
+    why: z.string().min(5).describe("One sentence: why this direction, type and palette fit this business in particular"),
+    headline: z.string().min(3).describe("A short, specific headline in sentence case, no exclamation mark, not a slogan you could put on any business"),
+    sub: z.string().min(10).describe("One plain sentence, at most 22 words, saying what they do, for whom, where"),
+    cta: z.string().min(3).describe("The main button, 2–4 words naming the action (Book on WhatsApp, Order on WhatsApp, Call us, Book a check-up)"),
+    statement: z.string().min(20).describe("18–35 words: what they do and for whom, true to the facts, in their voice"),
+    services: z.array(z.object({ title: z.string().min(2), text: z.string().min(5) })).min(3).describe("3–6 services or product lines: a title of 1–4 words and one line of at most 16 words"),
+    about: z.string().min(30).describe("40–80 words about the business, only from the facts given"),
+    highlights: z.array(z.object({ title: z.string().min(2), text: z.string().min(4) })).min(2).describe("3 reasons to choose them (title of 2–4 words, line of at most 14 words), true by nature, no numbers or awards unless given"),
+    closing: z.string().min(3).describe("A short closing line, at most 6 words, in sentence case"),
+    photo: z.string().min(3).describe("A 3–5 word stock photo search that fits, used only if they have no photos of their own"),
+  });
+}
 
-type Written = z.infer<typeof PreviewSchema>;
+type Written = z.infer<ReturnType<typeof previewSchema>>;
 
 export type PreviewContent = {
-  v: 2;
+  v: 3;
   name: string;
   kind?: string;
   area?: string;
@@ -168,14 +173,11 @@ export type PreviewContent = {
   email?: string | null;
   socials?: string | null;
   hours?: string;
-  style: (typeof STYLES)[number];
-  palette: (typeof PALETTES)[number];
-  eyebrow: string;
+  /** The art direction, type system and palette (cms/outreach/design), and why they were chosen. */
+  design: Design & { why?: string };
   headline: string;
-  headlineAccent: string;
   sub: string;
   cta: string;
-  marquee: string[];
   statement: string;
   services: { title: string; text: string }[];
   about: string;
@@ -193,17 +195,14 @@ const cut = (s: string, n: number) => {
   return `${t.slice(0, at > n * 0.6 ? at : n).replace(/[,;:\s]+$/, "")}…`;
 };
 
-function tidyWritten(w: Written): Omit<PreviewContent, "v" | "name" | "brand" | "stock"> {
-  const accent = w.headlineAccent.trim();
+/** The longest headline each direction's layout carries (in words). */
+const HEADLINE_WORDS: Record<DirectionId, number> = { poster: 5, monument: 7, place: 7, split: 8, catalogue: 8 };
+
+function tidyWritten(w: Written) {
   return {
-    style: w.style,
-    palette: w.palette,
-    eyebrow: cut(w.eyebrow, 48),
     headline: cut(w.headline, 64).replace(/…$/, ""),
-    headlineAccent: accent && w.headline.toLowerCase().includes(accent.toLowerCase()) ? accent : "",
     sub: cut(w.sub, 180),
     cta: cut(w.cta, 26).replace(/…$/, ""),
-    marquee: w.marquee.slice(0, 7).map((m) => cut(m, 26)),
     statement: cut(w.statement, 240),
     services: w.services.slice(0, 6).map((sv) => ({ title: cut(sv.title, 36), text: cut(sv.text, 140) })),
     about: cut(w.about, 560),
@@ -241,6 +240,9 @@ export async function makePreview(payload: Payload, id: number | string, opts: {
   const preview = (lead.preview ?? {}) as { slug?: string; views?: number };
   const slug = preview.slug || slugOf(lead.name);
   const brand = await gatherBrand(lead, slug).catch((): Brand => ({ photos: [], products: [], colours: [] }));
+  // Stock photos fill in (up to three) when they have fewer than two of their own. If that search
+  // comes back short, the page settles on a direction that fits what it really has (readPreview).
+  const offered = directionsFor(lead.kind as string | undefined, { photos: brand.photos.length >= 2 ? brand.photos.length : brand.photos.length + 3, products: brand.products.length });
   const prompt = [
     `BUSINESS: ${lead.name}${lead.kind ? ` (${lead.kind})` : ""}${lead.area ? `, ${lead.area}` : ""}.`,
     Object.keys(facts).length
@@ -250,18 +252,30 @@ export async function makePreview(payload: Payload, id: number | string, opts: {
           .join("; ")}`
       : "",
     check.site ? `WHAT THEIR CURRENT WEBSITE SAYS:\nTitle: ${check.site.title}\nDescription: ${check.site.description}\nHeadings: ${check.site.headings.join(" | ")}\nText: ${check.site.text.slice(0, 1400)}` : "They have no website of their own.",
-    `THEIR OWN PICTURES: ${brand.photos.length} photos, ${brand.products.length} product shots${brand.logo ? ", a logo" : ""}.`,
-    "Write the words for a beautiful one-page website for them, in the shape asked for. It will be shown to the owner as a free sample of what their new site could be.",
+    `THEIR OWN PICTURES: ${brand.photos.length} photos, ${brand.products.length} product shots${brand.logo ? ", a logo" : ""}${brand.colours.length ? `, brand colours ${brand.colours.slice(0, 3).join(", ")}` : ""}.`,
+    `THE DESIGNS ON OFFER (choose one direction, then one of ITS type systems and ITS palettes):\n${menu(offered)}`,
+    "First think about what belongs to this business and no competitor: its name and what it means, its street and neighbourhood, what it's known for, the materials and rituals of its trade. Choose the direction that can carry that best, not the most familiar one. Then write the words for that direction, using those specifics.",
   ]
     .filter(Boolean)
     .join("\n\n");
-  const written = await ask(
-    opts.model,
-    `You write website copy for small businesses, like the best studios do: specific, warm, confident, short. Use only the facts given (and what their current site says). Never invent years in business, awards, prices, staff names, reviews, testimonials, customer numbers or opening hours. Where you don't know, write general but true lines about this kind of business. No clichés ("look no further", "one-stop shop", "we've got you covered").`,
-    prompt,
-    PreviewSchema,
-  );
-  const words = tidyWritten(written);
+  const instructions = `You are the art director and copywriter at a studio known for websites that look designed by a person, never generated. You choose a design from the menu given and write the words for it: specific, warm, confident, short, in plain language, sentence case. Use only the facts given (and what their current site says). Never invent years in business, awards, prices, staff names, reviews, testimonials, customer numbers or opening hours. Where you don't know, write general but true lines about this kind of business.
+Never write: clichés ("look no further", "one-stop shop", "we've got you covered", "nestled", "in the heart of"), agency words (unlock, elevate, seamless, effortless, world-class, cutting-edge, premier, journey), "not just X, it's Y", exclamation marks, capitals for emphasis, labels joined with middle dots, headlines that are slogans for any business.`;
+  const schema = previewSchema(offered);
+  let written = await ask(opts.model, instructions, prompt, schema);
+  // Once: the copy goes back with what makes it read as generated.
+  const maxWords = HEADLINE_WORDS[offered.includes(written.direction) ? written.direction : offered[0]];
+  const found = problems(written, { maxHeadlineWords: maxWords });
+  if (found.length) {
+    written = await ask(
+      opts.model,
+      instructions,
+      `${prompt}\n\nYOUR FIRST VERSION:\n${JSON.stringify(written)}\n\nFIX THESE, keeping everything else:\n- ${found.join("\n- ")}`,
+      schema,
+    ).catch(() => written);
+  }
+  const design = settle(lead.name, offered, written);
+  // Proper names keep their capitals in a headline set in sentence case: theirs and their area's (not their trade: "hair salon" isn't a name).
+  const words = tidy(tidyWritten(written), [lead.name, String(lead.area ?? "")]);
 
   // Stock photos only when they have fewer than two of their own.
   const stock: PreviewContent["stock"] = [];
@@ -288,8 +302,9 @@ export async function makePreview(payload: Payload, id: number | string, opts: {
   }
 
   const full: PreviewContent = {
-    v: 2,
+    v: 3,
     ...words,
+    design: { ...design, why: cut(written.why, 240) },
     name: lead.name,
     kind: (lead.kind as string) || undefined,
     area: (lead.area as string) || undefined,

@@ -1,0 +1,359 @@
+/*
+ * Loud and flat. Each section is one flat field (--f1…--f4 with their ink),
+ * meeting edge to edge. Display type is the heaviest cut, set tight. Square
+ * corners; photographs hard-cropped and rotated a few degrees.
+ */
+
+.page {
+  --m: max(20px, 2vw);
+  background: var(--f1);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px var(--m);
+  background: var(--f1);
+  color: var(--f1-ink);
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  align-content: space-between;
+  min-height: calc(100svh - 56px - 76px);
+  padding: 0 var(--m) 32px;
+  overflow: hidden;
+  background: var(--f1);
+  color: var(--f1-ink);
+}
+
+.title {
+  position: relative;
+  z-index: 2;
+  max-width: 9ch;
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: clamp(64px, 13vw, 230px);
+  letter-spacing: var(--d-track);
+  line-height: 0.86;
+  text-transform: var(--d-case);
+}
+
+.title span {
+  display: inline;
+}
+
+.stick {
+  position: absolute;
+  z-index: 1;
+  right: 4vw;
+  bottom: 9vh;
+  width: min(36vw, 520px);
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  transform: rotate(-4deg);
+  animation: slap 0.7s cubic-bezier(0.3, 1.4, 0.4, 1) 0.2s both;
+}
+
+@keyframes slap {
+  from {
+    transform: rotate(6deg) scale(1.15);
+    opacity: 0;
+  }
+}
+
+.stick img,
+.stick2 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.heroFoot {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 20px;
+  max-width: 520px;
+  margin-top: 32px;
+}
+
+.heroFoot p {
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+.act {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+}
+
+.chunky,
+.chunkyDark {
+  min-height: 60px;
+  padding: 0 30px;
+  background: var(--f3) !important;
+  color: var(--f3-ink) !important;
+  font-size: 18px;
+}
+
+.chunkyDark {
+  background: var(--f1) !important;
+  color: var(--f1-ink) !important;
+}
+
+@media (max-width: 899px) {
+  .stick {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: 78%;
+    margin: 20px 0 0 auto;
+  }
+}
+
+/* Short statements, each on its own panel of unequal width. */
+.panels {
+  display: grid;
+}
+
+.panel {
+  display: grid;
+  align-content: space-between;
+  gap: 40px;
+  min-height: 300px;
+  padding: 36px var(--m);
+}
+
+.panel:nth-child(1) {
+  background: var(--f2);
+  color: var(--f2-ink);
+}
+
+.panel:nth-child(2) {
+  background: var(--f3);
+  color: var(--f3-ink);
+}
+
+.panel:nth-child(3) {
+  background: var(--f4);
+  color: var(--f4-ink);
+}
+
+.panel h2 {
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: clamp(40px, 4.6vw, 76px);
+  letter-spacing: var(--d-track);
+  line-height: 0.9;
+  text-transform: var(--d-case);
+}
+
+.panel p {
+  max-width: 26ch;
+  font-size: 18px;
+}
+
+@media (min-width: 900px) {
+  .panels {
+    display: flex;
+  }
+
+  .panel {
+    flex: var(--grow) 1 0;
+    min-height: 420px;
+  }
+}
+
+/* A large plain list. */
+.list {
+  padding: clamp(80px, 12vh, 140px) var(--m);
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.listHead {
+  margin-bottom: 24px;
+  font-size: 18px;
+  font-weight: var(--t-strong);
+}
+
+.row {
+  display: grid;
+  gap: 6px;
+  padding: 10px 0;
+}
+
+.row h3 {
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: clamp(46px, 7vw, 120px);
+  letter-spacing: var(--d-track);
+  line-height: 0.9;
+  text-transform: var(--d-case);
+}
+
+.row p {
+  max-width: 34ch;
+  font-size: 18px;
+}
+
+@media (min-width: 900px) {
+  .row {
+    grid-template-columns: 2fr 1fr;
+    align-items: end;
+    column-gap: 40px;
+  }
+}
+
+/* One photograph bleeding off two edges, the words on a solid bar. */
+.about {
+  position: relative;
+  display: grid;
+  background: var(--f3);
+  color: var(--f3-ink);
+}
+
+.bleed {
+  width: 100%;
+  height: 70svh;
+  object-fit: cover;
+}
+
+.caption {
+  display: grid;
+  gap: 18px;
+  padding: 40px var(--m) 56px;
+  background: var(--f2);
+  color: var(--f2-ink);
+}
+
+.caption h2 {
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: clamp(36px, 4vw, 64px);
+  letter-spacing: var(--d-track);
+  line-height: 0.92;
+  text-transform: var(--d-case);
+}
+
+.caption p {
+  max-width: 52ch;
+  font-size: 18px;
+}
+
+@media (min-width: 900px) {
+  .about {
+    grid-template-columns: repeat(12, 1fr);
+  }
+
+  .bleed {
+    grid-column: 1 / 9;
+    grid-row: 1;
+    height: 88svh;
+  }
+
+  .caption {
+    grid-column: 7 / 13;
+    grid-row: 1;
+    align-self: end;
+    margin-bottom: 8vh;
+    padding: 48px;
+  }
+}
+
+.visit {
+  display: grid;
+  gap: 36px;
+  padding: clamp(80px, 12vh, 140px) var(--m);
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.visit h2 {
+  margin-bottom: 18px;
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: clamp(48px, 6vw, 100px);
+  letter-spacing: var(--d-track);
+  line-height: 0.88;
+  text-transform: var(--d-case);
+}
+
+.where {
+  max-width: 24ch;
+  margin-bottom: 18px;
+  font-size: 22px;
+}
+
+.visit dt {
+  color: inherit;
+  opacity: 0.6;
+}
+
+.hours {
+  align-self: end;
+  font-size: 19px;
+}
+
+.map {
+  aspect-ratio: 4 / 3;
+}
+
+@media (min-width: 900px) {
+  .visit {
+    grid-template-columns: 5fr 3fr 4fr;
+    column-gap: 48px;
+  }
+}
+
+.closing {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 32px;
+  padding: clamp(90px, 14vh, 160px) var(--m);
+  overflow: hidden;
+  background: var(--f4);
+  color: var(--f4-ink);
+}
+
+.closing h2 {
+  position: relative;
+  z-index: 2;
+  max-width: 10ch;
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: clamp(56px, 9vw, 160px);
+  letter-spacing: var(--d-track);
+  line-height: 0.86;
+  text-transform: var(--d-case);
+}
+
+.stick2 {
+  position: absolute;
+  right: 6vw;
+  top: 50%;
+  width: min(26vw, 360px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 50%;
+  transform: translateY(-50%) rotate(5deg);
+}
+
+@media (max-width: 899px) {
+  .stick2 {
+    display: none;
+  }
+}
+
+.credits {
+  background: var(--f4);
+  color: var(--f4-ink) !important;
+  opacity: 0.85;
+}

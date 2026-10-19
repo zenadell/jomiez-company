@@ -1,0 +1,331 @@
+/*
+ * The place carries it. The photographs do the talking: full-bleed or large,
+ * square corners, never thumbnails. Text is small, calm and well spaced, in
+ * narrow columns with wide empty margins. Colour lives in the pictures.
+ */
+
+.page {
+  --m: max(20px, 5vw);
+}
+
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: calc(100svh - 56px);
+  min-height: 560px;
+  overflow: hidden;
+  background: var(--ink);
+  color: #fff;
+}
+
+/* On phones the Jomiez ribbon takes two rows. */
+@media (max-width: 899px) {
+  .hero {
+    height: calc(100svh - 80px);
+  }
+}
+
+.heroImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: settle 2.4s cubic-bezier(0.2, 0.7, 0.1, 1) both;
+}
+
+@keyframes settle {
+  from {
+    transform: scale(1.06);
+  }
+}
+
+/* A soft neutral shade only where the words sit. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.38), transparent 22%),
+    linear-gradient(transparent 52%, rgba(0, 0, 0, 0.5));
+}
+
+.head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px max(20px, 2vw);
+  font-size: 15px;
+}
+
+.where::first-letter {
+  text-transform: uppercase;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav a {
+  text-decoration: none;
+}
+
+.nav > a:not(.navAct) {
+  display: none;
+}
+
+.navAct {
+  padding: 9px 16px;
+  background: #fff;
+  color: #111 !important;
+  font-weight: var(--t-strong);
+}
+
+@media (min-width: 900px) {
+  .nav > a:not(.navAct) {
+    display: inline;
+  }
+}
+
+.title {
+  position: relative;
+  padding: 0 max(16px, 1.6vw);
+}
+
+.sub {
+  max-width: 40ch;
+  margin: 0 0 clamp(18px, 3vh, 34px) max(4px, 0.4vw);
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.name {
+  margin-bottom: -0.1em;
+  padding-top: 0.14em;
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: var(--size);
+  letter-spacing: var(--d-track);
+  line-height: 0.92;
+  text-transform: var(--d-case);
+  white-space: nowrap;
+}
+
+.name > span,
+.name > span > span {
+  display: block;
+}
+
+.name > span > span {
+  display: inline-block;
+}
+
+.intro {
+  display: grid;
+  gap: 24px;
+  max-width: calc(52ch + 2 * var(--m));
+  padding: clamp(110px, 18vh, 200px) var(--m);
+  margin: 0 auto;
+}
+
+.intro h2,
+.about h2,
+.visit h2 {
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: clamp(32px, 3.6vw, 54px);
+  letter-spacing: var(--d-track);
+  line-height: 1.02;
+  text-transform: var(--d-case);
+}
+
+.intro p {
+  font-size: 19px;
+  line-height: 1.6;
+}
+
+.wide {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 21 / 9;
+  object-fit: cover;
+}
+
+.offer {
+  display: grid;
+  gap: 36px;
+  padding: clamp(100px, 16vh, 180px) var(--m);
+}
+
+.offer h3 {
+  margin-bottom: 6px;
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: 24px;
+  letter-spacing: var(--d-track);
+  line-height: 1.15;
+  text-transform: var(--d-case);
+}
+
+.offer p {
+  max-width: 34ch;
+  color: var(--muted);
+}
+
+@media (min-width: 900px) {
+  .offer {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 64px 48px;
+    padding-left: calc(var(--m) + 8vw);
+  }
+}
+
+.pair {
+  display: grid;
+  gap: 20px;
+  padding: 0 var(--m) clamp(100px, 16vh, 180px);
+}
+
+.pair img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.portrait {
+  aspect-ratio: 3 / 4;
+}
+
+.land {
+  aspect-ratio: 16 / 10;
+}
+
+@media (min-width: 900px) {
+  .pair {
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+
+  .portrait {
+    grid-column: 2 / 6;
+    margin-top: 120px;
+  }
+
+  .land {
+    grid-column: 7 / 13;
+  }
+}
+
+.about {
+  display: grid;
+  gap: 40px;
+  padding: 0 var(--m) clamp(100px, 16vh, 180px);
+}
+
+.about > div {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+  max-width: 52ch;
+}
+
+.about p {
+  font-size: 18px;
+}
+
+.about ul {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+}
+
+.about strong {
+  color: var(--ink);
+  font-weight: var(--t-strong);
+}
+
+.offset {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+@media (min-width: 900px) {
+  .about {
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 24px;
+  }
+
+  .about > div {
+    grid-column: 2 / 7;
+  }
+
+  .offset {
+    grid-column: 8 / 12;
+    margin-top: 40px;
+  }
+}
+
+.visit {
+  display: grid;
+  gap: 48px;
+  padding: clamp(80px, 12vh, 140px) var(--m);
+  background: var(--surface);
+}
+
+.info {
+  display: grid;
+  gap: 32px;
+}
+
+.info h3 {
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: var(--t-strong);
+}
+
+.info p {
+  max-width: 30ch;
+  margin-bottom: 14px;
+}
+
+.reach {
+  font-size: 15px;
+}
+
+.act {
+  align-self: end;
+}
+
+.map {
+  aspect-ratio: 16 / 9;
+}
+
+@media (min-width: 900px) {
+  .visit {
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 24px;
+  }
+
+  .visit h2 {
+    grid-column: 1 / 7;
+  }
+
+  .info {
+    grid-column: 1 / 13;
+    grid-template-columns: 1fr 1fr auto;
+    column-gap: 48px;
+  }
+
+  .map {
+    grid-column: 1 / 13;
+    aspect-ratio: 21 / 8;
+  }
+}

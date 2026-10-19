@@ -1,0 +1,191 @@
+/*
+ * The split stage. Desktop: a photograph held still on one half, a reading
+ * column on the other (max 46ch, 56–72px padding), left-aligned throughout.
+ * Phone: the photograph opens the page, then the column.
+ */
+
+.stage {
+  display: block;
+}
+
+.still {
+  position: relative;
+  height: 58svh;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.still img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.field {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: 30vmin;
+  letter-spacing: var(--d-track);
+}
+
+.column {
+  padding: 0 max(22px, 5vw);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 26px 0;
+}
+
+.intro {
+  display: grid;
+  gap: 22px;
+  padding: clamp(48px, 10vh, 120px) 0 clamp(64px, 12vh, 140px);
+}
+
+.intro h1 {
+  max-width: 14ch;
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: clamp(42px, 4.6vw, 72px);
+  letter-spacing: var(--d-track);
+  line-height: var(--d-lead);
+  text-transform: var(--d-case);
+}
+
+.lead {
+  max-width: 40ch;
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+.act {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 6px;
+}
+
+.block {
+  display: grid;
+  gap: 20px;
+  max-width: 46ch;
+  padding-bottom: clamp(72px, 12vh, 120px);
+}
+
+.block h2 {
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: clamp(28px, 2.4vw, 38px);
+  letter-spacing: var(--d-track);
+  line-height: 1.08;
+  text-transform: var(--d-case);
+}
+
+.statement {
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: clamp(23px, 1.9vw, 28px);
+  letter-spacing: calc(var(--d-track) / 2);
+  line-height: 1.32;
+}
+
+.services {
+  display: grid;
+  gap: 18px;
+}
+
+.services dt {
+  font-weight: var(--t-strong);
+  font-size: 18px;
+}
+
+.services dd {
+  margin: 2px 0 0;
+  color: var(--muted);
+}
+
+.inline {
+  width: 100%;
+  max-width: 46ch;
+  aspect-ratio: 3 / 2;
+  margin-bottom: clamp(72px, 12vh, 120px);
+  object-fit: cover;
+}
+
+.reasons {
+  display: grid;
+  gap: 18px;
+}
+
+.reasons h3 {
+  font-size: 18px;
+  font-weight: var(--t-strong);
+}
+
+.reasons p {
+  color: var(--muted);
+}
+
+.where {
+  font-size: 20px;
+  line-height: 1.35;
+}
+
+.hours {
+  max-width: 320px;
+}
+
+.map {
+  aspect-ratio: 16 / 10;
+}
+
+.closing {
+  display: grid;
+  justify-items: start;
+  gap: 22px;
+  padding: clamp(56px, 10vh, 100px) 0;
+  border-top: 6px solid var(--accent);
+}
+
+.closing p {
+  font-family: var(--display);
+  font-weight: var(--d-weight);
+  font-size: clamp(30px, 3vw, 46px);
+  letter-spacing: var(--d-track);
+  line-height: 1.04;
+  text-transform: var(--d-case);
+}
+
+.credits {
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+}
+
+@media (min-width: 900px) {
+  .stage {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .still {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+  }
+
+  .column {
+    padding: 0 clamp(48px, 5vw, 88px);
+  }
+}

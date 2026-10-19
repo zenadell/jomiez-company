@@ -259,7 +259,15 @@ Keeper looks for businesses that could use a better website, checks their sites,
 - a **street map** with a pin in their colour (only when their map listing or address agrees on where they are), their **opening hours** and an "Open now" badge in their time zone;
 - every button uses **their** number: WhatsApp when it's a mobile, a call otherwise.
 - Keeper writes the words from what their listing and website say; it never invents reviews, awards, years or prices. Free stock photos (credited at the bottom) fill in only when they have fewer than two photos of their own.
-- One of three looks fits the kind of business: warm and elegant (shops, food, beauty), dark and bold (gyms, cars, events, trades), or light and calm (clinics, schools, professionals).
+- It's art-directed, not filled into one template. Keeper chooses one of five directions that suits the business, then a typeface pairing and a colour palette made for that direction (their own brand colour replaces the accent):
+  - **The name as a monument**: their name set as wide as the screen under one strong photo (salons, fashion, restaurants);
+  - **The place carries it**: a full-screen photo with the name along its edge, then photos at uneven sizes (hotels, restaurants, venues);
+  - **The split stage**: a photo that stays still on one half, a calm reading column on the other (clinics, schools, professionals);
+  - **Loud and flat**: flat bold colours, the heaviest type, photos stuck on at an angle (gyms, garages, events, trades);
+  - **The specimen catalogue**: each of their products on its own colour tile with its name and price (shops with product photos).
+- The directions, typefaces and palettes come from Taste Skill (an open-source study of 247 award-winning sites). Keeper's words are checked for the giveaways of AI-written pages (agency words like "elevate" and "seamless", exclamation marks, one word of the headline in a different style, labels joined with dots), sent back once to be fixed, then cleaned.
+- Previews made before this keep working and open in the new design.
+- To see every direction without real leads, run `npm run preview:fixtures` against a local database and open `/preview/fixture-salon`, `fixture-restaurant`, `fixture-clinic`, `fixture-gym` and `fixture-shop`.
 - With Cloudinary set up, the pictures and map are copied there; otherwise the site fetches and shrinks them itself. Maps are drawn from OpenStreetMap and credited on the map.
 
 **In the phone app**, the home screen shows “N messages to send”.
