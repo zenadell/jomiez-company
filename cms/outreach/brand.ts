@@ -1,6 +1,8 @@
 import { PHONE_UA, safeFetch } from "../agent/web";
 import { fetchImage, keepImage, logoColours, type Picture } from "./images";
 import { keepMap } from "./map";
+import { photoFits } from "./photo-check";
+import type { Sight } from "../agent/eyes";
 
 /*
  * What a business already has, for a preview that looks like theirs: its
@@ -143,7 +145,7 @@ async function place(name: string, area: string, address: string, country: strin
   }
 }
 
-export async function gatherBrand(lead: Record<string, unknown>, slug: string): Promise<Brand> {
+export async function gatherBrand(lead: Record<string, unknown>, slug: string, opts: { sight?: Sight } = {}): Promise<Brand> {
   const brand: Brand = { photos: [], products: [], colours: [] };
   const facts = ((lead.check as { facts?: Record<string, string> } | null)?.facts ?? {}) as Record<string, string>;
   const kind = (lead.check as { kind?: string } | null)?.kind;
@@ -192,10 +194,15 @@ export async function gatherBrand(lead: Record<string, unknown>, slug: string): 
     })
   ).filter((x): x is NonNullable<typeof x> => Boolean(x));
   const order = new Map(found.photos.map((src, i) => [src, i]));
-  const photos = imgs
+  const wide = imgs
     .filter((i) => i.w >= 640 && i.h >= 380 && i.w / i.h > 0.55 && i.w / i.h < 2.6 && !(i.alpha && i.format === "png"))
     .sort((a, b) => b.w * b.h * (1 - 0.02 * (order.get(a.url) ?? 0)) - a.w * a.h * (1 - 0.02 * (order.get(b.url) ?? 0)))
-    .slice(0, 6);
+    .slice(0, 8);
+  // Their own pictures are often flyers and adverts with prices printed on them: those stay off the page.
+  // A picture nobody could look at is kept (it's theirs); only a clear no drops it.
+  const what = `${String(lead.name)}${lead.kind ? `, a ${String(lead.kind)}` : ""}`;
+  const verdicts = await pool(wide, 3, (i) => photoFits(opts.sight, i, what));
+  const photos = wide.filter((_, n) => verdicts[n] !== false).slice(0, 6);
   const used = new Set(photos.map((p) => p.url));
   const products = imgs.filter((i) => !used.has(i.url) && i.w >= 280 && i.h >= 280 && i.w / i.h > 0.6 && i.w / i.h < 1.7).slice(0, 8);
   brand.photos = await Promise.all(photos.map((p, i) => keepImage(p, slug, `photo-${i}`, 1800)));

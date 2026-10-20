@@ -44,9 +44,33 @@ function all(c: Copy): [string, string][] {
 }
 
 /** What a writer should fix, in plain words. Empty when the copy is clean. */
-export function problems(c: Copy, opts: { maxHeadlineWords?: number } = {}): string[] {
+const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+
+/** Five-word runs that appear in three or more parts of the copy: the same fact said over and over. */
+function repeated(c: Copy): string[] {
+  const seen = new Map<string, Set<string>>();
+  for (const [field, text] of all(c)) {
+    const ws = norm(text).split(" ");
+    for (let i = 0; i + 5 <= ws.length; i++) {
+      const run = ws.slice(i, i + 5).join(" ");
+      const where = seen.get(run) ?? new Set<string>();
+      where.add(field.replace(/\[\d+\].*/, ""));
+      seen.set(run, where);
+    }
+  }
+  return [...seen].filter(([, where]) => where.size >= 3).map(([run]) => run);
+}
+
+export function problems(c: Copy, opts: { maxHeadlineWords?: number; name?: string } = {}): string[] {
   const out: string[] = [];
   const maxH = opts.maxHeadlineWords ?? 7;
+  if (opts.name) {
+    const h = norm(c.headline).replace(/\b(s|the|at|by)\b/g, "").replace(/\s+/g, " ").trim();
+    const n = norm(opts.name).replace(/\b(s|the|at|by)\b/g, "").replace(/\s+/g, " ").trim();
+    if (h === n || (h.includes(n) && words(h) - words(n) <= 1)) out.push("headline only repeats their name (the layout already shows it): say something about them instead");
+  }
+  const again = repeated(c);
+  if (again.length) out.push(`the same words appear in three or more sections ("${again[0]}"): say each thing once`);
   if (words(c.headline) > maxH) out.push(`headline has ${words(c.headline)} words; at most ${maxH}`);
   if (/[.!?]\s+\S/.test(c.headline)) out.push("headline is more than one sentence");
   if (words(c.sub) > 26) out.push(`sub has ${words(c.sub)} words; at most 26`);
@@ -60,6 +84,9 @@ export function problems(c: Copy, opts: { maxHeadlineWords?: number } = {}): str
     if (text.includes("!")) out.push(`${field} has an exclamation mark`);
     if (/\b[A-Z]{4,}\b/.test(text.replace(/\b(WhatsApp|OK)\b/g, ""))) out.push(`${field} has a word in capitals`);
     if (/\s·\s/.test(text)) out.push(`${field} joins things with middle dots`);
+    if (/\b(website|web site|online presence)\b/i.test(text)) out.push(`${field} talks about websites: this IS their website, write about the business`);
+    if (field !== "cta" && field !== "closing" && /\b\d{1,2}(:\d{2})?\s?(am|pm)\b|\b\d{1,2}:\d{2}\b|\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday) (to|-|through) (monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(text))
+      out.push(`${field} gives opening hours: they're shown in the visit section already, leave them out of the copy`);
     dashes += (text.match(/—|–| - /g) ?? []).length;
   }
   if (dashes > 2) out.push(`${dashes} dashes in the copy; use commas and full stops`);
