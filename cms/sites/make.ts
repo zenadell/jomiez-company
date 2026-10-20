@@ -57,6 +57,27 @@ function pagesOf(a: Answer): string[] {
   return pick(d) ?? [...new Set([...a.text.matchAll(/(?:^|[\s,"'[])(home|about|contact|services|work|pricing|blog(?:\/[a-z0-9-]+)?|[a-z0-9-]+\/[a-z0-9-]+)(?=[\s,"'\]]|$)/gim)].map((m) => m[1].toLowerCase()))];
 }
 
+/**
+ * The pages a lead sees: home, about and contact, whatever the template calls
+ * them (a restaurant's contact page is often "reservation", a salon's
+ * "book"), plus any others asked for. Everything else opens the preview note.
+ */
+export function previewPages(available: string[], asked: string[] = []): string[] {
+  const have = available.map((p) => p.toLowerCase());
+  // In order of preference: the first kind of page the template has wins.
+  const find = (...tests: RegExp[]) => tests.map((t) => have.find((p) => !p.includes("/") && t.test(p))).find(Boolean);
+  const about = find(/^(about|about-us|about-me)$/, /^(our-story|story|who-we-are|team|our-team)$/, /about|story/);
+  const contact = find(
+    /^(contact|contact-us|contacts|get-in-touch)$/,
+    /^(visit|visit-us|location|locations|find-us)$/,
+    /^(reservation|reservations|reserve|book|booking|bookings|book-now|appointment|appointments)$/,
+    /contact|reserv|booking|visit|location/,
+  );
+  // Never the whole template: what isn't shown is what the lead pays for.
+  const wanted = asked.map((p) => p.toLowerCase()).filter((p) => p !== "all" && (!have.length || have.includes(p)));
+  return [...new Set(["home", ...[about, contact].filter((p): p is string => Boolean(p)), ...wanted])].slice(0, 8);
+}
+
 /** The browser check's verdict: export_preview's structured answer, or its words from an older Aethron. */
 const verdictOf = (a: Answer) => {
   const v = (a.data as { verdict?: unknown } | undefined)?.verdict;
@@ -261,8 +282,7 @@ export async function makeSitePreview(payload: Payload, leadId: number, opts: { 
   if (old) await aethron("delete_project", { project: old, confirm: true });
 
   const available = ready.pages.map((p) => p.toLowerCase());
-  const wanted = (opts.pages?.length ? opts.pages : ["home", "contact"]).map((p) => p.toLowerCase()).filter((p) => p === "all" || !available.length || available.includes(p));
-  const pages = wanted.length ? wanted : ["home"];
+  const pages = previewPages(available, opts.pages);
   opts.progress?.(`Making ${lead.name}'s copy of “${template.name}” (${pages.join(", ")})…`);
   const makeArgs = (project: string) => ({
     template: project,

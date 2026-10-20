@@ -99,6 +99,42 @@ async function batch(model: LanguageModel, section: "strings" | "images" | "link
   return ask(model, `${RULES}${extra}`, prompt, Out);
 }
 
+/** Social networks, by the hosts their profile links use. */
+const NETWORKS: [string, RegExp][] = [
+  ["instagram", /(^|\.)instagram\.com$/],
+  ["facebook", /(^|\.)(facebook\.com|fb\.com|fb\.me)$/],
+  ["x", /(^|\.)(x\.com|twitter\.com)$/],
+  ["tiktok", /(^|\.)tiktok\.com$/],
+  ["linkedin", /(^|\.)linkedin\.com$/],
+  ["youtube", /(^|\.)(youtube\.com|youtu\.be)$/],
+  ["threads", /(^|\.)threads\.(net|com)$/],
+  ["pinterest", /(^|\.)pinterest\.[a-z.]+$/],
+  ["dribbble", /(^|\.)dribbble\.com$/],
+  ["behance", /(^|\.)behance\.net$/],
+];
+const networkOf = (url: string) => {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return NETWORKS.find(([, re]) => re.test(host))?.[0] ?? null;
+  } catch {
+    return null;
+  }
+};
+/** An address Aethron hides (by its href) wherever it appears. */
+export const HIDE_HREF = "https://www.framer.com/marketplace/?hidden-by-jomiez";
+
+/**
+ * A template's social icons are its designer's accounts. On a lead's preview
+ * each one becomes the business's own account on the same network, or is
+ * hidden when they have none there: a lead is never sent to the designer.
+ */
+export function socialLink(old: string, chosen: string, businessLinks: string[]): string {
+  const net = networkOf(old);
+  if (!net || businessLinks.includes(old)) return chosen;
+  if (chosen !== old && networkOf(chosen) === net) return chosen;
+  return businessLinks.find((u) => networkOf(u) === net) ?? HIDE_HREF;
+}
+
 /**
  * Fills a preview's lines with the business's own words, pictures and links.
  * Returns what was done, for the conversation (and the owner) to see.
@@ -146,6 +182,7 @@ export async function fillPreview(opts: { project: string; facts: Facts; model: 
         else if (next !== l.old && (!allowedUrls.has(next) || HIDDEN_LINK.test(l.old) || /\.(mp4|webm|mov|m4v|ogv)([?#]|$)/i.test(l.old))) next = l.old;
         // (a template's background video stays: a photo put in its place leaves the section empty)
         if (/^\s*javascript:/i.test(next)) next = l.old;
+        if (section === "links") next = socialLink(l.old, next, facts.links.map((x) => x.url));
         if (next === l.old) done.kept++;
         else done.written++;
         return { old: l.old, new: next, section };

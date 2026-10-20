@@ -5,6 +5,7 @@ import { fold, type AgentEvent, type PlanStep, type TranscriptItem } from "./eve
 import { decide, type Mode, type Permissions, type Risk } from "./policy";
 import { buildInstructions } from "./prompt";
 import { situation } from "./situation";
+import { repairHistory } from "./history";
 import { buildModel, missingSetup, PROVIDERS, resolveKey, type ProviderId } from "./providers";
 import { targetsOf } from "./schema";
 import { decrypt } from "./secrets";
@@ -390,6 +391,9 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
     pending = [];
   }
 
+  // A run that was stopped or interrupted can leave a call with no answer; every provider refuses that history.
+  messages = repairHistory(messages).messages;
+
   emit({ t: "status", status: "running" });
   await save({ status: "running", events, pending });
 
@@ -469,8 +473,11 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
   let status: "idle" | "waiting" | "stopped" | "error" = "idle";
   const inputs = new Map<string, unknown>();
 
+  // What this run has said and done so far, kept after every step: a stop, a crash or a deploy mid-run doesn't wipe it from memory.
+  let soFar: ModelMessage[] = [];
   const persist = async () => {
     await save({
+      messages: repairHistory([...messages, ...soFar]).messages,
       events,
       plan,
       pending,
@@ -497,7 +504,10 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
         }
         return undefined;
       },
-      onStepEnd: async () => {
+      onStepEnd: async (step) => {
+        const got = (step as { response?: { messages?: ModelMessage[] } }).response?.messages;
+        // Each step carries only its own messages.
+        if (Array.isArray(got)) soFar = [...soFar, ...got];
         await persist().catch(() => {});
       },
     });
@@ -595,6 +605,11 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
       emit({ t: "error", message: errorText(err, cfg.model) });
     }
   } finally {
+    // Stopped or failed part-way: keep what it did, so the next message carries on instead of starting from nothing.
+    if (status === "stopped" || status === "error") {
+      const note = status === "stopped" ? "[The owner stopped me here, before I finished.]" : "[I hit an error here and stopped.]";
+      messages = repairHistory([...messages, ...soFar, { role: "assistant", content: note } as ModelMessage]).messages;
+    }
     running.delete(String(threadId));
   }
 
@@ -603,8 +618,8 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
 
   // Pending approvals must stay answerable: keep the whole message history when waiting.
   await save({
-    messages: status === "stopped" ? (thread.messages ?? []) : messages,
-    ...(status === "stopped" ? {} : { provider: cfg.provider }),
+    messages,
+    provider: cfg.provider,
     events,
     plan,
     pending: status === "waiting" ? pending : [],
