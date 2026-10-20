@@ -1,3 +1,4 @@
+import { companyEmailOf, finishEmail, leadFor, previewUrlOf } from "../outreach/finish-email";
 import { generateText, isStepCount, tool, type LanguageModel, type ToolSet } from "ai";
 import type { CollectionSlug, Where } from "payload";
 import { z } from "zod";
@@ -658,24 +659,37 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
   );
 
   /* ---------- Inbox & email ---------- */
+  const finishedEmail = async (to: string, body: string, leadId?: string | number) => {
+    const lead = await leadFor(payload, to, leadId).catch(() => null);
+    const slug = lead?.preview?.slug;
+    const done = finishEmail(body, { previewUrl: slug ? previewUrlOf(slug) : null, companyEmail: await companyEmailOf(payload) });
+    return { ...done, lead };
+  };
+
 
   add(
     "send_email",
     {
       description:
-        "Send an email from the company address, e.g. a reply to a contact-form message (give inquiryId to mark it replied and log it in the message's notes).",
+        "Send an email from the company address, e.g. a reply to a contact-form message (give inquiryId to mark it replied and log it in the message's notes), or to a lead (give leadId). Sign off with the company email, never a phone number. An email to a lead with a preview always carries the preview's link: it's added if missing, and the sign-off's phone number becomes the company email (the approval shows the finished email).",
       input: z.object({
         to: z.string().email(),
         subject: z.string().min(2),
-        body: z.string().min(2).describe("Plain text. Sign off as the company."),
+        body: z.string().min(2).describe("Plain text. Sign off as the company, with the company email."),
         inquiryId: z.union([z.string(), z.number()]).optional(),
+        leadId: z.union([z.string(), z.number()]).optional().describe("When writing to a lead (a business from Clients): its id"),
         reason,
       }),
       risk: () => "email",
       title: (i) => `Emailing ${i.to}`,
-      preview: async (i) => ({ detail: `To: ${i.to}\nSubject: ${i.subject}\n\n${i.body}` }),
+      preview: async (i) => {
+        const done = await finishedEmail(String(i.to), String(i.body), i.leadId as string | number | undefined);
+        return { detail: `To: ${i.to}\nSubject: ${i.subject}\n\n${done.body}${done.changes.length ? `\n\n(Put right before sending: ${done.changes.join("; ")}.)` : ""}` };
+      },
     },
-    async ({ to, subject, body, inquiryId }) => {
+    async ({ to, subject, body: written, inquiryId, leadId }) => {
+      const done = await finishedEmail(to, written, leadId);
+      const body = done.body;
       const html = `<div style="font-family:system-ui,sans-serif;font-size:15px;line-height:1.6;color:#1a1a1a">${body
         .split(/\n{2,}/)
         .map((p) => `<p>${p.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "<br>")}</p>`)
@@ -691,8 +705,12 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
           overrideAccess: true,
         });
       }
+      // A lead written to at an address we didn't have: keep it, so their reply is recognised.
+      if (done.lead && !done.lead.email) {
+        await payload.update({ collection: "leads", id: done.lead.id, data: { email: to.trim().toLowerCase() } as never, overrideAccess: true }).catch(() => {});
+      }
       env.emit({ t: "notice", text: `Email sent to ${to}: “${subject}”` });
-      return { ok: true, sent: true };
+      return { ok: true, sent: true, ...(done.changes.length ? { putRight: done.changes } : {}) };
     },
   );
 

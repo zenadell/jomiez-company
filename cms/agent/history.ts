@@ -9,7 +9,7 @@ import type { ModelMessage } from "ai";
  * didn't finish, and an answer to a call that isn't there is dropped.
  */
 
-type Part = { type: string; toolCallId?: string; toolName?: string; approvalId?: string; providerExecuted?: boolean };
+type Part = { type: string; toolCallId?: string; toolName?: string; approvalId?: string; approved?: boolean; reason?: string; providerExecuted?: boolean };
 
 export const UNFINISHED = "This step didn't finish: the run was stopped or interrupted before it returned. Don't assume it worked; check before relying on it.";
 
@@ -22,10 +22,31 @@ export function repairHistory(messages: ModelMessage[]): { messages: ModelMessag
       if (p.type === "tool-result" && p.toolCallId) answered.add(p.toolCallId);
       if (p.type === "tool-approval-request" && p.approvalId && p.toolCallId) approvalCall.set(p.approvalId, p.toolCallId);
     }
-  // A call the owner answered (approved or declined) is settled by the model's own library.
-  for (const m of messages)
-    for (const p of partsOf(m))
-      if (p.type === "tool-approval-response" && p.approvalId && approvalCall.has(p.approvalId)) answered.add(approvalCall.get(p.approvalId)!);
+  // The owner's answer to an approval is acted on by the model's library only when it's the newest message
+  // (a run that starts from that decision). Anywhere earlier (the owner wrote something instead, so it was
+  // skipped) the library drops it, the call goes out unanswered and the provider refuses the whole
+  // conversation. Such an answer becomes the call's result: not done.
+  const nameOf = new Map<string, string>();
+  for (const m of messages) for (const p of partsOf(m)) if (p.type === "tool-call" && p.toolCallId) nameOf.set(p.toolCallId, p.toolName ?? "tool");
+  messages = messages.map((m, i) => {
+    if (m.role !== "tool" || typeof m.content === "string") return m;
+    if (i === messages.length - 1) {
+      for (const p of m.content as Part[]) if (p.type === "tool-approval-response" && p.approvalId && approvalCall.has(p.approvalId)) answered.add(approvalCall.get(p.approvalId)!);
+      return m;
+    }
+    const content = (m.content as Part[]).map((p) => {
+      const callId = p.type === "tool-approval-response" && p.approvalId ? approvalCall.get(p.approvalId) : undefined;
+      if (!callId || answered.has(callId)) return p;
+      answered.add(callId);
+      return {
+        type: "tool-result",
+        toolCallId: callId,
+        toolName: nameOf.get(callId) ?? "tool",
+        output: p.approved ? { type: "error-text", value: UNFINISHED } : { type: "execution-denied", reason: p.reason || "Not done: the owner didn't approve it." },
+      } as Part;
+    });
+    return { ...m, content } as ModelMessage;
+  });
 
   const out: ModelMessage[] = [];
   const called = new Set<string>();

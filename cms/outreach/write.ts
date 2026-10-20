@@ -11,6 +11,7 @@ import { photoFits } from "./photo-check";
 import type { CheckResult } from "./check";
 import { COUNTRIES } from "./kinds";
 import { directionsFor, menu, settle, type Design } from "./design/choose";
+import { companyEmailOf, finishEmail } from "./finish-email";
 import { byId, type DirectionId } from "./design/library";
 import { problems, tidy } from "./design/lint";
 
@@ -91,11 +92,11 @@ const MessagesSchema = z.object({
 
 export type Messages = z.infer<typeof MessagesSchema>;
 
-const FORMATS = (s: Settings) => `Write four versions:
+const FORMATS = (s: Settings, companyEmail: string | null) => `Write four versions:
 - whatsapp: 45–85 words in 2–4 short paragraphs. End with: If you'd rather not get messages like this, just reply "stop" and I won't message again.
 - sms: at most 300 characters including any link. End with: Reply STOP to opt out.
 - emailSubject: under 55 characters, specific and plain (e.g. "A quick idea for ${"{Business}"}'s website"), not clickbait.
-- emailBody: 70–130 words, starting "Hi" or "Good day" with the business name. Sign off as: ${sender(s).signOff.replace("\n", ", ")}${s.senderPhone ? `, ${s.senderPhone}` : ""}. Don't add an address or unsubscribe line (they're added when it's sent).`;
+- emailBody: 70–130 words, starting "Hi" or "Good day" with the business name. Sign off as: ${sender(s).signOff.replace("\n", ", ")}${companyEmail ? `, ${companyEmail}` : ""} (the company email, never a phone number). Don't add an address or unsubscribe line (they're added when it's sent).`;
 
 /** The first message (or the one follow-up), saved on the lead, which becomes "Message ready". */
 export async function writeLead(payload: Payload, id: number | string, opts: { model: LanguageModel; settings: Settings; previewUrl?: string | null; followUp?: boolean; extra?: string }) {
@@ -103,13 +104,14 @@ export async function writeLead(payload: Payload, id: number | string, opts: { m
   if (lead.status === "stopped") throw new Error(`${lead.name} asked not to be contacted.`);
   const previewUrl = opts.previewUrl ?? (lead.preview && (lead.preview as { slug?: string }).slug ? previewLink(String((lead.preview as { slug: string }).slug)) : null);
   const before = (lead.messages ?? {}) as Partial<Messages>;
+  const companyEmail = await companyEmailOf(payload);
   const prompt = [
     context(lead, opts.settings, previewUrl),
     opts.followUp
       ? `This is ONE short follow-up to the message below, sent a few days ago with no reply. Write all four versions as follow-ups: 25–55 words (the email up to 80), friendly, no guilt, one line on the benefit, the preview link again if there is one, and the same opt-out line.\nEARLIER WHATSAPP: ${before.whatsapp ?? "(none)"}\nEARLIER EMAIL: ${before.emailBody ?? "(none)"}`
       : "",
     opts.extra ? `THE OWNER ASKS: ${opts.extra}` : "",
-    FORMATS(opts.settings),
+    FORMATS(opts.settings, companyEmail),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -119,6 +121,8 @@ export async function writeLead(payload: Payload, id: number | string, opts: { m
   // The opt-out lines are not optional, whatever the model did.
   if (!/\bstop\b/i.test(out.whatsapp)) out.whatsapp = `${out.whatsapp.trim()}\n\nIf you'd rather not get messages like this, just reply "stop" and I won't message again.`;
   if (!/\bstop\b/i.test(out.sms)) out.sms = `${out.sms.trim()} Reply STOP to opt out.`;
+  // The email carries the preview's link and signs off with the company email, whatever the model did.
+  out.emailBody = finishEmail(out.emailBody, { previewUrl, companyEmail }).body;
   await payload.update({
     collection: "leads",
     id,

@@ -22,6 +22,7 @@ const { previewPages } = await import("../cms/sites/make");
 const { mayMakePreview, recordTry, quotes } = await import("../cms/sites/once");
 const { socialLink, HIDE_HREF } = await import("../cms/sites/fill");
 const { anchorTexts, linkTarget } = await import("../cms/sites/links");
+const { finishEmail, leadFor } = await import("../cms/outreach/finish-email");
 const { streamText } = await import("ai");
 const { MockLanguageModelV4 } = await import("ai/test");
 
@@ -92,6 +93,42 @@ const before = await answer(broken);
 check("the broken history is refused with the owner's exact error", !before.ok && /Tool result is missing for tool call call_00_Ky7Z/.test(before.text), before);
 const after = await answer(fixed.messages);
 check("the repaired one gets an answer", after.ok && after.text.length > 0, after);
+
+// A provider as strict as DeepSeek: every tool call it is sent must be followed by its result.
+type Prompt = { role: string; content: { type: string; toolCallId?: string }[] | string }[];
+const strict = new MockLanguageModelV4({
+  doStream: async ({ prompt }) => {
+    const p = prompt as unknown as Prompt;
+    for (let i = 0; i < p.length; i++) {
+      if (p[i].role !== "assistant" || typeof p[i].content === "string") continue;
+      const calls = (p[i].content as { type: string; toolCallId?: string }[]).filter((c) => c.type === "tool-call").map((c) => c.toolCallId);
+      const next = p[i + 1];
+      const got = next?.role === "tool" && typeof next.content !== "string" ? next.content.map((c) => c.toolCallId) : [];
+      if (calls.some((c) => !got.includes(c))) throw new Error("An assistant message with 'tool_calls' must be followed by tool messages responding to each 'tool_call_id'.");
+    }
+    return (model as unknown as { doStream: (o: unknown) => never }).doStream({ prompt });
+  },
+});
+const strictly = async (messages: M[]) => {
+  const r = streamText({ model: strict, messages, onError: () => {} });
+  for await (const part of r.fullStream) if (part.type === "error") return { ok: false, text: String((part.error as Error)?.message ?? part.error) };
+  return { ok: true, text: "" };
+};
+// The owner wrote instead of answering an approval: the run records "skipped" before their new message.
+const skipped: M[] = [
+  { role: "user", content: "Make a new homepage preview for one of our leads" },
+  { role: "assistant", content: [call("call_00_d", "save_draft"), { type: "tool-approval-request", approvalId: "ap9", toolCallId: "call_00_d" }] },
+  { role: "tool", content: [{ type: "tool-approval-response", approvalId: "ap9", approved: false, reason: "Not done: the owner moved on without approving it." }] },
+  { role: "user", content: "why no preview url in the draft?" },
+] as M[];
+const s1 = await strictly(skipped);
+check("a skipped approval is refused by a strict provider, as DeepSeek refused it", !s1.ok && /must be followed by tool messages/.test(s1.text), s1);
+const s2 = await strictly(repairHistory(skipped).messages);
+check("…and goes through once repaired (the call's result: not done)", s2.ok, s2);
+check("…which tells the model it wasn't done", JSON.stringify(repairHistory(skipped).messages).includes("execution-denied"));
+check("the stopped-run history goes through a strict provider once repaired", (await strictly(fixed.messages)).ok);
+const decided: M[] = skipped.slice(0, 3);
+check("an approval answered just now is left for the run to act on", repairHistory(decided).messages.length === 3 && JSON.stringify(repairHistory(decided).messages).includes("tool-approval-response"));
 
 // What a run keeps step by step (cms/agent/run.ts onStepEnd) is the whole run, not just its last step.
 {
@@ -178,6 +215,22 @@ check("the hidden address is one Aethron hides", /framer\.com\/marketplace/.test
   check("a map link is left alone", to("https://www.google.com/maps/search/?api=1&query=x") === "(left)");
 }
 
+/* ---------- Emails Keeper writes (cms/outreach/finish-email.ts) ---------- */
+{
+  const url = "https://www.jomiez.com/preview/chatora-city-567d98";
+  const draft = "Good afternoon,\n\nI'm Tim, from Jomiez Innovation. Your guests call 020 459 78339 after service.\n\nI made a homepage I mocked up for you in a darker, more editorial style, to show how we would treat the brand.\n\nBest,\nTim\nJomiez Innovation\n+234 803 123 4567";
+  const done = finishEmail(draft, { previewUrl: url, companyEmail: "hello@jomiez.com" });
+  check("the preview's link is added when the email talks about it but forgot it", done.body.includes(url), done.body);
+  check("…just before the sign-off", done.body.indexOf(url) < done.body.indexOf("Best,") && done.body.indexOf(url) > done.body.indexOf("editorial"));
+  check("the sign-off gives the company email, not the phone", /Jomiez Innovation\nhello@jomiez\.com$/.test(done.body) && !done.body.includes("803 123"), done.body);
+  check("a number in the letter itself (theirs) is left alone", done.body.includes("020 459 78339"));
+  const again = finishEmail(done.body, { previewUrl: url, companyEmail: "hello@jomiez.com" });
+  check("a finished email is left as it is", again.body === done.body && again.changes.length === 0, again);
+  const both = finishEmail("Hi,\n\nSee it: https://www.jomiez.com/preview/chatora-city-567d98\n\nKind regards,\nTim · hello@jomiez.com · +44 20 7946 0000", { previewUrl: url, companyEmail: "hello@jomiez.com" });
+  check("with the email already there, the phone just goes", both.body.endsWith("Tim · hello@jomiez.com") && both.body.split(url).length === 2, both.body);
+  check("no preview, no link added", !finishEmail("Hi,\n\nThanks for writing.\n\nBest,\nTim", { previewUrl: null, companyEmail: "hello@jomiez.com" }).body.includes("preview"));
+}
+
 /* ---------- One preview per lead per request ---------- */
 check("the owner's words must really be theirs", quotes("Ok try a different template for Chatora please", "try a different template") && !quotes("make a preview", "try a different template for them"));
 check("…and at least four of them", !quotes("use another one", "another one"));
@@ -216,6 +269,12 @@ check("…the owner's own words do, once", gate.ok, gate);
 const routine = await payload.create({ collection: "agent-threads", data: { title: "routine", status: "idle", messages: [], events: [], changes: [], pending: [] } as never, overrideAccess: true });
 gate = await mayMakePreview(payload, { threadId: String(routine.id), leadId: 7, site: passedSite, ownerAsked: "use a different template for them" });
 check("a routine (nobody typing) never replaces a finished preview", !gate.ok);
+
+const withPreview = await payload.create({ collection: "leads", data: { name: "Chatora City", kind: "restaurant", status: "ready", website: "https://chatoracity.co.uk", preview: { slug: "chatora-city-567d98" } } as never, overrideAccess: true });
+const found = await leadFor(payload, "info@chatoracity.co.uk");
+check("an email to a lead's own domain finds the lead (and so its preview)", found?.id === withPreview.id && found?.preview?.slug === "chatora-city-567d98", found);
+check("a free-mail address never matches a lead by domain", (await leadFor(payload, "someone@gmail.com")) === null);
+check("an id finds the lead whatever the address", (await leadFor(payload, "x@example.org", withPreview.id))?.id === withPreview.id);
 
 console.log(`\n${passed} passed, ${failed} failed`);
 rmSync(dir, { recursive: true, force: true });
