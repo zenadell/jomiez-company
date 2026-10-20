@@ -287,9 +287,11 @@ export async function loadImage(ref: string, ownOrigin: string): Promise<{ data:
   return { data: got.body, type: got.type.split(";")[0] };
 }
 
-/** Looks at one or more images and answers a question about them, in words. */
-export async function see(sight: Sight, images: { data: Buffer; type: string }[], question: string): Promise<string> {
-  const prompt = `${question}\n\nAnswer plainly and specifically: what you actually see (layout, text, colours, people, objects, mood), anything that looks broken, cut off, overlapping or out of place, and where it is. Don't guess at what isn't visible.`;
+/** Looks at one or more images and answers a question about them, in words. `exact`: the question is the whole prompt (for a verdict in a set form). */
+export async function see(sight: Sight, images: { data: Buffer; type: string }[], question: string, opts: { exact?: boolean } = {}): Promise<string> {
+  const prompt = opts.exact
+    ? question
+    : `${question}\n\nAnswer plainly and specifically: what you actually see (layout, text, colours, people, objects, mood), anything that looks broken, cut off, overlapping or out of place, and where it is. Don't guess at what isn't visible.`;
   // Gemini first (cheap and good at it), then the main model: one failing doesn't stop the other.
   const failed: string[] = [];
   if (sight.geminiKey) {

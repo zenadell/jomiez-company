@@ -2,11 +2,12 @@ import { randomBytes } from "node:crypto";
 import { generateText, Output, type LanguageModel } from "ai";
 import type { Payload } from "payload";
 import { z } from "zod";
-import { findPhotos } from "../agent/eyes";
+import { findPhotos, type Sight } from "../agent/eyes";
 import { gatherBrand, type Brand } from "./brand";
 import { fetchImage, keepImage, type Picture } from "./images";
 import { buildModel } from "../agent/providers";
-import { loadConfig } from "../agent/run";
+import { loadConfig, sightOf } from "../agent/run";
+import { photoFits } from "./photo-check";
 import type { CheckResult } from "./check";
 import { COUNTRIES } from "./kinds";
 import { directionsFor, menu, settle, type Design } from "./design/choose";
@@ -233,13 +234,15 @@ export const slugOf = (name: string) =>
  * from the facts (one short model call), stock photos only where they have
  * none of their own.
  */
-export async function makePreview(payload: Payload, id: number | string, opts: { model: LanguageModel }) {
+export async function makePreview(payload: Payload, id: number | string, opts: { model: LanguageModel; sight?: Sight }) {
   const lead = (await payload.findByID({ collection: "leads", id, depth: 0, overrideAccess: true })) as unknown as Lead;
   const check = (lead.check ?? {}) as CheckResult;
   const facts = check.facts ?? {};
   const preview = (lead.preview ?? {}) as { slug?: string; views?: number };
   const slug = preview.slug || slugOf(lead.name);
-  const brand = await gatherBrand(lead, slug).catch((): Brand => ({ photos: [], products: [], colours: [] }));
+  // Every photo is looked at before it's used (photo-check.ts): flyers, adverts and the wrong kind of business stay off the page.
+  const sight = opts.sight ?? (await loadConfig(payload).then(sightOf).catch(() => undefined));
+  const brand = await gatherBrand(lead, slug, { sight }).catch((): Brand => ({ photos: [], products: [], colours: [] }));
   // Stock photos fill in (up to three) when they have fewer than two of their own. If that search
   // comes back short, the page settles on a direction that fits what it really has (readPreview).
   const offered = directionsFor(lead.kind as string | undefined, { photos: brand.photos.length >= 2 ? brand.photos.length : brand.photos.length + 3, products: brand.products.length });
@@ -259,12 +262,13 @@ export async function makePreview(payload: Payload, id: number | string, opts: {
     .filter(Boolean)
     .join("\n\n");
   const instructions = `You are the art director and copywriter at a studio known for websites that look designed by a person, never generated. You choose a design from the menu given and write the words for it: specific, warm, confident, short, in plain language, sentence case. Use only the facts given (and what their current site says). Never invent years in business, awards, prices, staff names, reviews, testimonials, customer numbers or opening hours. Where you don't know, write general but true lines about this kind of business.
-Never write: clichés ("look no further", "one-stop shop", "we've got you covered", "nestled", "in the heart of"), agency words (unlock, elevate, seamless, effortless, world-class, cutting-edge, premier, journey), "not just X, it's Y", exclamation marks, capitals for emphasis, labels joined with middle dots, headlines that are slogans for any business.`;
+Never write: clichés ("look no further", "one-stop shop", "we've got you covered", "nestled", "in the heart of"), agency words (unlock, elevate, seamless, effortless, world-class, cutting-edge, premier, journey), "not just X, it's Y", exclamation marks, capitals for emphasis, labels joined with middle dots, headlines that are slogans for any business.
+The page shows their name, address, opening hours, map and phone by itself: never repeat those in the copy, never make the headline their name, and never mention websites (this IS their website). Say each thing once: every section adds something new about what they do, how, and for whom.`;
   const schema = previewSchema(offered);
   let written = await ask(opts.model, instructions, prompt, schema);
   // Once: the copy goes back with what makes it read as generated.
   const maxWords = HEADLINE_WORDS[offered.includes(written.direction) ? written.direction : offered[0]];
-  const found = problems(written, { maxHeadlineWords: maxWords });
+  const found = problems(written, { maxHeadlineWords: maxWords, name: lead.name });
   if (found.length) {
     written = await ask(
       opts.model,
@@ -277,27 +281,35 @@ Never write: clichés ("look no further", "one-stop shop", "we've got you covere
   // Proper names keep their capitals in a headline set in sentence case: theirs and their area's (not their trade: "hair salon" isn't a name).
   const words = tidy(tidyWritten(written), [lead.name, String(lead.area ?? "")]);
 
-  // Stock photos only when they have fewer than two of their own.
+  // Stock photos only when they have fewer than two of their own, and only ones that pass a look:
+  // a free photo search returns adverts, flyers and other businesses as often as usable photos.
+  // A photo nobody could look at is used only from Pexels (a curated library); no photo beats a bad one.
   const stock: PreviewContent["stock"] = [];
+  const what = `${lead.name}${lead.kind ? `, a ${String(lead.kind)}` : ""}${lead.area ? ` in ${String(lead.area)}` : ""}`;
   if (brand.photos.length < 2) {
     // A narrow search often finds nothing free to use, so widen it step by step.
     const words = written.photo.trim().split(/\s+/);
     const searches = [...new Set([written.photo, words.slice(0, 2).join(" "), lead.kind ? String(lead.kind) : ""].filter(Boolean))];
     const tried = new Set<string>();
+    let looked = 0;
     for (const q of searches) {
       const found = await findPhotos(q, "landscape").catch(() => []);
-      for (const p of found.filter((x) => (!x.width || x.width >= 1000) && !tried.has(x.url)).slice(0, 4)) {
+      for (const p of found.filter((x) => (!x.width || x.width >= 1000) && !tried.has(x.url)).slice(0, 8)) {
+        if (looked >= 12) break;
         tried.add(p.url);
         try {
           const img = await fetchImage(p.url);
           if (img.w < 900) continue;
+          looked++;
+          const ok = await photoFits(sight, img, what);
+          if (ok === false || (ok === null && p.source !== "Pexels")) continue;
           stock.push({ ...(await keepImage(img, slug, `stock-${stock.length}`, 1800, p.alt)), by: p.by, source: p.source, page: p.page });
           if (stock.length === 3) break;
         } catch {
           // the next one
         }
       }
-      if (stock.length >= 2) break;
+      if (stock.length >= 3 || looked >= 12) break;
     }
   }
 

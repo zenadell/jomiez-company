@@ -133,6 +133,7 @@ const answers = [
   // Then: the rewrite.
   { direction: "monument", type: "gambarino", palette: "blush-aubergine", why: "A short soft name suits a monument.", headline: "Hair that feels like you", sub: "Cuts, colour and braids on Admiralty Way, by stylists who listen first.", cta: "Book on WhatsApp", statement: "Glow Studio is a hair salon in Lekki for women who want healthy hair, done with care and on time.", services: [{ title: "Colour", text: "Rich colour that protects your hair." }, { title: "Braids", text: "Knotless braids done gently." }, { title: "Cuts", text: "Cuts shaped to how you wear your hair." }], about: "Glow Studio is a small salon on Admiralty Way where every appointment starts with a conversation about your hair and what you want.", highlights: [{ title: "On time", text: "Appointments start when they say they will." }, { title: "Gentle", text: "Kind to your edges." }], closing: "Your next appointment", photo: "hair salon interior" },
 ];
+const goodAnswer = JSON.stringify(answers[1]);
 const prompts: string[] = [];
 const model = new MockLanguageModelV4({
   doGenerate: async (opts) => {
@@ -165,6 +166,66 @@ answers.splice(1, 1);
 await makePreview(payload, lead.id, { model: model as never });
 const again = ((await payload.findByID({ collection: "leads", id: lead.id, depth: 0, overrideAccess: true })) as unknown as { preview: { content: { headline: string; closing: string } } }).preview.content;
 check("copy the model won't fix is still cleaned (no exclamation marks, sentence case)", !again.headline.includes("!") && !again.closing.includes("!") && again.headline === "Elevate your hair journey today", again);
+
+/* ---------- The copy that went live for Blanca's Hair Styling (2026-10-20) ---------- */
+
+const blanca = {
+  headline: "Blanca's hair styling",
+  sub: "A Houston hair salon for people who want practical cuts, colour and styling, open Monday to Friday, 8am to 8pm.",
+  cta: "Book an appointment",
+  statement: "Blanca's is a Houston salon for haircuts, colour and styling. We keep it practical, open Monday to Friday, 8am to 8pm.",
+  services: [{ title: "Haircuts", text: "Cuts shaped to your hair." }],
+  about: "Blanca's Hair Styling is a hair salon in Houston, open Monday to Friday, 8am to 8pm. There is no website, so the best way to book is to call.",
+  highlights: [{ title: "Weekday hours", text: "Open Monday to Friday, 8am to 8pm." }],
+  closing: "Book your appointment",
+};
+const live = problems(blanca, { name: "Blanca's Hair Styling" });
+check("a headline that only repeats the name is caught", live.some((p) => /repeats their name/.test(p)), live);
+check("opening hours written into the copy are caught", live.some((p) => /opening hours/.test(p)), live);
+check("the same words in three sections are caught", live.some((p) => /three or more sections/.test(p)), live);
+check("talk about websites is caught", live.some((p) => /talks about websites/.test(p)), live);
+check("a real headline mentioning the name is fine", !problems({ ...clean, headline: "Glow Studio, for healthy hair" }, { name: "Glow Studio" }).some((p) => /repeats their name/.test(p)));
+
+/* ---------- Photos are looked at before they're used ---------- */
+
+const sharp = (await import("sharp")).default;
+const colour = (r: number, g: number, b: number) => sharp({ create: { width: 1600, height: 1000, channels: 3, background: { r, g, b } } }).jpeg().toBuffer();
+// Red: a flyer with prices on it. Blue: another kind of business. Green: clean photos.
+const PHOTOS: Record<string, Buffer> = { flyer: await colour(220, 30, 30), wrong: await colour(30, 30, 220), clean1: await colour(30, 200, 40), clean2: await colour(40, 190, 50), clean3: await colour(50, 210, 60) };
+let judged = 0;
+globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+  const url = String(input instanceof Request ? input.url : input);
+  if (url.startsWith("https://api.openverse.org/v1/images/")) {
+    return Response.json({ results: Object.keys(PHOTOS).map((k) => ({ url: `https://api.openverse.org/test-photos/${k}.jpg`, creator: "someone", source: "flickr", license: "cc0", width: 1600, height: 1000, title: k })) });
+  }
+  const m = /test-photos\/(\w+)\.jpg/.exec(url);
+  if (m) return new Response(new Uint8Array(PHOTOS[m[1]]), { headers: { "content-type": "image/jpeg" } });
+  if (/generativelanguage|:generateContent/.test(url)) {
+    judged++;
+    const body = JSON.parse(String(init?.body ?? "{}")) as { contents?: { parts?: { inlineData?: { data: string } }[] }[] };
+    const data = body.contents?.[0]?.parts?.find((x) => x.inlineData)?.inlineData?.data ?? "";
+    const { channels } = await sharp(Buffer.from(data, "base64")).stats();
+    const [r, g, b] = channels.map((c) => c.mean);
+    const text = g > r && g > b ? "YES\nA clean, bright photograph." : r > b ? "NO\nIt's a flyer with prices printed on it." : "NO\nThis is a barber shop, not a hair salon for women.";
+    return Response.json({ candidates: [{ content: { role: "model", parts: [{ text }] }, finishReason: "STOP" }] });
+  }
+  return new Response("offline in this test", { status: 503 });
+}) as typeof fetch;
+
+answers.length = 0;
+answers.push({ ...JSON.parse(goodAnswer), photo: "hair salon" });
+const lead2 = await payload.create({ collection: "leads", data: { name: "Lumi Hair", kind: "hair salon", area: "Houston, Texas", phone: "+17136724767", status: "checked", country: "US" } as never, overrideAccess: true });
+await makePreview(payload, lead2.id, { model: model as never, sight: { geminiKey: "test-key", visionModel: "gemini-test" } });
+const withEyes = ((await payload.findByID({ collection: "leads", id: lead2.id, depth: 0, overrideAccess: true })) as unknown as { preview: { content: { stock: { url: string; alt?: string }[] } } }).preview.content.stock;
+check("every candidate photo was looked at", judged >= 5, judged);
+check("only the clean photos are used (no flyer, no wrong business)", withEyes.length === 3, withEyes.map((p) => p.alt));
+
+answers.length = 0;
+answers.push({ ...JSON.parse(goodAnswer), photo: "hair salon" });
+await makePreview(payload, lead2.id, { model: model as never, sight: {} });
+const blind = ((await payload.findByID({ collection: "leads", id: lead2.id, depth: 0, overrideAccess: true })) as unknown as { preview: { content: unknown } }).preview.content;
+check("with nothing that can see, unchecked free photos aren't used", (blind as { stock: unknown[] }).stock.length === 0);
+check("…and the page settles on a direction that works without photos", readPreview(blind)?.design.direction === "split", readPreview(blind)?.design);
 
 globalThis.fetch = realFetch;
 console.log(`\n${passed} passed, ${failed} failed`);
