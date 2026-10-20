@@ -157,4 +157,4 @@ export const getRedirect = cache(async (from: string) => {
   return docs[0] ?? null;
 });
 
-export { fill, img, localUrl, src, texts, type Img } from "./media";
+export { fill, img, localUrl, plain, src, texts, type Img } from "./media";

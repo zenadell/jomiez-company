@@ -1,5 +1,5 @@
 import type { Article, Project, Site } from "@/payload-types";
-import { img } from "./media";
+import { img, plain } from "./media";
 
 /*
  * Structured data (schema.org JSON-LD): the facts about Jomiez, its pages,
@@ -33,7 +33,7 @@ export function organization(site: Site): Thing {
     legalName: site.legalName !== site.name ? site.legalName : undefined,
     url: `${base(site)}/`,
     logo: { "@type": "ImageObject", url: logo },
-    image: og ? absolute(site, og.src) : undefined,
+    image: og ? absolute(site, plain(og.src)) : undefined,
     description: site.description,
     email: site.email,
     telephone: site.phone || undefined,
@@ -63,7 +63,7 @@ export function blogPosting(site: Site, a: Article): Thing {
     "@id": `${url}#article`,
     headline: a.title.slice(0, 110),
     description: a.meta?.description || a.excerpt,
-    image: image ? absolute(site, image.src) : undefined,
+    image: image ? absolute(site, plain(image.src)) : undefined,
     datePublished: a.date,
     dateModified: a.updatedAt,
     author: a.author ? { "@type": "Person", name: a.author } : { "@id": orgId(site) },
@@ -82,7 +82,7 @@ export function project(site: Site, p: Project): Thing {
     "@id": `${url}#work`,
     name: p.name,
     description: p.meta?.description || p.summary,
-    image: image ? absolute(site, image.src) : undefined,
+    image: image ? absolute(site, plain(image.src)) : undefined,
     url,
   };
   if (p.isProduct) return clean({ "@type": "SoftwareApplication", ...common, applicationCategory: p.category || undefined, publisher: { "@id": orgId(site) }, creator: { "@id": orgId(site) } });

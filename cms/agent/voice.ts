@@ -227,6 +227,7 @@ export async function startVoice(opts: {
       targets: targetsOf(payload),
       now: new Date(),
       timeZone: process.env.AGENT_TIMEZONE || "Africa/Lagos",
+      custom: cfg.instructions,
     }) + VOICE_RULES;
 
   const config: LiveConnectConfig = {

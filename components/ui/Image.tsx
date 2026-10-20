@@ -1,6 +1,7 @@
 "use client";
 
 import NextImage, { type ImageLoader, type ImageProps } from "next/image";
+import { readFrame } from "@/lib/media";
 
 /*
  * next/image, except that pictures stored on Cloudinary (everything uploaded
@@ -18,6 +19,16 @@ const cloudinary: ImageLoader = ({ src, width, quality }) =>
   src.replace(CLOUDINARY, (_, base: string, file: string) => `${base}f_auto,c_limit,w_${width},q_${quality ?? "auto"}/${file}`);
 
 export default function Image(props: ImageProps) {
-  const fromCloudinary = typeof props.src === "string" && CLOUDINARY.test(props.src);
-  return <NextImage {...props} loader={fromCloudinary ? cloudinary : props.loader} />;
+  // How the picture is framed (Media → "How it's framed on the site"), carried on its address.
+  const { url, frame } = typeof props.src === "string" ? readFrame(props.src) : { url: props.src, frame: null };
+  const fromCloudinary = typeof url === "string" && CLOUDINARY.test(url);
+  const style = frame
+    ? {
+        ...props.style,
+        objectFit: frame.fit,
+        objectPosition: `${frame.x}% ${frame.y}%`,
+        ...(frame.zoom !== 100 ? { transform: `scale(${frame.zoom / 100})`, transformOrigin: `${frame.x}% ${frame.y}%` } : {}),
+      }
+    : props.style;
+  return <NextImage {...props} src={url} style={style} loader={fromCloudinary ? cloudinary : props.loader} />;
 }

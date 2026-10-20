@@ -1,6 +1,7 @@
 import type { Access, CollectionConfig, Field, GlobalConfig } from "payload";
 import { adminsOnly, hasRole, signedIn } from "../access";
 import { DEFAULT_FAST_MODEL, DEFAULT_MODEL, DEFAULT_PROVIDER, PROVIDERS } from "./providers";
+import { effective, MAIN_INSTRUCTIONS, MARKERS, TRIAGE_INSTRUCTIONS } from "./instructions";
 import { nextRunAt } from "./schedule";
 import { encrypt, hint, isEncrypted } from "./secrets";
 
@@ -115,6 +116,24 @@ const providerRows: Field = {
 const PERSONA = `Write like jomiez.com: an ancient, natural voice (roots, seasons, gardens, craft), calm and certain, never hype. Short sentences. Plain words. No exclamation marks.
 Jomiez Innovation is a software company that grows its own AI products (Chaka AI, Chaka WAP) and builds custom software for businesses.
 Never invent facts, numbers, clients or testimonials. If something isn't known, ask or leave it out.`;
+
+/** An instructions box: shows the built-in text, with the owner's saved edits carried onto it. */
+function instructionsField(name: string, label: string, builtIn: string, rows: number): Field {
+  return {
+    name,
+    label,
+    type: "textarea",
+    admin: {
+      rows,
+      description: `Markers in {{double braces}} are filled in for every task: ${Object.entries(MARKERS)
+        .map(([k, v]) => `{{${k}}} ${v}`)
+        .join("; ")}. Keep the ones you want Keeper to know.`,
+    },
+    hooks: {
+      afterRead: [({ value, siblingData }) => effective({ text: value as string | null, base: (siblingData as Record<string, unknown> | undefined)?.[`${name}Base`] as string | null }, builtIn)],
+    },
+  };
+}
 
 export const AgentSettings: GlobalConfig = {
   slug: "agent",
@@ -347,6 +366,17 @@ export const AgentSettings: GlobalConfig = {
           ],
         },
         {
+          label: "Instructions",
+          description:
+            "Everything Keeper is told before every task, word for word. Change, add or delete anything. When Keeper is improved, the new instructions arrive here with your changes kept on top. Empty a box to go back to the built-in text.",
+          fields: [
+            instructionsField("instructions", "Its instructions", MAIN_INSTRUCTIONS, 36),
+            { name: "instructionsBase", type: "textarea", admin: { hidden: true } },
+            instructionsField("triageInstructions", "Reading new contact messages (inbox)", TRIAGE_INSTRUCTIONS, 14),
+            { name: "triageInstructionsBase", type: "textarea", admin: { hidden: true } },
+          ],
+        },
+        {
           label: "Automation",
           fields: [
             {
@@ -412,6 +442,18 @@ export const AgentSettings: GlobalConfig = {
     beforeChange: [
       async ({ data, req }) => {
         const next = { ...data } as Record<string, unknown>;
+        // Instructions: kept with the built-in text they were edited from (so later improvements carry over);
+        // the built-in text itself, or an empty box, is stored as nothing.
+        for (const [field, builtIn] of [
+          ["instructions", MAIN_INSTRUCTIONS],
+          ["triageInstructions", TRIAGE_INSTRUCTIONS],
+        ] as const) {
+          if (!(field in next)) continue;
+          const text = typeof next[field] === "string" ? (next[field] as string).replace(/\r\n/g, "\n") : "";
+          const own = text.trim() && text.trim() !== builtIn.trim();
+          next[field] = own ? text : null;
+          next[`${field}Base`] = own ? builtIn : null;
+        }
         // The browser never has saved keys, so an untouched key box comes back empty: keep
         // what's stored. Read it from the database itself, since every normal read leaves keys out.
         let stored: Record<string, unknown> | null | undefined;

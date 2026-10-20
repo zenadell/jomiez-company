@@ -444,6 +444,12 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
 
   /* ---------- Changing the site ---------- */
 
+  /** A frame_image request as fields to set on the media item. */
+  const frameSet = (i: Record<string, unknown>): Record<string, unknown> =>
+    i.reset
+      ? { "frame.fit": "cover", "frame.x": 50, "frame.y": 50, "frame.zoom": 100 }
+      : Object.fromEntries((["fit", "x", "y", "zoom"] as const).filter((k) => i[k] !== undefined && i[k] !== null).map((k) => [`frame.${k}`, i[k]]));
+
   const editInput = z.object({
     target: z.string().describe("Area slug, e.g. home, about, navigation, site, pages, projects, articles, inquiries"),
     id: idSchema,
@@ -497,6 +503,38 @@ export function makeTools(env: ToolEnv): { tools: ToolSet; meta: Record<string, 
         onSite: siteUrl(t, saved),
         inAdmin: adminUrl(t, id ?? (saved.id as number)),
       };
+    },
+  );
+
+  add(
+    "frame_image",
+    {
+      description:
+        "Fit a picture on the site when the owner says it's too big, too zoomed in, cropped badly, cut off or off-centre. It changes how that image (a media id) is framed everywhere it's used: fit \"contain\" shows the whole picture; \"cover\" fills the space, keeping the point x,y (0–100 %, 50,50 = the centre) in view; zoom 50–300 % (under 100 smaller, over 100 closer). Find the media id by reading the section that shows it (e.g. read home, showcase.image). Then take a screenshot of the page and look; adjust again if it still isn't right. reset puts it back to the usual (fill, centred, 100 %).",
+      input: z.object({
+        media: idSchema.describe("The image's media id"),
+        fit: z.enum(["cover", "contain"]).optional(),
+        x: z.number().min(0).max(100).optional().describe("Across: 0 = the left edge, 100 = the right"),
+        y: z.number().min(0).max(100).optional().describe("Down: 0 = the top, 100 = the bottom"),
+        zoom: z.number().min(50).max(300).optional().describe("Per cent: 100 = as it is"),
+        reset: z.boolean().optional(),
+        reason,
+      }),
+      risk: () => writeRisk(target("media"), false),
+      title: (i) => `Framing image ${String(i.media)}`,
+      preview: async (i) => {
+        const t = target("media");
+        return { changes: await engine.previewUpdate(t, await idOf(t, i.media), { set: frameSet(i) } as never) };
+      },
+    },
+    async (i) => {
+      const t = target("media");
+      const id = await idOf(t, i.media);
+      const set = frameSet(i);
+      if (!Object.keys(set).length) throw new Error("Say how to frame it: fit, x, y, zoom or reset.");
+      const { saved, changes } = await engine.update(t, id, { set } as never, false);
+      recordChange(t, saved, "changed", changes);
+      return { ok: true, image: titleOf(t, saved), status: "live now, everywhere this picture is used", changed: describeChanges(changes), next: "Take a screenshot of the page and look before saying it's fixed." };
     },
   );
 
