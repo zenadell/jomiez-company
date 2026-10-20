@@ -4,6 +4,7 @@ import { loadOutreach } from "../outreach/settings";
 import { writeLead, writerModel } from "../outreach/write";
 import { aethron, aethronStatus, KEEPER_AETHRON_TOOLS } from "./aethron";
 import { makeSitePreview, prepareTemplate, publishSitePreview } from "./make";
+import { mayMakePreview, recordTry } from "./once";
 import { findFreeTemplates, libraryFor } from "./templates";
 
 /*
@@ -89,18 +90,33 @@ export function addSiteTools(add: AddTool, env: ToolEnv) {
     "make_site_preview",
     {
       description:
-        "Makes a lead's preview from a library template, with Aethron: copies the template with only the pages worth showing (home, plus contact or about when they help; links to other pages open a 'this is a preview' note), writes the business's own words, pictures and links into it, adds a map, and has Aethron check every page in a browser. Only when the check passes does it go online at jomiez.com/preview/… and the lead's messages are rewritten to link to it. Takes several minutes.",
+        "Makes a lead's preview from a library template, with Aethron: copies the template with its home, about and contact pages (whatever the template calls them; links to other pages open a 'this is a preview' note), writes the business's own words, pictures and links into it, adds a map, and has Aethron check every page in a browser. Only when the check passes does it go online at jomiez.com/preview/… and the lead's messages are rewritten to link to it. Takes several minutes and real money, so choose the template once, carefully, before calling it. A preview that passed is finished: never make another to get a better one, and never switch template because of one picture, line or section; fix that in place (aethron tool, then publish_site_preview). It refuses a second preview for a lead unless the owner asked for one.",
       input: z.object({
         id: leadId,
         template: z.union([z.string(), z.number()]).describe("The library template's id (from find_templates or save_template)"),
-        pages: z.array(z.string().min(1).max(60)).max(8).optional().describe("Which of the template's pages to build, e.g. [\"home\", \"contact\"] (default). Only what's worth showing."),
+        pages: z.array(z.string().min(1).max(60)).max(5).optional().describe("Extra pages to build besides home, about and contact (which are always built). Usually none."),
+        owner_asked: z.string().max(300).optional().describe("Only when replacing a lead's finished preview because the owner asked: their own words, copied exactly from their latest message"),
       }),
       risk: () => "draft",
       title: () => "Making a preview from a template",
     },
-    async ({ id, template, pages }) => {
+    async ({ id, template, pages, owner_asked }) => {
+      const lead = (await payload.findByID({ collection: "leads", id: Number(id), depth: 0, overrideAccess: true })) as unknown as { preview?: { slug?: string; site?: { verdict?: string; uploaded?: unknown; template?: { name?: string } } } | null };
+      const gate = await mayMakePreview(payload, {
+        threadId: env.threadId,
+        leadId: Number(id),
+        site: lead.preview?.site,
+        url: lead.preview?.slug ? `https://www.jomiez.com/preview/${lead.preview.slug}` : null,
+        ownerAsked: owner_asked,
+      });
+      if (!gate.ok) return { ok: false, refused: gate.refused };
       const model = await writerModel(payload);
-      const res = await makeSitePreview(payload, Number(id), { templateId: Number(template), pages, model, progress });
+      let res: Awaited<ReturnType<typeof makeSitePreview>> | null = null;
+      try {
+        res = await makeSitePreview(payload, Number(id), { templateId: Number(template), pages, model, progress });
+      } finally {
+        await recordTry(payload, { threadId: env.threadId, leadId: Number(id), at: gate.at, passed: Boolean(res?.ok) });
+      }
       if (!res.ok) return res;
       const written = await writeLead(payload, id, { model, settings: await loadOutreach(payload), previewUrl: res.url ?? null });
       env.emit({ t: "change", title: `Preview from ${res.template}`, action: "made", admin: `/admin/collections/leads/${id}`, site: res.url ?? null });
