@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Media } from "@/payload-types";
 import { getGlobal } from "./cms";
-import { img } from "./media";
+import { img, plain } from "./media";
 
 type Meta = { title?: string | null; description?: string | null; image?: number | Media | null } | null | undefined;
 
@@ -30,7 +30,7 @@ export async function pageMetadata(
   const description = meta?.description || fallback.description || site.description || undefined;
   const picked = img(meta?.image) ?? img(fallback.image) ?? img(site.ogImage);
   const card = picked
-    ? { url: picked.src, width: picked.width ?? undefined, height: picked.height ?? undefined, alt: picked.alt || shareTitle }
+    ? { url: plain(picked.src), width: picked.width ?? undefined, height: picked.height ?? undefined, alt: picked.alt || shareTitle }
     : { url: `/og?title=${encodeURIComponent((meta?.title || fallback.title || site.title).slice(0, 120))}`, width: 1200, height: 630, alt: shareTitle };
   return {
     title,

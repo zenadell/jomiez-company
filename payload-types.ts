@@ -701,6 +701,21 @@ export interface Media {
    * What the image shows, for screen readers and search engines. Leave empty for decoration.
    */
   alt?: string | null;
+  frame?: {
+    fit?: ('cover' | 'contain') | null;
+    /**
+     * Under 100 shows it smaller; over 100 closer.
+     */
+    zoom?: number | null;
+    /**
+     * 0 = the left edge, 100 = the right.
+     */
+    x?: number | null;
+    /**
+     * 0 = the top, 100 = the bottom.
+     */
+    y?: number | null;
+  };
   prefix?: string | null;
   _objectKey?: string | null;
   updatedAt: string;
@@ -1568,6 +1583,14 @@ export interface ArticlesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  frame?:
+    | T
+    | {
+        fit?: T;
+        zoom?: T;
+        x?: T;
+        y?: T;
+      };
   prefix?: T;
   _objectKey?: T;
   updatedAt?: T;
@@ -2631,6 +2654,16 @@ export interface Agent {
    */
   persona?: string | null;
   /**
+   * Markers in {{double braces}} are filled in for every task: {{name}} its name (Agent settings); {{who}} who it's working for; {{now}} the date and time; {{web_off}} " (turned off by the owner)" when reading other websites is off; {{permissions}} what the Permissions tab allows; {{voice}} How it should write and behave (the box above); {{memory}} its memory (Agent → Memory); {{where}} where the request came from (the console, a page, a routine…); {{situation}} what's waiting right now (approvals, drafts, new messages); {{areas}} the list of the site's areas, read from the admin itself; {{draft_replies}} on when “Also draft a reply” is ticked (inbox only). Keep the ones you want Keeper to know.
+   */
+  instructions?: string | null;
+  instructionsBase?: string | null;
+  /**
+   * Markers in {{double braces}} are filled in for every task: {{name}} its name (Agent settings); {{who}} who it's working for; {{now}} the date and time; {{web_off}} " (turned off by the owner)" when reading other websites is off; {{permissions}} what the Permissions tab allows; {{voice}} How it should write and behave (the box above); {{memory}} its memory (Agent → Memory); {{where}} where the request came from (the console, a page, a routine…); {{situation}} what's waiting right now (approvals, drafts, new messages); {{areas}} the list of the site's areas, read from the admin itself; {{draft_replies}} on when “Also draft a reply” is ticked (inbox only). Keep the ones you want Keeper to know.
+   */
+  triageInstructions?: string | null;
+  triageInstructionsBase?: string | null;
+  /**
    * It sorts the message (lead, question, spam), writes a summary in the notes and marks obvious spam. It never replies on its own.
    */
   triage?: boolean | null;
@@ -3549,6 +3582,10 @@ export interface AgentSelect<T extends boolean = true> {
   email?: T;
   web?: T;
   persona?: T;
+  instructions?: T;
+  instructionsBase?: T;
+  triageInstructions?: T;
+  triageInstructionsBase?: T;
   triage?: T;
   triageDraft?: T;
   notifyAuto?: T;

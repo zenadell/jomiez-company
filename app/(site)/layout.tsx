@@ -16,7 +16,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Nav } from "@/components/layout/Nav";
 import { SiteLens, SiteMotion } from "@/components/layout/SiteEffects";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { getGlobal, getNavPages, img, isPreview } from "@/lib/cms";
+import { getGlobal, getNavPages, img, isPreview, plain } from "@/lib/cms";
 import { organization, website } from "@/lib/structured-data";
 
 const interDisplay = localFont({
@@ -45,9 +45,9 @@ export async function generateMetadata(): Promise<Metadata> {
       title: site.title,
       description: site.description,
       url: site.url,
-      images: [og ? { url: og.src, width: og.width ?? 1200, height: og.height ?? 630 } : { url: `/og?title=${encodeURIComponent(site.title)}`, width: 1200, height: 630 }],
+      images: [og ? { url: plain(og.src), width: og.width ?? 1200, height: og.height ?? 630 } : { url: `/og?title=${encodeURIComponent(site.title)}`, width: 1200, height: 630 }],
     },
-    twitter: { card: "summary_large_image", title: site.title, description: site.description, images: [og ? og.src : `/og?title=${encodeURIComponent(site.title)}`] },
+    twitter: { card: "summary_large_image", title: site.title, description: site.description, images: [og ? plain(og.src) : `/og?title=${encodeURIComponent(site.title)}`] },
     icons: { icon: "/favicon.ico" },
   };
 }

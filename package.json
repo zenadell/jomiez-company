@@ -21,7 +21,8 @@
     "test:replies": "payload run tests/replies.test.ts",
     "preview:fixtures": "payload run tests/preview-fixtures.ts",
     "test:design": "payload run tests/design.test.ts",
-    "test:keeper": "payload run tests/keeper-preview.test.ts"
+    "test:keeper": "payload run tests/keeper-preview.test.ts",
+    "test:instructions": "payload run tests/instructions-images.test.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "4.0.68",

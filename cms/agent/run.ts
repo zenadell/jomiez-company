@@ -6,6 +6,7 @@ import { decide, type Mode, type Permissions, type Risk } from "./policy";
 import { buildInstructions } from "./prompt";
 import { situation } from "./situation";
 import { repairHistory } from "./history";
+import { MAIN_INSTRUCTIONS, TRIAGE_INSTRUCTIONS, type SavedInstructions } from "./instructions";
 import { buildModel, missingSetup, PROVIDERS, resolveKey, type ProviderId } from "./providers";
 import { targetsOf } from "./schema";
 import { decrypt } from "./secrets";
@@ -74,6 +75,8 @@ export type AgentConfig = {
   thinking: string;
   perms: Permissions;
   persona: string;
+  /** The owner's instructions (Agent settings → Instructions), already carried onto the built-in text when read. */
+  instructions: { main?: SavedInstructions; triage?: SavedInstructions };
   triage: boolean;
   triageDraft: boolean;
   notifyAuto: boolean;
@@ -127,6 +130,11 @@ export async function loadConfig(payload: Payload): Promise<AgentConfig> {
       web: g.web !== false,
     },
     persona: String(g.persona || ""),
+    // Reading the settings carries the owner's edits onto the current built-in text, so that text is now their base.
+    instructions: {
+      main: typeof g.instructions === "string" ? { text: g.instructions, base: MAIN_INSTRUCTIONS } : null,
+      triage: typeof g.triageInstructions === "string" ? { text: g.triageInstructions, base: TRIAGE_INSTRUCTIONS } : null,
+    },
     triage: g.triage !== false,
     triageDraft: g.triageDraft !== false,
     notifyAuto: g.notifyAuto !== false,
@@ -450,6 +458,7 @@ export async function runAgent(input: RunInput): Promise<{ threadId: number; sta
     now: new Date(),
     timeZone: process.env.AGENT_TIMEZONE || "Africa/Lagos",
     draftReplies: cfg.triageDraft,
+    custom: cfg.instructions,
   });
 
   const toolApproval = async ({ toolCall }: { toolCall: { toolName: string; input: unknown } }): Promise<ToolApprovalStatus> => {
