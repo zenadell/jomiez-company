@@ -21,6 +21,7 @@ const { repairHistory, UNFINISHED } = await import("../cms/agent/history");
 const { previewPages } = await import("../cms/sites/make");
 const { mayMakePreview, recordTry, quotes } = await import("../cms/sites/once");
 const { socialLink, HIDE_HREF } = await import("../cms/sites/fill");
+const { anchorTexts, linkTarget } = await import("../cms/sites/links");
 const { streamText } = await import("ai");
 const { MockLanguageModelV4 } = await import("ai/test");
 
@@ -150,6 +151,32 @@ check("the designer's X is hidden when the business has no X", socialLink("https
 check("…even if the model pointed it at their WhatsApp", socialLink("https://x.com/gola99", "https://wa.me/447000000000", theirs) === HIDE_HREF);
 check("a link that isn't social is left to the model", socialLink("tel:+440000", "tel:+447000000000", theirs) === "tel:+447000000000");
 check("the hidden address is one Aethron hides", /framer\.com\/marketplace/.test(HIDE_HREF));
+
+/* ---------- Every link on a published preview (cms/sites/links.ts) ---------- */
+{
+  // The Qitchen template's own footer and promo links, as its live site has them.
+  const html = `<a href="https://gola.supply"><p>© Gola Templates</p></a>
+    <a href="https://www.framer.com/@pawel-gola/?tab=marketplace&amp;via=pawelgola"><div>More Templates</div></a>
+    <a href="https://www.framer.com/community/marketplace/templates/qitchen/?via=pawelgola">Use for Free</a>
+    <a href="https://www.framer.com/marketplace/templates/salon/">Book Now</a>
+    <a href="https://www.framer.com/marketplace/templates/salon/"><span>Contact us</span></a>
+    <a href="https://www.instagram.com/gola.design/" aria-label="Instagram"></a>
+    <a href="./reservation">Book a Table</a>`;
+  const texts = anchorTexts(html);
+  const ctx = { texts, business: ["https://wa.me/442045978339", "tel:+442045978339"], contactPage: "reservation", templateHosts: ["qitchen.framer.website"] };
+  const to = (href: string, current = href) => linkTarget(href, current, ctx)?.to ?? "(left)";
+  check("button words are read from the template's own page", texts.get("https://www.framer.com/@pawel-gola/?tab=marketplace&via=pawelgola")?.[0] === "More Templates", [...texts.keys()]);
+  check("the designer's studio link goes to the preview's home", to("https://gola.supply") === "./index.html");
+  check("…unless the model already pointed it at the business", linkTarget("https://gola.supply", "tel:+442045978339", ctx) === null);
+  check("a “More Templates” sales link stays hidden", to("https://www.framer.com/@pawel-gola/?tab=marketplace&via=pawelgola") === "(left)");
+  check("a “Use for Free” sales link stays hidden", to("https://www.framer.com/community/marketplace/templates/qitchen/?via=pawelgola") === "(left)");
+  check("“Book Now” / “Contact us” buttons on a sales link go to the contact page", to("https://www.framer.com/marketplace/templates/salon/") === "./reservation.html");
+  check("…and are reported even once done (so publishing doesn't hide them again)", linkTarget("https://www.framer.com/marketplace/templates/salon/", "./reservation.html", ctx)?.cta === true);
+  check("without a contact page they call the business", linkTarget("https://www.framer.com/marketplace/templates/salon/", "https://www.framer.com/marketplace/templates/salon/", { ...ctx, contactPage: null })?.to === "https://wa.me/442045978339");
+  check("the designer's Instagram is hidden", to("https://www.instagram.com/gola.design/") === HIDE_HREF);
+  check("links between the template's own pages are left alone", to("./reservation") === "(left)" && to("https://qitchen.framer.website/about") === "(left)");
+  check("a map link is left alone", to("https://www.google.com/maps/search/?api=1&query=x") === "(left)");
+}
 
 /* ---------- One preview per lead per request ---------- */
 check("the owner's words must really be theirs", quotes("Ok try a different template for Chatora please", "try a different template") && !quotes("make a preview", "try a different template for them"));

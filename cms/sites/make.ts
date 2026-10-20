@@ -5,7 +5,8 @@ import type { CheckResult } from "../outreach/check";
 import { looksMobile } from "../outreach/kinds";
 import { previewLink, slugOf } from "../outreach/write";
 import { aethron, uploadExport, type Answer } from "./aethron";
-import { fillPreview, HIDDEN_LINK, HIDDEN_LINK_WORDS, linesOf, type Facts } from "./fill";
+import { fillPreview, HIDDEN_LINK, HIDDEN_LINK_WORDS, HIDE_HREF, linesOf, type Facts } from "./fill";
+import { fixTemplateLinks } from "./links";
 
 /*
  * A lead's preview made from a template (the Aethron handoff, section 2):
@@ -57,6 +58,21 @@ function pagesOf(a: Answer): string[] {
   return pick(d) ?? [...new Set([...a.text.matchAll(/(?:^|[\s,"'[])(home|about|contact|services|work|pricing|blog(?:\/[a-z0-9-]+)?|[a-z0-9-]+\/[a-z0-9-]+)(?=[\s,"'\]]|$)/gim)].map((m) => m[1].toLowerCase()))];
 }
 
+/** A template's about and contact pages, whatever it calls them (in order of preference: the first kind it has wins). */
+export function essentialPages(pages: string[]): { about?: string; contact?: string } {
+  const have = pages.map((p) => p.toLowerCase());
+  const find = (...tests: RegExp[]) => tests.map((t) => have.find((p) => !p.includes("/") && t.test(p))).find(Boolean);
+  return {
+    about: find(/^(about|about-us|about-me)$/, /^(our-story|story|who-we-are|team|our-team)$/, /about|story/),
+    contact: find(
+      /^(contact|contact-us|contacts|get-in-touch)$/,
+      /^(visit|visit-us|location|locations|find-us)$/,
+      /^(reservation|reservations|reserve|book|booking|bookings|book-now|appointment|appointments)$/,
+      /contact|reserv|booking|visit|location/,
+    ),
+  };
+}
+
 /**
  * The pages a lead sees: home, about and contact, whatever the template calls
  * them (a restaurant's contact page is often "reservation", a salon's
@@ -64,15 +80,7 @@ function pagesOf(a: Answer): string[] {
  */
 export function previewPages(available: string[], asked: string[] = []): string[] {
   const have = available.map((p) => p.toLowerCase());
-  // In order of preference: the first kind of page the template has wins.
-  const find = (...tests: RegExp[]) => tests.map((t) => have.find((p) => !p.includes("/") && t.test(p))).find(Boolean);
-  const about = find(/^(about|about-us|about-me)$/, /^(our-story|story|who-we-are|team|our-team)$/, /about|story/);
-  const contact = find(
-    /^(contact|contact-us|contacts|get-in-touch)$/,
-    /^(visit|visit-us|location|locations|find-us)$/,
-    /^(reservation|reservations|reserve|book|booking|bookings|book-now|appointment|appointments)$/,
-    /contact|reserv|booking|visit|location/,
-  );
+  const { about, contact } = essentialPages(have);
   // Never the whole template: what isn't shown is what the lead pays for.
   const wanted = asked.map((p) => p.toLowerCase()).filter((p) => p !== "all" && (!have.length || have.includes(p)));
   return [...new Set(["home", ...[about, contact].filter((p): p is string => Boolean(p)), ...wanted])].slice(0, 8);
@@ -115,9 +123,10 @@ const ribbonFor = (lead: Lead) => {
  * export (the template's "Buy now", "Made in Framer"…). A link pointed elsewhere would show again,
  * so any such link that was changed is put back.
  */
-async function keepTemplateLinksHidden(project: string) {
+async function keepTemplateLinksHidden(project: string, keep: Set<string> = new Set()) {
   const hits = linesOf(await aethron("get_content", { project, section: "links", filter: HIDDEN_LINK_WORDS, limit: 40 }));
-  const entries = hits.filter((h) => HIDDEN_LINK.test(h.old) && typeof h.new === "string" && h.new && h.new !== h.old).map((h) => ({ old: h.old, new: h.old, section: "links" }));
+  // (except buttons fixTemplateLinks pointed at the preview's contact page: their old address is a booking or contact button, not a sale)
+  const entries = hits.filter((h) => HIDDEN_LINK.test(h.old) && typeof h.new === "string" && h.new && h.new !== h.old && h.new !== HIDE_HREF && !keep.has(h.old)).map((h) => ({ old: h.old, new: h.old, section: "links" }));
   if (entries.length) await aethron("set_content_bulk", { project, entries, build: false });
 }
 
@@ -205,6 +214,25 @@ async function placeMap(project: string, lead: Lead): Promise<string | null> {
   return map;
 }
 
+/** The business's own addresses, as a link on its preview may use them. */
+function businessLinks(lead: Lead): string[] {
+  const phone = typeof lead.phone === "string" ? lead.phone : "";
+  return [
+    ...(phone && looksMobile(phone) ? [`https://wa.me/${phone.replace(/\D/g, "")}`] : []),
+    ...(phone ? [`tel:${phone.replace(/[^\d+]/g, "")}`] : []),
+    ...(typeof lead.email === "string" && lead.email ? [`mailto:${lead.email}`] : []),
+    ...(typeof lead.website === "string" && lead.website ? [lead.website] : []),
+    ...String(lead.socials ?? "").split(/\s+/).filter((x) => /^https?:\/\//.test(x)),
+  ];
+}
+
+async function templateUrlOf(payload: Payload, site: Record<string, unknown>): Promise<string | null> {
+  const id = (site.template as { id?: number } | undefined)?.id;
+  if (!id) return null;
+  const t = (await payload.findByID({ collection: "site-templates", id, depth: 0, overrideAccess: true }).catch(() => null)) as { url?: string } | null;
+  return t?.url ?? null;
+}
+
 type Published = { ok: boolean; verdict: string; note?: string; report?: string; url?: string; uploaded?: string; pages?: string[]; extra?: string[] };
 
 /** Exports a lead's template preview and, when Aethron's browser check passes, puts it online. */
@@ -217,7 +245,15 @@ export async function publishSitePreview(payload: Payload, leadId: number, opts:
   // Whatever happened to the project since it was made, the ribbon is on every page and the template's sales links stay hidden.
   const ribbon = await aethron("preview_ribbon", { project, ribbon: ribbonFor(lead) });
   if (!ribbon.ok) return { ok: false, verdict: "not exported", note: `Aethron couldn't put the Jomiez ribbon on the preview, so it isn't put online: ${ribbon.text.slice(0, 300)}` };
-  await keepTemplateLinksHidden(project);
+  const chosenPages = ((opts.pages ?? site.pages ?? []) as string[]).map((p) => String(p).toLowerCase());
+  const templateUrl = opts.template?.url ?? (site.template as { url?: string } | undefined)?.url ?? (await templateUrlOf(payload, site));
+  const links = await fixTemplateLinks(project, {
+    templateUrl,
+    pages: chosenPages.length ? chosenPages : ["home"],
+    business: businessLinks(lead),
+    contactPage: essentialPages(chosenPages).contact ?? null,
+  }).catch(() => ({ cta: [] as string[], changed: [] as string[] }));
+  await keepTemplateLinksHidden(project, new Set(links.cta));
   if (opts.redoMap) await placeMap(project, lead);
   opts.progress?.("Exporting the preview and checking every page in a browser (1–3 minutes)…");
   const exported = await aethron("export_preview", { project });

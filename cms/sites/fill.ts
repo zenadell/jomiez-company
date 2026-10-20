@@ -112,7 +112,7 @@ const NETWORKS: [string, RegExp][] = [
   ["dribbble", /(^|\.)dribbble\.com$/],
   ["behance", /(^|\.)behance\.net$/],
 ];
-const networkOf = (url: string) => {
+export const networkOf = (url: string) => {
   try {
     const host = new URL(url).hostname.toLowerCase();
     return NETWORKS.find(([, re]) => re.test(host))?.[0] ?? null;
